@@ -75,6 +75,50 @@ def get_hotspots(timeframe: str = Query("Live Data"), district: Optional[str] = 
 
     return {"hotspots": hotspots_list}
 
+@app.get("/api/forecast")
+def get_forecast():
+    if df.empty:
+        return {"forecasts": []}
+
+    # Simulate "Live" data by getting the most recent 30 days of data
+    start_time = max_date - pd.Timedelta(days=30)
+    filtered_df = df[df['created_datetime'] >= start_time].copy()
+
+    # Aggregate by location
+    filtered_df['lat_r'] = filtered_df['latitude'].round(3)
+    filtered_df['lon_r'] = filtered_df['longitude'].round(3)
+    
+    grouped = filtered_df.groupby(['lat_r', 'lon_r', 'location']).size().reset_index(name='weight')
+    
+    # Get the absolute top 4 worst chokepoints to generate "Predictive Forecasts" for
+    top_chokepoints = grouped.sort_values('weight', ascending=False).head(4)
+
+    forecast_list = []
+    for i, row in top_chokepoints.iterrows():
+        weight = int(row['weight'])
+        
+        # Dynamically assign severity based on rank/weight
+        if len(forecast_list) == 0:
+            risk = "Critical Spillover in 15 mins"
+            color = "#f44336" # Red
+        elif len(forecast_list) == 1:
+            risk = "High Risk in 30 mins"
+            color = "#ff9800" # Orange
+        else:
+            risk = "Med Risk in 60 mins"
+            color = "#ffeb3b" # Yellow
+
+        forecast_list.append({
+            "latitude": row['lat_r'],
+            "longitude": row['lon_r'],
+            "name": str(row['location']),
+            "risk": risk,
+            "color": color,
+            "trigger": f"Trigger: {weight} active violations"
+        })
+
+    return {"forecasts": forecast_list}
+
 @app.get("/api/analytics")
 def get_analytics(timeframe: str = Query("Last 24 Hours")):
     if df.empty:

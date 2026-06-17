@@ -21,6 +21,8 @@ export default function TrafficDashboard() {
   const [stats, setStats] = useState({ totalViolations: 0, avgSpeed: 0, busBlocks: 0, loadingZones: 0 });
   const [activeTab, setActiveTab] = useState("Command Center");
   const [mapTheme, setMapTheme] = useState('dark');
+  const [isPredictiveMode, setIsPredictiveMode] = useState(false);
+  const [forecastData, setForecastData] = useState<any>(null);
   const mapRef = useRef<MapRef>(null);
 
   const getMapStyleUrl = (theme: string) => {
@@ -99,6 +101,26 @@ export default function TrafficDashboard() {
       .finally(() => setLoading(false));
   }, [timeframe, district]);
 
+  useEffect(() => {
+    if (isPredictiveMode && !forecastData) {
+      fetch('http://localhost:8000/api/forecast')
+        .then(res => res.json())
+        .then(data => {
+          const forecasts = data.forecasts || [];
+          const geojsonData = {
+            type: "FeatureCollection",
+            features: forecasts.map((f: any) => ({
+              type: "Feature",
+              geometry: { type: "Point", coordinates: [f.longitude, f.latitude] },
+              properties: { name: f.name, risk: f.risk, color: f.color, trigger: f.trigger }
+            }))
+          };
+          setForecastData(geojsonData);
+        })
+        .catch(err => console.error("Error fetching forecast:", err));
+    }
+  }, [isPredictiveMode, forecastData]);
+
   const heatmapLayer = {
     id: 'parking-heatmap',
     type: 'heatmap',
@@ -130,6 +152,36 @@ export default function TrafficDashboard() {
       'circle-stroke-color': '#93000a',
       'circle-stroke-width': 1,
       'circle-opacity': ['interpolate', ['linear'], ['zoom'], 10, 0, 15, 1]
+    }
+  };
+
+  const predictiveLayer = {
+    id: 'predictive-zones',
+    type: 'circle',
+    paint: {
+      'circle-radius': ['interpolate', ['linear'], ['zoom'], 10, 30, 15, 120],
+      'circle-color': ['get', 'color'],
+      'circle-opacity': 0.25,
+      'circle-stroke-width': 2,
+      'circle-stroke-color': ['get', 'color']
+    }
+  };
+
+  const predictiveLabels = {
+    id: 'predictive-labels',
+    type: 'symbol',
+    layout: {
+      'text-field': ['concat', ['get', 'name'], '\n', ['get', 'risk']],
+      'text-font': ['Open Sans Bold', 'Arial Unicode MS Bold'],
+      'text-size': 12,
+      'text-variable-anchor': ['top', 'bottom', 'left', 'right'],
+      'text-radial-offset': 1.5,
+      'text-justify': 'center',
+    },
+    paint: {
+      'text-color': '#ffffff',
+      'text-halo-color': '#000000',
+      'text-halo-width': 2
     }
   };
 
@@ -373,7 +425,7 @@ export default function TrafficDashboard() {
               </div>
 
               {/* Map Area */}
-              <div className="bg-surface-container-low border border-outline-variant rounded-lg flex-1 flex flex-col relative overflow-hidden min-h-[400px]">
+              <div className="bg-surface-container-low border border-outline-variant rounded-lg flex-1 flex flex-col relative overflow-hidden min-h-[600px]">
                 <div className="flex justify-between items-center px-4 py-3 border-b border-outline-variant shrink-0 bg-surface-container">
                   <div className="flex items-center gap-2">
                     <span className="material-symbols-outlined text-primary text-xl">map</span>
@@ -402,14 +454,33 @@ export default function TrafficDashboard() {
                         <Layer {...(pointLayer as any)} />
                       </Source>
                     )}
+                    {isPredictiveMode && forecastData && (
+                      <Source type="geojson" data={forecastData as any}>
+                        <Layer {...(predictiveLayer as any)} />
+                        <Layer {...(predictiveLabels as any)} />
+                      </Source>
+                    )}
                   </Map>
                   
                   {/* Map Style Switcher Overlay */}
                   <div className="absolute top-4 left-4 bg-[#1e2025]/90 backdrop-blur-md border border-white/10 rounded-2xl p-1.5 shadow-xl z-10 flex items-center gap-4">
-                    <div className="flex items-center gap-2 pl-3 hidden sm:flex">
-                      <div className="w-2 h-2 rounded-full bg-error animate-pulse"></div>
-                      <span className="font-bold text-white text-xs tracking-widest">MAP</span>
-                      <span className="text-[9px] font-bold text-error border border-error/30 bg-error/10 px-1.5 py-0.5 rounded uppercase tracking-wider">Live</span>
+                    <div className="flex items-center gap-1 pl-2 pr-2 hidden sm:flex">
+                      <div className="flex bg-black/40 rounded-xl p-1">
+                        <button 
+                          onClick={() => setIsPredictiveMode(false)}
+                          className={`flex items-center gap-1.5 px-3 py-1 rounded-lg text-[10px] font-bold transition-all ${!isPredictiveMode ? 'bg-error/20 text-error border border-error/30 shadow-md' : 'text-white/60 hover:text-white border border-transparent'}`}
+                        >
+                          <div className={`w-1.5 h-1.5 rounded-full ${!isPredictiveMode ? 'bg-error animate-pulse' : 'bg-transparent'}`}></div>
+                          LIVE
+                        </button>
+                        <button 
+                          onClick={() => setIsPredictiveMode(true)}
+                          className={`flex items-center gap-1.5 px-3 py-1 rounded-lg text-[10px] font-bold transition-all ${isPredictiveMode ? 'bg-amber-500/20 text-amber-400 border border-amber-500/30 shadow-md' : 'text-white/60 hover:text-white border border-transparent'}`}
+                        >
+                          <div className={`w-1.5 h-1.5 rounded-full ${isPredictiveMode ? 'bg-amber-400 animate-pulse' : 'bg-transparent'}`}></div>
+                          FORECAST
+                        </button>
+                      </div>
                     </div>
                     
                     <div className="w-[1px] h-6 bg-white/10 hidden sm:block"></div>
