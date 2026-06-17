@@ -26,7 +26,12 @@ export default function TrafficDashboard() {
   const [isPredictiveMode, setIsPredictiveMode] = useState(false);
   const [isDispatchPanelOpen, setIsDispatchPanelOpen] = useState(false);
   const [forecastData, setForecastData] = useState<any>(null);
+  const [notifications, setNotifications] = useState([
+    { id: 1, text: 'Severe Congestion in CBD', time: '2 mins ago', read: false },
+    { id: 2, text: 'High Violation Rate: North Sector', time: '15 mins ago', read: false },
+  ]);
   const mapRef = useRef<MapRef>(null);
+  const dropdownRef = useRef<HTMLDivElement>(null);
 
   const getMapStyleUrl = (theme: string) => {
     if (theme === 'dark') return "https://basemaps.cartocdn.com/gl/dark-matter-gl-style/style.json";
@@ -66,6 +71,17 @@ export default function TrafficDashboard() {
         if (data.districts) setAvailableDistricts(data.districts);
       })
       .catch(err => console.error("Error fetching districts:", err));
+  }, []);
+
+  // Close dropdown when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (e: MouseEvent) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(e.target as Node)) {
+        setActiveDropdown(null);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
   useEffect(() => {
@@ -307,7 +323,7 @@ export default function TrafficDashboard() {
                 type="text"
               />
             </div>
-            <div className="flex items-center gap-1 sm:gap-sm shrink-0 relative">
+            <div className="flex items-center gap-1 sm:gap-sm shrink-0 relative" ref={dropdownRef}>
               <button onClick={() => setActiveDropdown(activeDropdown === 'search' ? null : 'search')} className="md:hidden w-10 h-10 rounded-full flex items-center justify-center text-on-surface-variant hover:bg-surface-container-high hover:text-primary transition-all duration-200 relative">
                 <span className="material-symbols-outlined">search</span>
               </button>
@@ -319,7 +335,9 @@ export default function TrafficDashboard() {
 
               <button onClick={() => setActiveDropdown(activeDropdown === 'notifications' ? null : 'notifications')} className="w-10 h-10 rounded-full flex items-center justify-center text-on-surface-variant hover:bg-surface-container-high hover:text-primary transition-all duration-200 relative">
                 <span className="material-symbols-outlined">notifications</span>
-                <span className="absolute top-2 right-2 w-2 h-2 bg-error rounded-full"></span>
+                {notifications.some(n => !n.read) && (
+                  <span className="absolute top-2 right-2 w-2 h-2 bg-error rounded-full"></span>
+                )}
               </button>
               {activeDropdown === 'notifications' && (
                 <div className="absolute top-12 right-0 mt-2 w-80 bg-surface-container-high border border-outline-variant rounded-xl shadow-lg overflow-hidden z-50">
@@ -327,18 +345,19 @@ export default function TrafficDashboard() {
                     <h4 className="font-label-md font-bold text-on-surface">Notifications</h4>
                   </div>
                   <div className="p-2 space-y-1">
-                    <div className="p-2 rounded-lg bg-surface-container-lowest hover:bg-surface-container-low cursor-pointer transition-colors">
-                      <p className="font-label-md text-on-surface">Severe Congestion in CBD</p>
-                      <p className="text-xs text-on-surface-variant mt-1">2 mins ago</p>
-                    </div>
-                    <div className="p-2 rounded-lg bg-surface-container-lowest hover:bg-surface-container-low cursor-pointer transition-colors">
-                      <p className="font-label-md text-on-surface">High Violation Rate: North Sector</p>
-                      <p className="text-xs text-on-surface-variant mt-1">15 mins ago</p>
-                    </div>
+                    {notifications.map(n => (
+                      <div key={n.id} className={`p-2 rounded-lg cursor-pointer transition-colors hover:bg-surface-container-low ${ n.read ? 'bg-surface-container opacity-60' : 'bg-surface-container-lowest' }`}>
+                        <p className={`font-label-md ${n.read ? 'text-on-surface-variant' : 'text-on-surface'}`}>{n.text}</p>
+                        <p className="text-xs text-on-surface-variant mt-1">{n.time}</p>
+                      </div>
+                    ))}
                   </div>
-                  <div className="p-2 border-t border-outline-variant text-center cursor-pointer hover:bg-surface-container-highest">
+                  <button
+                    onClick={() => setNotifications(prev => prev.map(n => ({ ...n, read: true })))}
+                    className="w-full p-2 border-t border-outline-variant text-center hover:bg-surface-container-highest transition-colors"
+                  >
                     <span className="text-xs font-label-md text-primary">Mark all as read</span>
-                  </div>
+                  </button>
                 </div>
               )}
 
