@@ -207,10 +207,15 @@ export default function TrafficDashboard() {
   };
 
   return (
-    <div className="bg-surface text-on-surface font-body-md overflow-hidden flex h-screen w-full">
+    <div 
+      className="text-on-surface font-body-md overflow-hidden flex h-screen w-full relative bg-cover bg-center bg-no-repeat"
+      style={{ backgroundImage: 'url("/bg-hero.png")' }}
+    >
+      {/* Dark Overlay for Readability */}
+      <div className="absolute inset-0 bg-[#060a16]/70 z-0 pointer-events-none"></div>
       
       {/* SideNavBar */}
-      <nav className="bg-surface-container-low h-screen w-[280px] shrink-0 border-r border-outline-variant hidden md:flex flex-col py-md z-40">
+      <nav className="bg-[#121626]/40 backdrop-blur-2xl h-screen w-[280px] shrink-0 border-r border-white/10 hidden md:flex flex-col py-md z-40 relative shadow-[10px_0_30px_rgba(0,0,0,0.5)]">
         {/* Header */}
         <div className="px-md pb-lg flex items-center gap-sm border-b border-outline-variant">
           <div className="w-10 h-10 rounded bg-primary-container flex items-center justify-center shrink-0">
@@ -274,7 +279,7 @@ export default function TrafficDashboard() {
       <div className="flex-1 flex flex-col h-screen overflow-hidden relative">
         
         {/* TopNavBar */}
-        <header className="bg-surface top-0 sticky z-30 border-b border-outline-variant flex justify-between items-center h-16 px-4 md:px-6 lg:px-8 shrink-0 gap-4">
+        <header className="bg-[#121626]/60 backdrop-blur-md top-0 sticky z-30 border-b border-white/5 flex justify-between items-center h-16 px-4 md:px-6 lg:px-8 shrink-0 gap-4">
           <div className="flex items-center gap-md shrink-0">
             <h2 className="font-headline-md text-headline-md font-bold text-on-surface hidden lg:block truncate">Urban Intelligence Platform</h2>
             <button className="lg:hidden text-on-surface-variant hover:text-primary transition-colors">
@@ -360,7 +365,7 @@ export default function TrafficDashboard() {
         </header>
 
         {/* Main Dashboard Canvas */}
-        <main className="flex-1 overflow-y-auto p-4 md:p-8 bg-background flex flex-col">
+        <main className="flex-1 overflow-y-auto p-4 md:p-8 bg-transparent flex flex-col relative z-10">
           
           {activeTab === "Command Center" && (
             <>
