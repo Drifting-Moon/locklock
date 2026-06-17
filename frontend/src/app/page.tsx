@@ -7,7 +7,7 @@ import 'maplibre-gl/dist/maplibre-gl.css';
 import { AlertCircle, Navigation, Clock, Activity, ShieldAlert, X } from 'lucide-react';
 import AnalyticsTab from './components/AnalyticsTab';
 import EnforcementTab from './components/EnforcementTab';
-import SensorsTab from './components/SensorsTab';
+import DetectionTab from './components/DetectionTab';
 import EconomicCalculator from './components/EconomicCalculator';
 import DispatchPanel from './components/DispatchPanel';
 
@@ -71,7 +71,7 @@ export default function TrafficDashboard() {
     { id: "Analytics", icon: "insert_chart", fill: false },
     { id: "Economics", icon: "account_balance", fill: false },
     { id: "Enforcement", icon: "gavel", fill: false },
-    { id: "Sensors", icon: "videocam", fill: false }
+    { id: "Detection", icon: "radar", fill: false }
   ];
 
   useEffect(() => {
@@ -890,7 +890,7 @@ export default function TrafficDashboard() {
           {activeTab === "Analytics" && <AnalyticsTab />}
           {activeTab === "Economics" && <EconomicCalculator />}
           {activeTab === "Enforcement" && <EnforcementTab />}
-          {activeTab === "Sensors" && <SensorsTab />}
+          {activeTab === "Detection" && <DetectionTab />}
         </main>
       </div>
     </div>
