@@ -38,6 +38,24 @@ export default function TrafficDashboard() {
   const [faqOpenIndex, setFaqOpenIndex] = useState<number | null>(null);
   const [supportForm, setSupportForm] = useState({ category: 'Technical Issue', message: '' });
   const [isSubmittingSupport, setIsSubmittingSupport] = useState(false);
+
+  const [globalSearchQuery, setGlobalSearchQuery] = useState("");
+
+  const handleGlobalSearch = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === 'Enter' && globalSearchQuery.trim() !== '') {
+      const matchedDistrict = availableDistricts.find(d => 
+        d.toLowerCase().includes(globalSearchQuery.toLowerCase().trim())
+      );
+      
+      if (matchedDistrict) {
+        setDistrict(matchedDistrict);
+      } else {
+        setDistrict(globalSearchQuery.trim());
+      }
+      setActiveTab("Command Center");
+      setActiveDropdown(null);
+    }
+  };
   const [supportSuccess, setSupportSuccess] = useState(false);
   const [loginEmail, setLoginEmail] = useState('admin@gridlock.app');
   const [loginPassword, setLoginPassword] = useState('••••••••');
@@ -511,8 +529,11 @@ export default function TrafficDashboard() {
               <span className="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-on-surface-variant pointer-events-none">search</span>
               <input 
                 className="w-full bg-surface-container-low border border-outline-variant rounded-full py-2 pl-10 pr-4 text-body-sm text-on-surface focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-all" 
-                placeholder="Search analytics, districts..." 
+                placeholder="Search districts, police stations..." 
                 type="text"
+                value={globalSearchQuery}
+                onChange={(e) => setGlobalSearchQuery(e.target.value)}
+                onKeyDown={handleGlobalSearch}
               />
             </div>
             <div className="flex items-center gap-1 sm:gap-sm shrink-0 relative" ref={dropdownRef}>
@@ -521,7 +542,15 @@ export default function TrafficDashboard() {
               </button>
               {activeDropdown === 'search' && (
                 <div className="absolute top-12 right-0 mt-2 w-64 bg-surface-container-high border border-outline-variant rounded-xl shadow-lg p-2 z-50 md:hidden">
-                  <input autoFocus className="w-full bg-surface-container-low border border-outline-variant rounded py-2 px-3 text-body-sm text-on-surface focus:outline-none focus:border-primary" placeholder="Search..." type="text" />
+                  <input 
+                    autoFocus 
+                    className="w-full bg-surface-container-low border border-outline-variant rounded py-2 px-3 text-body-sm text-on-surface focus:outline-none focus:border-primary" 
+                    placeholder="Search districts, police stations..." 
+                    type="text" 
+                    value={globalSearchQuery}
+                    onChange={(e) => setGlobalSearchQuery(e.target.value)}
+                    onKeyDown={handleGlobalSearch}
+                  />
                 </div>
               )}
 
