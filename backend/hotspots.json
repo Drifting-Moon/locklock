@@ -1,0 +1,602 @@
+[
+  {
+    "latitude": 12.981,
+    "longitude": 77.61,
+    "weight": 4411,
+    "location": "Kamaraj Road, Sri Nagamma Devi Circle, Sivanchetti Gardens, Bengaluru, Karnataka. Pin-560042 (India)"
+  },
+  {
+    "latitude": 12.964,
+    "longitude": 77.577,
+    "weight": 3745,
+    "location": "KR Main Road, City Market Circle, Bengaluru, Karnataka. Pin-560002 (India)"
+  },
+  {
+    "latitude": 12.934,
+    "longitude": 77.691,
+    "weight": 3343,
+    "location": "New Horizon College Road, New Horizon College of Engineering, Kadubisanahalli, Bengaluru, Karnataka. Pin-560103 (India)"
+  },
+  {
+    "latitude": 13.071,
+    "longitude": 77.588,
+    "weight": 3280,
+    "location": "Sahakar Nagar Road, Fortuna Acacia, Byatarayanapura, Bengaluru, Karnataka. Pin-560092 (India)"
+  },
+  {
+    "latitude": 12.977,
+    "longitude": 77.576,
+    "weight": 3181,
+    "location": "Subedar Chatram Road, RK Puram, Gandhi Nagar, Bengaluru, Karnataka. Pin-560009 (India)"
+  },
+  {
+    "latitude": 12.933,
+    "longitude": 77.691,
+    "weight": 2375,
+    "location": "New Horizon College Road, Embassy Tech Village, Devara Beesana Halli, Bengaluru, Karnataka. Pin-560103 (India)"
+  },
+  {
+    "latitude": 12.973,
+    "longitude": 77.579,
+    "weight": 2366,
+    "location": "Hospital Road, Kempegowda Extension, Chickpete, Bengaluru, Karnataka. Pin-560009 (India)"
+  },
+  {
+    "latitude": 13.035,
+    "longitude": 77.589,
+    "weight": 2284,
+    "location": "Bellary Road, Vinayaka Nagar, Hebbal, Bengaluru, Karnataka. Pin-560024 (India)"
+  },
+  {
+    "latitude": 12.965,
+    "longitude": 77.576,
+    "weight": 1933,
+    "location": "Mysore Road, Sri Krishna Rajendra Market, Chickpete, Bengaluru, Karnataka. Pin-560002 (India)"
+  },
+  {
+    "latitude": 13.184,
+    "longitude": 77.68,
+    "weight": 1926,
+    "location": "Unnamed Road, Begur Chikkanahalli, Bengaluru, Karnataka. Pin-562149 (India)"
+  },
+  {
+    "latitude": 12.977,
+    "longitude": 77.577,
+    "weight": 1907,
+    "location": "5th Main Road, Kempe Gowda Circle, Gandhi Nagar, Bengaluru, Karnataka. Pin-560009 (India)"
+  },
+  {
+    "latitude": 12.976,
+    "longitude": 77.577,
+    "weight": 1795,
+    "location": "5th Main Road, Kempe Gowda Circle, Gandhi Nagar, Bengaluru, Karnataka. Pin-560009 (India)"
+  },
+  {
+    "latitude": 12.974,
+    "longitude": 77.545,
+    "weight": 1766,
+    "location": "Chord Road, Manuvana, Vijaya Nagar, Bengaluru, Karnataka. Pin-560040 (India)"
+  },
+  {
+    "latitude": 12.984,
+    "longitude": 77.603,
+    "weight": 1649,
+    "location": "Meenakshi Koil Street, Shivaji Nagar, Bengaluru, Karnataka. Pin-560001 (India)"
+  },
+  {
+    "latitude": 12.984,
+    "longitude": 77.604,
+    "weight": 1630,
+    "location": "Central Street, Shivaji Nagar, Bengaluru, Karnataka. Pin-560001 (India)"
+  },
+  {
+    "latitude": 12.97,
+    "longitude": 77.576,
+    "weight": 1591,
+    "location": "AS Char Main Road, Chickpet Circle, Chickpete, Bengaluru, Karnataka. Pin-560053 (India)"
+  },
+  {
+    "latitude": 13.008,
+    "longitude": 77.695,
+    "weight": 1429,
+    "location": "MBT Road, Devasandra Junction, KR Puram, Bengaluru, Karnataka. Pin-560036 (India)"
+  },
+  {
+    "latitude": 12.982,
+    "longitude": 77.608,
+    "weight": 1408,
+    "location": "Dispensary Road, Tasker Town, Shivaji Nagar, Bengaluru, Karnataka. Pin-560001 (India)"
+  },
+  {
+    "latitude": 12.965,
+    "longitude": 77.539,
+    "weight": 1402,
+    "location": "Sri Sankasta Hara Ganapati Temple Road, RPC Layout, Vijaya Nagar Stage 2, Bengaluru, Karnataka. Pin-560104 (India)"
+  },
+  {
+    "latitude": 12.98,
+    "longitude": 77.607,
+    "weight": 1350,
+    "location": "Main Guard Cross Road, Tasker Town, Shivaji Nagar, Bengaluru, Karnataka. Pin-560001 (India)"
+  },
+  {
+    "latitude": 13.0,
+    "longitude": 77.55,
+    "weight": 1327,
+    "location": "WOC Road, Block 1, Rajaji Nagar, Bengaluru, Karnataka. Pin-560010 (India)"
+  },
+  {
+    "latitude": 12.975,
+    "longitude": 77.576,
+    "weight": 1277,
+    "location": "Kempegowda Road, Kempe Gowda Circle, Gandhi Nagar, Bengaluru, Karnataka. Pin-560009 (India)"
+  },
+  {
+    "latitude": 12.977,
+    "longitude": 77.58,
+    "weight": 1257,
+    "location": "Y Ramachandra Road, Sri Kanakadasa Circle, Gandhi Nagar, Bengaluru, Karnataka. Pin-560009 (India)"
+  },
+  {
+    "latitude": 12.965,
+    "longitude": 77.584,
+    "weight": 1215,
+    "location": "Pailwan M Krishnappa Road, Shoukath Mohalla, Nagartapete, Bengaluru, Karnataka. Pin-560002 (India)"
+  },
+  {
+    "latitude": 12.976,
+    "longitude": 77.578,
+    "weight": 1207,
+    "location": "3rd Main Road, Sagar Theatre Junction, Gandhi Nagar, Bengaluru, Karnataka. Pin-560009 (India)"
+  },
+  {
+    "latitude": 12.976,
+    "longitude": 77.576,
+    "weight": 1174,
+    "location": "Vajreshwari Road, Jakkarayana Kere, Gandhi Nagar, Bengaluru, Karnataka. Pin-560009 (India)"
+  },
+  {
+    "latitude": 12.978,
+    "longitude": 77.574,
+    "weight": 1167,
+    "location": "Major T Ramachandrappa Road, AT Extension, Gandhi Nagar, Bengaluru, Karnataka. Pin-560009 (India)"
+  },
+  {
+    "latitude": 12.972,
+    "longitude": 77.658,
+    "weight": 1165,
+    "location": "Pusa Thippasandra Main Road, Nada Prabhu Kempegowda Circle, New Thippasandra, Bengaluru, Karnataka. Pin-560075 (India)"
+  },
+  {
+    "latitude": 12.982,
+    "longitude": 77.61,
+    "weight": 1142,
+    "location": "Kamaraj Road, Sri Nagamma Devi Circle, Sivanchetti Gardens, Bengaluru, Karnataka. Pin-560042 (India)"
+  },
+  {
+    "latitude": 12.983,
+    "longitude": 77.611,
+    "weight": 1123,
+    "location": "Veera Pillai Road, Sri Nagamma Devi Circle, Sivanchetti Gardens, Bengaluru, Karnataka. Pin-560042 (India)"
+  },
+  {
+    "latitude": 12.982,
+    "longitude": 77.606,
+    "weight": 1117,
+    "location": "Hospital Cross Road, Tasker Town, Shivaji Nagar, Bengaluru, Karnataka. Pin-560001 (India)"
+  },
+  {
+    "latitude": 12.974,
+    "longitude": 77.551,
+    "weight": 1107,
+    "location": "1st Cross Road, Mallige Thotta, Cholurpalya, Bengaluru, Karnataka. Pin-560023 (India)"
+  },
+  {
+    "latitude": 12.973,
+    "longitude": 77.551,
+    "weight": 1105,
+    "location": "Main Road, Mallige Thotta, Cholurpalya, Bengaluru, Karnataka. Pin-560023 (India)"
+  },
+  {
+    "latitude": 12.974,
+    "longitude": 77.579,
+    "weight": 1078,
+    "location": "Kempegowda Road, Kempegowda Extension, Chickpete, Bengaluru, Karnataka. Pin-560009 (India)"
+  },
+  {
+    "latitude": 12.981,
+    "longitude": 77.608,
+    "weight": 1074,
+    "location": "Main Guard Cross Road, Tasker Town, Shivaji Nagar, Bengaluru, Karnataka. Pin-560001 (India)"
+  },
+  {
+    "latitude": 12.981,
+    "longitude": 77.609,
+    "weight": 1074,
+    "location": "Dispensary Road, Tasker Town, Shivaji Nagar, Bengaluru, Karnataka. Pin-560001 (India)"
+  },
+  {
+    "latitude": 12.978,
+    "longitude": 77.575,
+    "weight": 1035,
+    "location": "2nd Main Road, RK Puram, Gandhi Nagar, Bengaluru, Karnataka. Pin-560009 (India)"
+  },
+  {
+    "latitude": 12.98,
+    "longitude": 77.575,
+    "weight": 1033,
+    "location": "Subedar Chatram Road, Anand Rao Circle, Gandhi Nagar, Bengaluru, Karnataka. Pin-560009 (India)"
+  },
+  {
+    "latitude": 13.008,
+    "longitude": 77.696,
+    "weight": 1031,
+    "location": "MBT Road, Devasandra Junction, KR Puram, Bengaluru, Karnataka. Pin-560036 (India)"
+  },
+  {
+    "latitude": 12.975,
+    "longitude": 77.545,
+    "weight": 1011,
+    "location": "1st Cross Road, Manuvana, Vijaya Nagar, Bengaluru, Karnataka. Pin-560040 (India)"
+  },
+  {
+    "latitude": 12.977,
+    "longitude": 77.571,
+    "weight": 1004,
+    "location": "Rao Bahadur DGT Road, Majestic Circle, Majestic, Bengaluru, Karnataka. Pin-560023 (India)"
+  },
+  {
+    "latitude": 12.999,
+    "longitude": 77.549,
+    "weight": 991,
+    "location": "9th B Cross Road, Star Circle, Rajaji Nagar, Bengaluru, Karnataka. Pin-560010 (India)"
+  },
+  {
+    "latitude": 13.012,
+    "longitude": 77.554,
+    "weight": 985,
+    "location": "80 Feet Ring Road, Orion, Brigade Gateway, Malleshwaram West, Bengaluru, Karnataka. Pin-560055 (India)"
+  },
+  {
+    "latitude": 12.964,
+    "longitude": 77.578,
+    "weight": 980,
+    "location": "Silver Jubilee Park Road, City Market Circle, Bengaluru, Karnataka. Pin-560002 (India)"
+  },
+  {
+    "latitude": 12.981,
+    "longitude": 77.598,
+    "weight": 977,
+    "location": "Cunningham Road, Mantri Altiue Apartment, Shivaji Nagar, Bengaluru, Karnataka. Pin-560001 (India)"
+  },
+  {
+    "latitude": 12.94,
+    "longitude": 77.696,
+    "weight": 969,
+    "location": "Kadubeesanahalli Underpass, Kadubisanahalli Junction, Kadubisanahalli, Bengaluru, Karnataka. Pin-560103 (India)"
+  },
+  {
+    "latitude": 12.977,
+    "longitude": 77.579,
+    "weight": 956,
+    "location": "Y Ramachandra Road, Sri Kanakadasa Circle, Gandhi Nagar, Bengaluru, Karnataka. Pin-560009 (India)"
+  },
+  {
+    "latitude": 12.979,
+    "longitude": 77.579,
+    "weight": 952,
+    "location": "5th Cross Road, Jakkarayana Kere, Gandhi Nagar, Bengaluru, Karnataka. Pin-560009 (India)"
+  },
+  {
+    "latitude": 12.979,
+    "longitude": 77.575,
+    "weight": 939,
+    "location": "Subedar Chatram Road, AT Extension, Gandhi Nagar, Bengaluru, Karnataka. Pin-560009 (India)"
+  },
+  {
+    "latitude": 12.964,
+    "longitude": 77.584,
+    "weight": 931,
+    "location": "Sri Narasimha Raj Wadiyar Road, Town Hall Junction, Nagartapete, Bengaluru, Karnataka. Pin-560002 (India)"
+  },
+  {
+    "latitude": 12.999,
+    "longitude": 77.55,
+    "weight": 909,
+    "location": "10th Cross Road, Block 1, Rajaji Nagar, Bengaluru, Karnataka. Pin-560010 (India)"
+  },
+  {
+    "latitude": 12.974,
+    "longitude": 77.578,
+    "weight": 894,
+    "location": "Maharaja Times, 8th Cross Road, Balepet, Chikkapete, Chickpete, Bengaluru Central City Corporation, Bengaluru, Bangalore North, Bengaluru Urban, Karnataka, 560053, India"
+  },
+  {
+    "latitude": 13.008,
+    "longitude": 77.571,
+    "weight": 876,
+    "location": "Sri Venkataranga Ayangar Road, Malleshwaram 18th Cross Junction, Malleshwaram West, Bengaluru, Karnataka. Pin-560055 (India)"
+  },
+  {
+    "latitude": 12.979,
+    "longitude": 77.578,
+    "weight": 873,
+    "location": "5th Cross Road, Jakkarayana Kere, Gandhi Nagar, Bengaluru, Karnataka. Pin-560009 (India)"
+  },
+  {
+    "latitude": 13.009,
+    "longitude": 77.555,
+    "weight": 851,
+    "location": "80 Feet Ring Road, Dr Rajkumar Road 17th Cross Junction, Rajaji Nagar, Bengaluru, Karnataka. Pin-560010 (India)"
+  },
+  {
+    "latitude": 12.968,
+    "longitude": 77.575,
+    "weight": 831,
+    "location": "AS Char Main Road, Santhusapete, Chickpete, Bengaluru, Karnataka. Pin-560053 (India)"
+  },
+  {
+    "latitude": 12.965,
+    "longitude": 77.718,
+    "weight": 825,
+    "location": "ITPL Main Road, Vijetha Lapis Lazati, Brookefield, Bengaluru, Karnataka. Pin-560037 (India)"
+  },
+  {
+    "latitude": 12.996,
+    "longitude": 77.668,
+    "weight": 824,
+    "location": "MBT Road, Royal Heritage, Pai Layout, Mahadevapura, Bengaluru, Karnataka. Pin-560016 (India)"
+  },
+  {
+    "latitude": 12.974,
+    "longitude": 77.546,
+    "weight": 813,
+    "location": "Chord Road, Manuvana, Vijaya Nagar, Bengaluru, Karnataka. Pin-560040 (India)"
+  },
+  {
+    "latitude": 12.978,
+    "longitude": 77.579,
+    "weight": 806,
+    "location": "5th Cross Road, Jakkarayana Kere, Gandhi Nagar, Bengaluru, Karnataka. Pin-560009 (India)"
+  },
+  {
+    "latitude": 13.011,
+    "longitude": 77.555,
+    "weight": 805,
+    "location": "80 Feet Ring Road, Orion, Brigade Gateway, Malleshwaram West, Bengaluru, Karnataka. Pin-560055 (India)"
+  },
+  {
+    "latitude": 12.978,
+    "longitude": 77.577,
+    "weight": 801,
+    "location": "5th Main Road, RK Puram, Gandhi Nagar, Bengaluru, Karnataka. Pin-560009 (India)"
+  },
+  {
+    "latitude": 13.07,
+    "longitude": 77.588,
+    "weight": 792,
+    "location": "Ayyappa Temple Road, Fortune Acacia, Byatarayanapura, Bengaluru, Karnataka. Pin-560092 (India)"
+  },
+  {
+    "latitude": 13.012,
+    "longitude": 77.552,
+    "weight": 786,
+    "location": "Da Ra Bendre Road, Kirloskar Foundry, Yeshwanthpur Suburb Stage 2, Yeshwanthpur, Bengaluru, Karnataka. Pin-560022 (India)"
+  },
+  {
+    "latitude": 13.012,
+    "longitude": 77.553,
+    "weight": 786,
+    "location": "Da Ra Bendre Road, Orion, Brigade Gateway, Malleshwaram West, Bengaluru, Karnataka. Pin-560055 (India)"
+  },
+  {
+    "latitude": 13.0,
+    "longitude": 77.677,
+    "weight": 777,
+    "location": "Outer Ring Road, Venkatappa Colony, Mahadevapura, Bengaluru, Karnataka. Pin-560016 (India)"
+  },
+  {
+    "latitude": 13.008,
+    "longitude": 77.555,
+    "weight": 749,
+    "location": "80 Feet Ring Road, Dr Rajkumar Road 17th Cross Junction, Rajaji Nagar, Bengaluru, Karnataka. Pin-560010 (India)"
+  },
+  {
+    "latitude": 12.991,
+    "longitude": 77.589,
+    "weight": 747,
+    "location": "Palace Road, Kalpana Circle, Vasant Nagar, Bengaluru, Karnataka. Pin-560001 (India)"
+  },
+  {
+    "latitude": 12.977,
+    "longitude": 77.578,
+    "weight": 711,
+    "location": "4th Main Road, Sri Kanakadasa Circle, Gandhi Nagar, Bengaluru, Karnataka. Pin-560009 (India)"
+  },
+  {
+    "latitude": 12.842,
+    "longitude": 77.646,
+    "weight": 703,
+    "location": "Neeladri Road, Ajmera Annex, Karuna Nagar, Doddathogur, Bengaluru, Karnataka. Pin-560100 (India)"
+  },
+  {
+    "latitude": 12.976,
+    "longitude": 77.559,
+    "weight": 700,
+    "location": "G Narayana Kumar Road, Block C, KP Agrahara, Bengaluru, Karnataka. Pin-560023 (India)"
+  },
+  {
+    "latitude": 13.007,
+    "longitude": 77.571,
+    "weight": 687,
+    "location": "Sri Venkataranga Ayangar Road, Ranganathapura, Malleshwaram, Bengaluru, Karnataka. Pin-560003 (India)"
+  },
+  {
+    "latitude": 13.036,
+    "longitude": 77.589,
+    "weight": 679,
+    "location": "Bellary Road, Vinayaka Nagar, Hebbal, Bengaluru, Karnataka. Pin-560024 (India)"
+  },
+  {
+    "latitude": 12.996,
+    "longitude": 77.669,
+    "weight": 669,
+    "location": "MBT Road, Tin Factory Junction, Dooravani Nagar, Bengaluru, Karnataka. Pin-560016 (India)"
+  },
+  {
+    "latitude": 12.943,
+    "longitude": 77.571,
+    "weight": 658,
+    "location": "Sri DV Gundappa Road, Shopper Junction, Basavanagudi, Bengaluru, Karnataka. Pin-560004 (India)"
+  },
+  {
+    "latitude": 12.994,
+    "longitude": 77.589,
+    "weight": 646,
+    "location": "Palace Road, Kumar Park, Vasant Nagar, Bengaluru, Karnataka. Pin-560001 (India)"
+  },
+  {
+    "latitude": 13.006,
+    "longitude": 77.571,
+    "weight": 645,
+    "location": "Sri Venkataranga Ayangar Road, Ranganathapura, Malleshwaram, Bengaluru, Karnataka. Pin-560003 (India)"
+  },
+  {
+    "latitude": 12.964,
+    "longitude": 77.576,
+    "weight": 635,
+    "location": "Mysore Road, Sri Krishna Rajendra Market, Chickpete, Bengaluru, Karnataka. Pin-560002 (India)"
+  },
+  {
+    "latitude": 13.009,
+    "longitude": 77.554,
+    "weight": 626,
+    "location": "80 Feet Ring Road, Dr Rajkumar Road 17th Cross Junction, Rajaji Nagar, Bengaluru, Karnataka. Pin-560010 (India)"
+  },
+  {
+    "latitude": 13.008,
+    "longitude": 77.694,
+    "weight": 624,
+    "location": "MBT Road, Devasandra Junction, KR Puram, Bengaluru, Karnataka. Pin-560036 (India)"
+  },
+  {
+    "latitude": 12.982,
+    "longitude": 77.607,
+    "weight": 623,
+    "location": "Dispensary Road, Tasker Town, Shivaji Nagar, Bengaluru, Karnataka. Pin-560001 (India)"
+  },
+  {
+    "latitude": 12.975,
+    "longitude": 77.575,
+    "weight": 613,
+    "location": "Major T Ramachandrappa Road, Subash Nagar, Gandhi Nagar, Bengaluru, Karnataka. Pin-560009 (India)"
+  },
+  {
+    "latitude": 12.962,
+    "longitude": 77.599,
+    "weight": 609,
+    "location": "Kadidal Manjappa Road, Divyasree Chambers, Langford Garden, Richmond Town, Bengaluru, Karnataka. Pin-560025 (India)"
+  },
+  {
+    "latitude": 13.191,
+    "longitude": 77.646,
+    "weight": 595,
+    "location": "Ronald Colaco Road, Sadahalli Gate Junction, Navarathna Agrahara, Bengaluru, Karnataka. Pin-562157 (India)"
+  },
+  {
+    "latitude": 12.998,
+    "longitude": 77.553,
+    "weight": 593,
+    "location": "80 Feet Ring Road, Navarang Circle, Rajaji Nagar, Bengaluru, Karnataka. Pin-560010 (India)"
+  },
+  {
+    "latitude": 13.0,
+    "longitude": 77.571,
+    "weight": 593,
+    "location": "Sri Venkataranga Ayangar Road, RR Palace, Malleshwaram, Bengaluru, Karnataka. Pin-560003 (India)"
+  },
+  {
+    "latitude": 12.981,
+    "longitude": 77.611,
+    "weight": 585,
+    "location": "St John Road, Sri Nagamma Devi Circle, Sivanchetti Gardens, Bengaluru, Karnataka. Pin-560042 (India)"
+  },
+  {
+    "latitude": 12.964,
+    "longitude": 77.579,
+    "weight": 583,
+    "location": "Silver Jubilee Park Road, Dodpete, Nagartapete, Bengaluru, Karnataka. Pin-560002 (India)"
+  },
+  {
+    "latitude": 12.965,
+    "longitude": 77.575,
+    "weight": 571,
+    "location": "BGS Flyover, Kalasipalyam, K.R Market, Bengaluru Central City Corporation, Bengaluru, Bangalore North, Bengaluru Urban, Karnataka, 560002, India"
+  },
+  {
+    "latitude": 12.981,
+    "longitude": 77.599,
+    "weight": 568,
+    "location": "Cunningham Road, Mantri Altiue Apartment, Shivaji Nagar, Bengaluru, Karnataka. Pin-560001 (India)"
+  },
+  {
+    "latitude": 12.998,
+    "longitude": 77.55,
+    "weight": 559,
+    "location": "Padmabhushan Dr MC Modi Road, Star Circle, Rajaji Nagar, Bengaluru, Karnataka. Pin-560010 (India)"
+  },
+  {
+    "latitude": 12.945,
+    "longitude": 77.571,
+    "weight": 554,
+    "location": "Gandhi Bazar Road, Gandhi Bazar Circle, Basavanagudi, Bengaluru, Karnataka. Pin-560004 (India)"
+  },
+  {
+    "latitude": 12.965,
+    "longitude": 77.577,
+    "weight": 552,
+    "location": "Police Road, Sri Krishna Rajendra Market, Chickpete, Bengaluru, Karnataka. Pin-560002 (India)"
+  },
+  {
+    "latitude": 12.979,
+    "longitude": 77.581,
+    "weight": 541,
+    "location": "1st Main Road, Railway Officers Enclave, Gandhi Nagar, Bengaluru, Karnataka. Pin-560009 (India)"
+  },
+  {
+    "latitude": 12.973,
+    "longitude": 77.578,
+    "weight": 532,
+    "location": "1st Cross Road, Kempegowda Maharaja Complex, Kempegowda Extension, Chickpete, Bengaluru, Karnataka. Pin-560009 (India)"
+  },
+  {
+    "latitude": 12.965,
+    "longitude": 77.574,
+    "weight": 531,
+    "location": "Mysore Road, Chanda Nagar, Sultanpete, Bengaluru, Karnataka. Pin-560053 (India)"
+  },
+  {
+    "latitude": 13.008,
+    "longitude": 77.554,
+    "weight": 529,
+    "location": "80 Feet Ring Road, Dr Rajkumar Road 17th Cross Junction, Rajaji Nagar, Bengaluru, Karnataka. Pin-560010 (India)"
+  },
+  {
+    "latitude": 12.999,
+    "longitude": 77.571,
+    "weight": 528,
+    "location": "Sri Venkataranga Ayangar Road, RR Palace, Malleshwaram, Bengaluru, Karnataka. Pin-560003 (India)"
+  },
+  {
+    "latitude": 13.186,
+    "longitude": 77.68,
+    "weight": 516,
+    "location": "Unnamed Road, Begur Chikkanahalli, Bengaluru, Karnataka. Pin-562149 (India)"
+  },
+  {
+    "latitude": 13.006,
+    "longitude": 77.569,
+    "weight": 509,
+    "location": "15th Cross Road, Malleshwara Extension, Malleshwaram West, Bengaluru, Karnataka. Pin-560055 (India)"
+  }
+]
