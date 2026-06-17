@@ -194,8 +194,21 @@ def get_hotspots(timeframe: str = Query("Live Data"), district: Optional[str] = 
             "weight": int(row['weight']),
             "location": str(row['location'])
         })
+        
+    # Calculate exact counts for the specific time frame
+    total_violations = len(filtered_df)
+    filtered_df['v_type_str'] = filtered_df['violation_type'].astype(str).str.upper()
+    bus_blocks = int(filtered_df['v_type_str'].str.contains('BUSTOP', na=False).sum())
+    main_road_blocks = int(filtered_df['v_type_str'].str.contains('MAIN ROAD', na=False).sum())
 
-    return {"hotspots": hotspots_list}
+    return {
+        "hotspots": hotspots_list,
+        "stats": {
+            "totalViolations": total_violations,
+            "busBlocks": bus_blocks,
+            "mainRoadBlocks": main_road_blocks
+        }
+    }
 
 @app.get("/api/forecast")
 def get_forecast():
@@ -335,13 +348,19 @@ def get_analytics(timeframe: str = Query("Last 24 Hours")):
     violation_counts = f_df['v_type_clean'].value_counts().head(5).to_dict()
     vehicle_counts = f_df['veh_type_clean'].value_counts().head(5).to_dict()
     
+    # Dynamic Revenue Calculation based on BTP Fine Tiers
+    f_df['v_type_upper'] = f_df['v_type_clean'].str.upper()
+    tier_1000 = int(f_df['v_type_upper'].str.contains('BUSTOP|FOOTPATH|MAIN ROAD|DOUBLE PARKING', na=False).sum())
+    tier_500 = len(f_df) - tier_1000
+    total_revenue_inr = (tier_1000 * 1000) + (tier_500 * 500)
+    
     return {
         "violation_breakdown": [{"type": k, "count": v} for k, v in violation_counts.items()],
         "vehicle_breakdown": [{"type": k, "count": v} for k, v in vehicle_counts.items()],
         "metrics": {
             "totalViolations": len(f_df),
             "avgClearanceTime": "12m",
-            "revenueImpact": f"${len(f_df) * 50:,}"
+            "revenueImpact": f"₹{total_revenue_inr:,}"
         }
     }
 

@@ -125,15 +125,24 @@ export default function TrafficDashboard() {
           total += h.weight;
         });
         
-        busBlocks = Math.floor(total * 0.12);
-        loadingZones = Math.floor(total * 0.18);
-        
-        setStats({
-          totalViolations: total,
-          avgSpeed: 14.2,
-          busBlocks,
-          loadingZones
-        });
+        if (data.stats) {
+          setStats({
+            totalViolations: data.stats.totalViolations,
+            avgSpeed: 14.2,
+            busBlocks: data.stats.busBlocks,
+            loadingZones: data.stats.mainRoadBlocks
+          });
+        } else {
+          busBlocks = Math.floor(total * 0.12);
+          loadingZones = Math.floor(total * 0.18);
+          
+          setStats({
+            totalViolations: total,
+            avgSpeed: 14.2,
+            busBlocks,
+            loadingZones
+          });
+        }
       })
       .catch(err => console.error("Error fetching hotspots:", err))
       .finally(() => setLoading(false));
@@ -689,7 +698,7 @@ export default function TrafficDashboard() {
                 <div className="bg-[#1e2025]/80 backdrop-blur-md border border-white/5 border-t-[3px] border-t-emerald-500 rounded-xl p-4 relative overflow-hidden group hover:border-white/20 transition-all shadow-lg">
                   <div className="flex items-center gap-2 text-white/50 font-bold text-[10px] tracking-widest uppercase mb-3">
                     <span className="material-symbols-outlined text-[14px]">local_shipping</span>
-                    <span className="truncate">LOADING ZONES</span>
+                    <span className="truncate">MAIN ROAD BLOCKS</span>
                   </div>
                   <div className="font-display-lg text-3xl font-black text-white tracking-tight mb-3">{stats.loadingZones.toLocaleString()}</div>
                   <div className="w-full bg-black/40 h-1.5 rounded-full overflow-hidden">
