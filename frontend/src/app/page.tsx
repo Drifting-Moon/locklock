@@ -245,17 +245,73 @@ export default function TrafficDashboard() {
   if (!isLoggedIn) {
     return (
       <div 
-        className="flex items-center justify-center h-screen w-full relative bg-cover bg-center bg-no-repeat font-body-md text-on-surface"
-        style={{ backgroundImage: 'url("/bg-hero.png")' }}
+        style={{
+          position: 'fixed',
+          top: 0,
+          left: 0,
+          width: '100vw',
+          height: '100vh',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          backgroundImage: 'url("/bg-hero.png")',
+          backgroundSize: 'cover',
+          backgroundPosition: 'center',
+          backgroundRepeat: 'no-repeat',
+          fontFamily: 'var(--font-body-md)',
+          color: '#dae2fd'
+        }}
       >
-        <div className="absolute inset-0 bg-[#060a16]/80 z-0 pointer-events-none"></div>
+        <div 
+          style={{
+            position: 'absolute',
+            top: 0,
+            left: 0,
+            width: '100%',
+            height: '100%',
+            backgroundColor: 'rgba(6, 10, 22, 0.8)',
+            zIndex: 0,
+            pointerEvents: 'none'
+          }}
+        ></div>
         
-        <div className="bg-[#121626]/60 backdrop-blur-2xl border border-white/10 rounded-2xl p-8 max-w-md w-full mx-4 shadow-[0_20px_50px_rgba(0,0,0,0.6)] z-10 flex flex-col items-center">
-          <div className="w-14 h-14 rounded-xl bg-primary-container flex items-center justify-center mb-4 shadow-lg shadow-primary/20">
-            <span className="material-symbols-outlined text-[32px] text-on-primary-container" style={{ fontVariationSettings: "'FILL' 1" }}>domain</span>
+        <div 
+          style={{
+            backgroundColor: 'rgba(18, 22, 38, 0.65)',
+            backdropFilter: 'blur(24px)',
+            WebkitBackdropFilter: 'blur(24px)',
+            border: '1px solid rgba(255, 255, 255, 0.1)',
+            borderRadius: '16px',
+            padding: '32px',
+            width: '100%',
+            maxWidth: '380px',
+            boxShadow: '0 20px 50px rgba(0,0,0,0.6)',
+            zIndex: 10,
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+            gap: '20px'
+          }}
+        >
+          <div 
+            style={{
+              width: '56px',
+              height: '56px',
+              borderRadius: '12px',
+              backgroundColor: '#3e52ff',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              boxShadow: '0 8px 16px rgba(62, 82, 255, 0.2)'
+            }}
+          >
+            <span className="material-symbols-outlined" style={{ fontSize: '32px', color: '#e9e9ff' }}>domain</span>
           </div>
-          <h1 className="font-headline-lg text-3xl font-bold text-primary tracking-tight">Urban Intel</h1>
-          <p className="font-label-md text-sm text-on-surface-variant mb-6">Traffic & City Command Center</p>
+          
+          <div style={{ textAlign: 'center' }}>
+            <h1 style={{ margin: 0, fontSize: '28px', fontWeight: 'bold', color: '#bdc2ff', letterSpacing: '-0.5px' }}>Urban Intel</h1>
+            <p style={{ margin: '4px 0 0 0', fontSize: '12px', color: '#c5c5d9', fontFamily: '"Geist", monospace' }}>Traffic & City Command Center</p>
+          </div>
           
           <form 
             onSubmit={(e) => {
@@ -266,50 +322,85 @@ export default function TrafficDashboard() {
                 setIsLoggedIn(true);
               }, 1500);
             }}
-            className="w-full flex flex-col gap-4 text-body-sm"
+            style={{ width: '100%', display: 'flex', flexDirection: 'column', gap: '16px' }}
           >
-            <div className="flex flex-col gap-xs">
-              <label className="text-[10px] font-bold text-white/50 uppercase tracking-wider pl-1">Email Address</label>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+              <label style={{ fontSize: '10px', fontWeight: 'bold', color: 'rgba(255, 255, 255, 0.5)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Email Address</label>
               <input 
                 type="email" 
                 value={loginEmail}
                 onChange={(e) => setLoginEmail(e.target.value)}
                 required
-                className="w-full bg-black/40 border border-outline-variant rounded-lg px-3 py-2 text-on-surface focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-all"
+                style={{
+                  width: '100%',
+                  backgroundColor: 'rgba(0,0,0,0.4)',
+                  border: '1px solid rgba(255, 255, 255, 0.1)',
+                  borderRadius: '8px',
+                  padding: '8px 12px',
+                  color: '#dae2fd',
+                  outline: 'none',
+                  fontSize: '13px'
+                }}
               />
             </div>
             
-            <div className="flex flex-col gap-xs">
-              <label className="text-[10px] font-bold text-white/50 uppercase tracking-wider pl-1">Password</label>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+              <label style={{ fontSize: '10px', fontWeight: 'bold', color: 'rgba(255, 255, 255, 0.5)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Password</label>
               <input 
                 type="password" 
                 value={loginPassword}
                 onChange={(e) => setLoginPassword(e.target.value)}
                 required
-                className="w-full bg-black/40 border border-outline-variant rounded-lg px-3 py-2 text-on-surface focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-all"
+                style={{
+                  width: '100%',
+                  backgroundColor: 'rgba(0,0,0,0.4)',
+                  border: '1px solid rgba(255, 255, 255, 0.1)',
+                  borderRadius: '8px',
+                  padding: '8px 12px',
+                  color: '#dae2fd',
+                  outline: 'none',
+                  fontSize: '13px'
+                }}
               />
             </div>
             
             <button 
               type="submit"
               disabled={isLoggingIn}
-              className="w-full bg-primary text-on-primary font-bold py-2.5 rounded-lg mt-2 transition-all hover:brightness-110 flex items-center justify-center gap-2 cursor-pointer font-label-md"
+              style={{
+                width: '100%',
+                backgroundColor: '#bdc2ff',
+                color: '#00149e',
+                fontWeight: 'bold',
+                padding: '10px',
+                borderRadius: '8px',
+                marginTop: '8px',
+                border: 'none',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                gap: '8px',
+                cursor: 'pointer',
+                fontSize: '14px',
+                fontFamily: '"Geist", monospace'
+              }}
             >
               {isLoggingIn ? (
                 <>
-                  <span className="material-symbols-outlined animate-spin text-[18px]">sync</span>
+                  <span className="material-symbols-outlined animate-spin" style={{ fontSize: '18px' }}>sync</span>
                   <span>Verifying Session...</span>
                 </>
               ) : (
                 <>
-                  <span className="material-symbols-outlined text-[18px]">login</span>
+                  <span className="material-symbols-outlined" style={{ fontSize: '18px' }}>login</span>
                   <span>Sign In</span>
                 </>
               )}
             </button>
           </form>
-          <div className="mt-6 text-center text-xs text-on-surface-variant/70">
-            For assistance, contact <span className="text-primary hover:underline cursor-pointer">support@gridlock.app</span>
+          
+          <div style={{ marginTop: '8px', textAlign: 'center', fontSize: '11px', color: 'rgba(197, 197, 217, 0.7)' }}>
+            For assistance, contact <span style={{ color: '#bdc2ff', textDecoration: 'underline', cursor: 'pointer' }}>support@gridlock.app</span>
           </div>
         </div>
       </div>
@@ -318,14 +409,16 @@ export default function TrafficDashboard() {
 
   return (
     <div 
-      className="text-on-surface font-body-md overflow-hidden flex h-screen w-full relative bg-cover bg-center bg-no-repeat"
+      className="text-on-surface font-body-md overflow-hidden h-screen w-full relative bg-cover bg-center bg-no-repeat"
       style={{ backgroundImage: 'url("/bg-hero.png")' }}
     >
       {/* Dark Overlay for Readability */}
       <div className="absolute inset-0 bg-[#060a16]/70 z-0 pointer-events-none"></div>
       
-      {/* SideNavBar */}
-      <nav className="bg-[#121626]/40 backdrop-blur-2xl h-screen w-[280px] shrink-0 border-r border-white/10 hidden md:flex flex-col py-md z-40 relative shadow-[10px_0_30px_rgba(0,0,0,0.5)]">
+      {/* Main Dashboard Flex Layout Wrapper */}
+      <div className="flex h-full w-full relative z-10">
+        {/* SideNavBar */}
+        <nav className="bg-[#121626]/40 backdrop-blur-2xl h-screen w-[280px] shrink-0 border-r border-white/10 hidden md:flex flex-col py-md z-40 relative shadow-[10px_0_30px_rgba(0,0,0,0.5)]">
         {/* Header */}
         <div className="px-md pb-lg flex items-center gap-sm border-b border-outline-variant">
           <div className="w-10 h-10 rounded bg-primary-container flex items-center justify-center shrink-0">
@@ -800,35 +893,74 @@ export default function TrafficDashboard() {
           {activeTab === "Sensors" && <SensorsTab />}
         </main>
       </div>
+    </div>
 
       {/* Support Help Center Modal */}
       {showSupportModal && (
-        <div className="fixed inset-0 flex items-center justify-center bg-[#060a16]/80 backdrop-blur-md z-[100] p-4">
-          <div className="bg-[#121626]/90 border border-white/10 rounded-2xl p-6 max-w-2xl w-full shadow-[0_20px_50px_rgba(0,0,0,0.5)] flex flex-col gap-4 relative">
+        <div 
+          style={{
+            position: 'fixed',
+            top: 0,
+            left: 0,
+            width: '100vw',
+            height: '100vh',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            backgroundColor: 'rgba(6, 10, 22, 0.85)',
+            backdropFilter: 'blur(12px)',
+            WebkitBackdropFilter: 'blur(12px)',
+            zIndex: 9999,
+            padding: '16px'
+          }}
+        >
+          <div 
+            style={{
+              backgroundColor: '#121626',
+              border: '1px solid rgba(255, 255, 255, 0.1)',
+              borderRadius: '16px',
+              padding: '24px',
+              width: '100%',
+              maxWidth: '600px',
+              boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.5)',
+              display: 'flex',
+              flexDirection: 'column',
+              gap: '16px',
+              position: 'relative'
+            }}
+          >
             <button 
               onClick={() => {
                 setShowSupportModal(false);
                 setSupportSuccess(false);
                 setSupportForm({ category: 'Technical Issue', message: '' });
               }}
-              className="absolute top-4 right-4 text-on-surface-variant hover:text-white transition-colors cursor-pointer"
+              style={{
+                position: 'absolute',
+                top: '16px',
+                right: '16px',
+                background: 'none',
+                border: 'none',
+                color: '#c5c5d9',
+                cursor: 'pointer'
+              }}
             >
               <span className="material-symbols-outlined">close</span>
             </button>
             
-            <div className="flex items-center gap-sm pb-2 border-b border-outline-variant">
-              <span className="material-symbols-outlined text-primary text-2xl">help_center</span>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', paddingBottom: '8px', borderBottom: '1px solid rgba(255, 255, 255, 0.1)' }}>
+              <span className="material-symbols-outlined" style={{ color: '#bdc2ff', fontSize: '24px' }}>help_center</span>
               <div>
-                <h3 className="text-lg font-bold text-on-surface font-headline-md">Support & Help Center</h3>
-                <p className="text-xs text-on-surface-variant font-body-sm">Resolve platform issues and submit tickets</p>
+                <h3 style={{ margin: 0, fontSize: '18px', fontWeight: 'bold', color: '#dae2fd' }}>Support & Help Center</h3>
+                <p style={{ margin: 0, fontSize: '12px', color: '#c5c5d9' }}>Resolve platform issues and submit tickets</p>
               </div>
             </div>
             
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-2">
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '24px', marginTop: '8px' }}>
               {/* FAQ Section */}
-              <div className="flex flex-col gap-3">
-                <h4 className="text-xs font-bold text-white/50 uppercase tracking-wider font-label-md">Frequently Asked Questions</h4>
-                <div className="flex flex-col gap-2 overflow-y-auto max-h-[300px] pr-1">
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                <h4 style={{ margin: 0, fontSize: '11px', fontWeight: 'bold', color: 'rgba(255, 255, 255, 0.5)', uppercase: 'true', tracking: '0.05em' }}>Frequently Asked Questions</h4>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', overflowY: 'auto', maxHeight: '280px', paddingRight: '4px' }}>
                   {[
                     {
                       q: "How is congestion score calculated?",
@@ -843,16 +975,29 @@ export default function TrafficDashboard() {
                       a: "Our forecasting system monitors hotspot trend cycles to suggest where police units will have the maximum deterrent effect."
                     }
                   ].map((faq, idx) => (
-                    <div key={idx} className="border border-white/5 rounded-lg overflow-hidden bg-black/20">
+                    <div key={idx} style={{ border: '1px solid rgba(255,255,255,0.05)', borderRadius: '8px', overflow: 'hidden', backgroundColor: 'rgba(0,0,0,0.2)' }}>
                       <button 
                         onClick={() => setFaqOpenIndex(faqOpenIndex === idx ? null : idx)}
-                        className="w-full text-left px-3 py-2 text-xs font-bold text-on-surface flex justify-between items-center hover:bg-white/5 transition-colors font-body-sm cursor-pointer"
+                        style={{
+                          width: '100%',
+                          textAlign: 'left',
+                          padding: '8px 12px',
+                          fontSize: '12px',
+                          fontWeight: 'bold',
+                          color: '#dae2fd',
+                          background: 'none',
+                          border: 'none',
+                          display: 'flex',
+                          justifyContent: 'between',
+                          alignItems: 'center',
+                          cursor: 'pointer'
+                        }}
                       >
-                        <span>{faq.q}</span>
-                        <span className="material-symbols-outlined text-[16px] transition-transform duration-200" style={{ transform: faqOpenIndex === idx ? 'rotate(180deg)' : 'none' }}>expand_more</span>
+                        <span style={{ flex: 1 }}>{faq.q}</span>
+                        <span className="material-symbols-outlined" style={{ fontSize: '16px', transform: faqOpenIndex === idx ? 'rotate(180deg)' : 'none', transition: 'transform 0.2s' }}>expand_more</span>
                       </button>
                       {faqOpenIndex === idx && (
-                        <div className="px-3 pb-2.5 text-xs text-on-surface-variant leading-relaxed font-body-sm bg-black/10">
+                        <div style={{ padding: '0 12px 10px 12px', fontSize: '11px', color: '#c5c5d9', lineHeight: '1.4', backgroundColor: 'rgba(0,0,0,0.1)' }}>
                           {faq.a}
                         </div>
                       )}
@@ -862,14 +1007,14 @@ export default function TrafficDashboard() {
               </div>
               
               {/* Ticket Form Section */}
-              <div className="flex flex-col gap-3 border-t md:border-t-0 md:border-l border-outline-variant pt-4 md:pt-0 md:pl-6">
-                <h4 className="text-xs font-bold text-white/50 uppercase tracking-wider font-label-md">Submit a Support Ticket</h4>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', borderLeft: '1px solid rgba(255, 255, 255, 0.1)', paddingLeft: '24px' }}>
+                <h4 style={{ margin: 0, fontSize: '11px', fontWeight: 'bold', color: 'rgba(255, 255, 255, 0.5)', uppercase: 'true', tracking: '0.05em' }}>Submit a Support Ticket</h4>
                 
                 {supportSuccess ? (
-                  <div className="flex-1 flex flex-col items-center justify-center text-center p-4 bg-primary/10 rounded-xl border border-primary/20 animate-fade-in">
-                    <span className="material-symbols-outlined text-4xl text-primary mb-2 animate-bounce">check_circle</span>
-                    <h5 className="text-sm font-bold text-on-surface font-headline-md">Ticket Submitted</h5>
-                    <p className="text-xs text-on-surface-variant mt-1 font-body-sm">We will review your inquiry and get back to you within 24 hours.</p>
+                  <div style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', textAlign: 'center', padding: '16px', backgroundColor: 'rgba(62, 82, 255, 0.1)', borderRadius: '12px', border: '1px solid rgba(62, 82, 255, 0.2)' }}>
+                    <span className="material-symbols-outlined animate-bounce" style={{ fontSize: '36px', color: '#bdc2ff', marginBottom: '8px' }}>check_circle</span>
+                    <h5 style={{ margin: 0, fontSize: '14px', fontWeight: 'bold', color: '#dae2fd' }}>Ticket Submitted</h5>
+                    <p style={{ margin: '4px 0 0 0', fontSize: '11px', color: '#c5c5d9' }}>We will review your inquiry and get back to you within 24 hours.</p>
                   </div>
                 ) : (
                   <form 
@@ -881,14 +1026,23 @@ export default function TrafficDashboard() {
                         setSupportSuccess(true);
                       }, 1000);
                     }}
-                    className="flex flex-col gap-3 text-xs"
+                    style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}
                   >
-                    <div className="flex flex-col gap-1">
-                      <label className="text-[10px] font-bold text-white/40 uppercase tracking-wider font-label-md">Category</label>
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                      <label style={{ fontSize: '10px', fontWeight: 'bold', color: 'rgba(255, 255, 255, 0.4)', textTransform: 'uppercase' }}>Category</label>
                       <select 
                         value={supportForm.category}
                         onChange={(e) => setSupportForm({ ...supportForm, category: e.target.value })}
-                        className="w-full bg-black/40 border border-outline-variant rounded px-2.5 py-1.5 focus:outline-none focus:border-primary text-on-surface font-body-sm"
+                        style={{
+                          width: '100%',
+                          backgroundColor: 'rgba(0,0,0,0.4)',
+                          border: '1px solid #444656',
+                          borderRadius: '6px',
+                          padding: '6px 10px',
+                          color: '#dae2fd',
+                          fontSize: '12px',
+                          outline: 'none'
+                        }}
                       >
                         <option value="Technical Issue">Technical Issue</option>
                         <option value="Data Discrepancy">Data Discrepancy</option>
@@ -897,31 +1051,55 @@ export default function TrafficDashboard() {
                       </select>
                     </div>
                     
-                    <div className="flex flex-col gap-1">
-                      <label className="text-[10px] font-bold text-white/40 uppercase tracking-wider font-label-md">Description</label>
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                      <label style={{ fontSize: '10px', fontWeight: 'bold', color: 'rgba(255, 255, 255, 0.4)', textTransform: 'uppercase' }}>Description</label>
                       <textarea 
                         value={supportForm.message}
                         onChange={(e) => setSupportForm({ ...supportForm, message: e.target.value })}
                         required
                         rows={4}
-                        placeholder="Describe your issue or feedback..."
-                        className="w-full bg-black/40 border border-outline-variant rounded px-2.5 py-1.5 focus:outline-none focus:border-primary text-on-surface resize-none font-body-sm"
+                        placeholder="Describe your issue..."
+                        style={{
+                          width: '100%',
+                          backgroundColor: 'rgba(0,0,0,0.4)',
+                          border: '1px solid #444656',
+                          borderRadius: '6px',
+                          padding: '6px 10px',
+                          color: '#dae2fd',
+                          fontSize: '12px',
+                          outline: 'none',
+                          resize: 'none'
+                        }}
                       />
                     </div>
                     
                     <button 
                       type="submit"
                       disabled={isSubmittingSupport}
-                      className="w-full bg-primary text-on-primary font-bold py-2 rounded transition-all hover:brightness-110 flex items-center justify-center gap-1.5 cursor-pointer font-label-md"
+                      style={{
+                        width: '100%',
+                        backgroundColor: '#bdc2ff',
+                        color: '#00149e',
+                        fontWeight: 'bold',
+                        padding: '8px 12px',
+                        borderRadius: '6px',
+                        border: 'none',
+                        fontSize: '12px',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        gap: '6px',
+                        cursor: 'pointer'
+                      }}
                     >
                       {isSubmittingSupport ? (
                         <>
-                          <span className="material-symbols-outlined animate-spin text-[16px]">sync</span>
+                          <span className="material-symbols-outlined animate-spin" style={{ fontSize: '16px' }}>sync</span>
                           <span>Sending...</span>
                         </>
                       ) : (
                         <>
-                          <span className="material-symbols-outlined text-[16px]">send</span>
+                          <span className="material-symbols-outlined" style={{ fontSize: '16px' }}>send</span>
                           <span>Submit Ticket</span>
                         </>
                       )}
@@ -936,21 +1114,74 @@ export default function TrafficDashboard() {
 
       {/* Logout Confirmation Dialog */}
       {showLogoutConfirm && (
-        <div className="fixed inset-0 flex items-center justify-center bg-[#060a16]/80 backdrop-blur-md z-[100] p-4">
-          <div className="bg-[#121626]/95 border border-white/10 rounded-xl p-5 max-w-sm w-full shadow-2xl flex flex-col gap-4 text-center">
-            <div className="w-12 h-12 rounded-full bg-error/15 text-error flex items-center justify-center mx-auto animate-pulse">
-              <span className="material-symbols-outlined text-[24px]">logout</span>
+        <div 
+          style={{
+            position: 'fixed',
+            top: 0,
+            left: 0,
+            width: '100vw',
+            height: '100vh',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            backgroundColor: 'rgba(6, 10, 22, 0.85)',
+            backdropFilter: 'blur(12px)',
+            WebkitBackdropFilter: 'blur(12px)',
+            zIndex: 9999,
+            padding: '16px'
+          }}
+        >
+          <div 
+            style={{
+              backgroundColor: '#121626',
+              border: '1px solid rgba(255, 255, 255, 0.1)',
+              borderRadius: '16px',
+              padding: '24px',
+              width: '100%',
+              maxWidth: '380px',
+              boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.5)',
+              display: 'flex',
+              flexDirection: 'column',
+              gap: '16px',
+              textAlign: 'center'
+            }}
+          >
+            <div 
+              style={{
+                width: '48px',
+                height: '48px',
+                borderRadius: '50%',
+                backgroundColor: 'rgba(255, 180, 171, 0.15)',
+                color: '#ffb4ab',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                margin: '0 auto'
+              }}
+            >
+              <span className="material-symbols-outlined" style={{ fontSize: '24px' }}>logout</span>
             </div>
             
             <div>
-              <h3 className="text-base font-bold text-on-surface font-headline-md">Confirm Log Out</h3>
-              <p className="text-xs text-on-surface-variant mt-1.5 leading-relaxed font-body-sm">Are you sure you want to end your current session? You will need to log back in to access the command center.</p>
+              <h3 style={{ margin: 0, fontSize: '16px', fontWeight: 'bold', color: '#dae2fd' }}>Confirm Log Out</h3>
+              <p style={{ margin: '8px 0 0 0', fontSize: '12px', color: '#c5c5d9', lineHeight: '1.4' }}>Are you sure you want to end your current session? You will need to log back in to access the command center.</p>
             </div>
             
-            <div className="grid grid-cols-2 gap-3 mt-1">
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px', marginTop: '4px' }}>
               <button 
                 onClick={() => setShowLogoutConfirm(false)}
-                className="w-full border border-outline-variant hover:bg-white/5 text-on-surface font-bold py-2 rounded-lg text-xs transition-all cursor-pointer font-label-md"
+                style={{
+                  width: '100%',
+                  border: '1px solid #444656',
+                  backgroundColor: 'transparent',
+                  color: '#dae2fd',
+                  fontWeight: 'bold',
+                  padding: '8px 16px',
+                  borderRadius: '8px',
+                  fontSize: '12px',
+                  cursor: 'pointer',
+                  transition: 'all 0.2s'
+                }}
               >
                 Cancel
               </button>
@@ -959,7 +1190,18 @@ export default function TrafficDashboard() {
                   setShowLogoutConfirm(false);
                   setIsLoggedIn(false);
                 }}
-                className="w-full bg-error text-on-error font-bold py-2 rounded-lg text-xs transition-all hover:brightness-110 cursor-pointer font-label-md"
+                style={{
+                  width: '100%',
+                  backgroundColor: '#ffb4ab',
+                  color: '#690005',
+                  fontWeight: 'bold',
+                  padding: '8px 16px',
+                  borderRadius: '8px',
+                  fontSize: '12px',
+                  cursor: 'pointer',
+                  transition: 'all 0.2s',
+                  border: 'none'
+                }}
               >
                 Log Out
               </button>
