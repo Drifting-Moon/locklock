@@ -1,13 +1,27 @@
 "use client";
 import React, { useEffect, useState } from 'react';
+import { apiUrl } from '../lib/api';
+
+interface EnforcementRecord {
+  id: string;
+  vehicle_number: string;
+  violation_type: string;
+  location: string;
+  datetime: string;
+  status: 'Pending' | 'Issued' | 'Dismissed';
+}
+
+interface EnforcementData {
+  records: EnforcementRecord[];
+}
 
 export default function EnforcementTab() {
-  const [data, setData] = useState<any>(null);
+  const [data, setData] = useState<EnforcementData | null>(null);
   const [search, setSearch] = useState("");
-  const [issueModalRecord, setIssueModalRecord] = useState<any>(null);
+  const [issueModalRecord, setIssueModalRecord] = useState<EnforcementRecord | null>(null);
 
   useEffect(() => {
-    fetch('http://localhost:8000/api/enforcement')
+    fetch(apiUrl('/api/enforcement'))
       .then(r => r.json())
       .then(setData)
       .catch(console.error);
@@ -16,15 +30,15 @@ export default function EnforcementTab() {
   if (!data) return <div className="p-8 text-on-surface">Loading Enforcement Data...</div>;
 
   const handleAction = (id: string, action: string) => {
-    setData((prev: any) => ({
+    setData((prev) => prev ? ({
       ...prev,
-      records: prev.records.map((r: any) => 
+      records: prev.records.map((r) => 
         r.id === id ? { ...r, status: action === 'issue' ? 'Issued' : 'Dismissed' } : r
       )
-    }));
+    }) : prev);
   };
 
-  const records = data.records?.filter((r: any) => 
+  const records = data.records?.filter((r) => 
     r.vehicle_number.toLowerCase().includes(search.toLowerCase()) ||
     r.violation_type.toLowerCase().includes(search.toLowerCase())
   ) || [];
@@ -63,7 +77,7 @@ export default function EnforcementTab() {
               </tr>
             </thead>
             <tbody className="divide-y divide-outline-variant">
-              {records.map((r: any, i: number) => (
+              {records.map((r, i: number) => (
                 <tr key={i} className="hover:bg-surface-variant transition-colors group">
                   <td className="px-md py-sm font-code-sm text-code-sm font-bold text-primary">{r.vehicle_number}</td>
                   <td className="px-md py-sm">

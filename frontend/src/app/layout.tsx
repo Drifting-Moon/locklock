@@ -1,6 +1,5 @@
 import type { Metadata } from "next";
 import { Inter, Hanken_Grotesk } from "next/font/google";
-import localFont from "next/font/local";
 import "./globals.css";
 
 const inter = Inter({ subsets: ["latin"], variable: "--font-inter" });
@@ -19,6 +18,8 @@ export default function RootLayout({
   return (
     <html lang="en" className="dark">
       <head>
+        {/* Material Symbols power the existing icon-only dashboard controls. */}
+        {/* eslint-disable-next-line @next/next/no-page-custom-font */}
         <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet" />
       </head>
       <body className={`${inter.variable} ${hankenGrotesk.variable} antialiased bg-surface text-on-surface`}>

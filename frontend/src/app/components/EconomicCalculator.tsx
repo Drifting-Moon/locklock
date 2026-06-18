@@ -3,6 +3,7 @@
 import React, { useState } from 'react';
 import { ChevronDown, Calculator, IndianRupee, Clock, TrendingUp, Activity, CarFront, Users, AlertTriangle, HelpCircle } from 'lucide-react';
 import { LineChart, Line, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip as RechartsTooltip, ResponsiveContainer, ReferenceLine } from 'recharts';
+import type { ValueType } from 'recharts/types/component/DefaultTooltipContent';
 
 export default function EconomicCalculator() {
   const [laneWidth, setLaneWidth] = useState<number>(3.5);
@@ -89,19 +90,19 @@ export default function EconomicCalculator() {
             <div className="p-6 grid grid-cols-1 md:grid-cols-2 gap-6 text-sm text-gray-300">
               <div className="bg-white/5 p-4 rounded-xl border border-white/5">
                 <p className="mb-2"><strong className="text-white flex items-center gap-2"><Activity size={16} className="text-blue-400"/> 1. The Physics (LWR Theory)</strong></p>
-                <p>This tool uses Lighthill-Whitham-Richards (LWR) shockwave theory. It calculates the financial damage of a single illegally parked car by modeling how a physical bottleneck creates a backward-propagating queue of delayed vehicles.</p>
+                <p>This tool uses Lighthill-Whitham-Richards (LWR) shockwave theory. It estimates the financial damage of a single illegally parked car by modeling how a physical bottleneck creates a backward-propagating queue of delayed vehicles.</p>
               </div>
               <div className="bg-white/5 p-4 rounded-xl border border-white/5">
                 <p className="mb-2"><strong className="text-white flex items-center gap-2"><CarFront size={16} className="text-red-400"/> 2. Physical Limits</strong></p>
-                <p>Adjust the lane width and the parked car's width. A wider parked vehicle blocks more of the lane, which drastically drops the road's <strong>Effective Capacity</strong> (the maximum number of cars that can pass per hour).</p>
+                <p>Adjust the lane width and the parked car&apos;s width. A wider parked vehicle blocks more of the lane, which drastically drops the road&apos;s <strong>Effective Capacity</strong> (the maximum number of cars that can pass per hour).</p>
               </div>
               <div className="bg-white/5 p-4 rounded-xl border border-white/5">
                 <p className="mb-2"><strong className="text-white flex items-center gap-2"><TrendingUp size={16} className="text-amber-400"/> 3. Traffic Conditions</strong></p>
-                <p>If the "Arriving Flow" of traffic is higher than the new restricted "Effective Capacity", a shockwave queue forms. The longer the violation lasts, the exponentially worse the cumulative delay gets for the network.</p>
+                <p>If the &quot;Arriving Flow&quot; of traffic is higher than the new restricted &quot;Effective Capacity&quot;, a shockwave queue forms. The longer the violation lasts, the exponentially worse the cumulative delay gets for the network.</p>
               </div>
               <div className="bg-white/5 p-4 rounded-xl border border-white/5">
                 <p className="mb-2"><strong className="text-white flex items-center gap-2"><IndianRupee size={16} className="text-emerald-400"/> 4. Economic Cost</strong></p>
-                <p>We take the total vehicle delay and multiply it by the "Avg Occupancy" (people per car) and the "Value of Time" (local hourly wage) to calculate the final real-world Fiscal Damage caused by the violation.</p>
+                <p>We take the total vehicle delay and multiply it by the &quot;Avg Occupancy&quot; (people per car) and the &quot;Value of Time&quot; (local hourly wage) to estimate the final fiscal damage caused by the violation.</p>
               </div>
             </div>
           </div>
@@ -191,11 +192,11 @@ export default function EconomicCalculator() {
               <div className="space-y-4 text-xs leading-relaxed text-gray-400">
                 <div className="bg-white/5 p-4 rounded-xl border border-white/5">
                   <p className="mb-1"><strong className="text-red-400 flex items-center gap-1.5"><TrendingUp size={14}/> Exponential Economic Loss</strong></p>
-                  <p>As the blockage duration increases, traffic doesn't just build up linearly. Delayed vehicles slow down the cars behind them, causing a cascading "shockwave" queue. The line chart visualizes how fast this financial damage curve bends upward.</p>
+                  <p>As the blockage duration increases, traffic doesn&apos;t just build up linearly. Delayed vehicles slow down the cars behind them, causing a cascading &quot;shockwave&quot; queue. The line chart visualizes how fast this financial damage curve bends upward.</p>
                 </div>
                 <div className="bg-white/5 p-4 rounded-xl border border-white/5">
                   <p className="mb-1"><strong className="text-blue-400 flex items-center gap-1.5"><Activity size={14}/> Road Capacity Bottleneck</strong></p>
-                  <p>The Bar Chart simulates the physical road. The blue bar is the road's natural capacity. The red bar is what's left after the parked car takes up lane space. If the <strong className="text-amber-400">Yellow Dotted Line</strong> (Arrival Flow) overtakes the red bar, a traffic jam begins forming.</p>
+                  <p>The Bar Chart simulates the physical road. The blue bar is the road&apos;s natural capacity. The red bar is what&apos;s left after the parked car takes up lane space. If the <strong className="text-amber-400">Yellow Dotted Line</strong> (Arrival Flow) overtakes the red bar, a traffic jam begins forming.</p>
                 </div>
               </div>
             </div>
@@ -318,7 +319,7 @@ export default function EconomicCalculator() {
                       <YAxis stroke="#ffffff40" fontSize={11} tickFormatter={(val) => `₹${val}`} width={55} />
                       <RechartsTooltip 
                         contentStyle={{ backgroundColor: '#1e2025', borderColor: '#ffffff20', fontSize: '13px', borderRadius: '8px' }}
-                        formatter={(value: any) => [`₹${value.toLocaleString()}`, 'Fiscal Damage']}
+                        formatter={(value?: ValueType) => [`₹${Number(value ?? 0).toLocaleString()}`, 'Fiscal Damage']}
                         labelFormatter={(label) => `Minute ${label}`}
                       />
                       <Line type="monotone" dataKey="cost" stroke="#f87171" strokeWidth={3} dot={{ r: 3, fill: '#f87171', strokeWidth: 0 }} activeDot={{ r: 6 }} animationDuration={500} />
@@ -340,7 +341,7 @@ export default function EconomicCalculator() {
                       <RechartsTooltip 
                         cursor={{fill: '#ffffff05'}}
                         contentStyle={{ backgroundColor: '#1e2025', borderColor: '#ffffff20', fontSize: '13px', borderRadius: '8px' }}
-                        formatter={(value: any) => [`${value} PCU/hr`, 'Capacity']}
+                        formatter={(value?: ValueType) => [`${Number(value ?? 0)} PCU/hr`, 'Capacity']}
                       />
                       <Bar dataKey="value" radius={[0, 4, 4, 0]} animationDuration={500} />
                       <ReferenceLine x={arrivingFlow} stroke="#fbbf24" strokeDasharray="3 3" label={{ position: 'top', value: 'Arrival Flow', fill: '#fbbf24', fontSize: 11 }} />

@@ -1,10 +1,26 @@
 "use client";
 import React, { useEffect, useState } from 'react';
+import { apiUrl } from '../lib/api';
+
+interface BreakdownItem {
+  type: string;
+  count: number;
+}
+
+interface AnalyticsData {
+  violation_breakdown: BreakdownItem[];
+  vehicle_breakdown: BreakdownItem[];
+  metrics?: {
+    totalViolations?: number;
+    avgClearanceTime?: string;
+    revenueImpact?: string;
+  };
+}
 
 export default function AnalyticsTab() {
-  const [data, setData] = useState<any>(null);
+  const [data, setData] = useState<AnalyticsData | null>(null);
   useEffect(() => {
-    fetch('http://localhost:8000/api/analytics')
+    fetch(apiUrl('/api/analytics'))
       .then(r => r.json())
       .then(setData)
       .catch(console.error);
@@ -19,7 +35,7 @@ export default function AnalyticsTab() {
           <h2 className="font-headline-md text-headline-md-mobile text-on-surface">Violation Analytics</h2>
           <div className="flex items-center gap-xs px-sm py-xs bg-surface-container-high rounded-lg border border-outline-variant text-on-surface-variant">
             <span className="material-symbols-outlined text-[16px]">calendar_today</span>
-            <span className="font-label-md text-label-md">Last 24 Hours</span>
+            <span className="font-label-md text-label-md">Recent Dataset Window</span>
           </div>
         </div>
       </div>
@@ -57,7 +73,7 @@ export default function AnalyticsTab() {
       <section className="glass-card rounded-xl p-md space-y-lg bg-surface-container/50 border border-outline-variant">
         <h3 className="font-label-md text-label-md font-bold text-on-surface uppercase tracking-widest">Violation Breakdown</h3>
         <div className="h-48 flex items-end justify-around gap-sm pt-md">
-          {data.violation_breakdown?.map((v: any, i: number) => {
+          {data.violation_breakdown?.map((v, i: number) => {
             const colors = ["#bdc2ff", "#14d1ff", "#7d37ff", "#444656", "#ffb4ab"];
             const color = colors[i % colors.length];
             const max = data.violation_breakdown[0]?.count || 1;
@@ -76,7 +92,7 @@ export default function AnalyticsTab() {
       <section className="space-y-md pb-12">
         <h3 className="font-label-md text-label-md font-bold text-on-surface uppercase tracking-widest">Vehicle Breakdown</h3>
         <div className="grid grid-cols-2 md:grid-cols-4 gap-md">
-          {data.vehicle_breakdown?.map((v: any, i: number) => {
+          {data.vehicle_breakdown?.map((v, i: number) => {
             const icons = ["directions_car", "local_shipping", "two_wheeler", "airport_shuttle", "directions_bus"];
             const iconCols = ["text-primary", "text-secondary", "text-tertiary", "text-outline", "text-error"];
             return (
