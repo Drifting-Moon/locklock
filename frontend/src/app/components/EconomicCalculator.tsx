@@ -1,9 +1,42 @@
 "use client";
 
-import React, { useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { ChevronDown, Calculator, IndianRupee, Clock, TrendingUp, Activity, CarFront, Users, AlertTriangle, HelpCircle } from 'lucide-react';
 import { LineChart, Line, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip as RechartsTooltip, ResponsiveContainer, ReferenceLine } from 'recharts';
 import type { ValueType } from 'recharts/types/component/DefaultTooltipContent';
+import { apiUrl } from '../lib/api';
+
+interface HotspotDefaults {
+  id: number;
+  locationName: string;
+  policeStation: string;
+  violationCount: number;
+  laneCount: number;
+  highwayType: string;
+  bprDelay: number;
+}
+
+function useAnimatedNumber(target: number) {
+  const [display, setDisplay] = useState(target);
+  const previous = useRef(target);
+
+  useEffect(() => {
+    const start = previous.current;
+    const startedAt = performance.now();
+    let frame = 0;
+    const animate = (now: number) => {
+      const progress = Math.min(1, (now - startedAt) / 350);
+      const eased = 1 - Math.pow(1 - progress, 3);
+      setDisplay(start + (target - start) * eased);
+      if (progress < 1) frame = requestAnimationFrame(animate);
+      else previous.current = target;
+    };
+    frame = requestAnimationFrame(animate);
+    return () => cancelAnimationFrame(frame);
+  }, [target]);
+
+  return Math.round(display);
+}
 
 export default function EconomicCalculator() {
   const [laneWidth, setLaneWidth] = useState<number>(3.5);
@@ -14,6 +47,15 @@ export default function EconomicCalculator() {
   const [vott, setVott] = useState<number>(100);
   const [showBreakdown, setShowBreakdown] = useState<boolean>(true);
   const [showGuide, setShowGuide] = useState<boolean>(false);
+  const [hotspots, setHotspots] = useState<HotspotDefaults[]>([]);
+  const [selectedHotspot, setSelectedHotspot] = useState('');
+
+  useEffect(() => {
+    fetch(apiUrl('/api/v1/clusters/active?timeframe=Recent%20Dataset%20Window'))
+      .then(response => response.json())
+      .then(data => setHotspots((data.features || []).slice(0, 25).map((feature: { properties: HotspotDefaults }) => feature.properties)))
+      .catch(console.error);
+  }, []);
 
   const BASE_CAPACITY = 1800;
   const effectiveWidth = Math.max(0, laneWidth - carWidth);
@@ -25,7 +67,19 @@ export default function EconomicCalculator() {
   const totalDelayVehMin = Math.round(totalDelayVehHours * 60);
   const personHoursLost = totalDelayVehHours * occupancy;
   const economicCost = personHoursLost * vott;
+  const animatedEconomicCost = useAnimatedNumber(economicCost);
   const queueGrowthPerMin = excessDemand / 60;
+  const isJamForming = arrivingFlow > blockedCapacity;
+
+  const loadHotspot = (hotspotId: string) => {
+    setSelectedHotspot(hotspotId);
+    const hotspot = hotspots.find(item => String(item.id) === hotspotId);
+    if (!hotspot) return;
+    setLaneWidth(Math.min(5, Math.max(2.5, 3.2 + (hotspot.laneCount - 1) * 0.35)));
+    setCarWidth(hotspot.highwayType?.includes('service') ? 1.7 : 1.9);
+    setArrivingFlow(Math.min(2500, Math.max(500, hotspot.violationCount * 7)));
+    setDurationMin(Math.min(180, Math.max(15, Math.round(hotspot.bprDelay || 45))));
+  };
 
   // Chart 1: Exponential Delay Data
   const delayData = [];
@@ -67,8 +121,9 @@ export default function EconomicCalculator() {
             <div className="bg-white/5 backdrop-blur-xl border border-white/10 rounded-2xl p-4 flex flex-col items-end min-w-[200px]">
               <span className="text-xs text-gray-400 uppercase tracking-wider font-bold mb-1">Live Damage Estimate</span>
               <div className="text-3xl font-extrabold bg-clip-text text-transparent bg-gradient-to-r from-red-500 to-orange-400">
-                ₹{Math.round(economicCost).toLocaleString()}
+                ₹{animatedEconomicCost.toLocaleString()}
               </div>
+              <span className="text-[10px] text-gray-500 mt-1 text-right">Single-incident simulation</span>
             </div>
           </div>
         </div>
@@ -120,6 +175,15 @@ export default function EconomicCalculator() {
               <Calculator className="w-5 h-5 text-indigo-400" />
               <span>Simulation Parameters</span>
             </h3>
+
+            <div className="mb-8 rounded-xl border border-blue-500/20 bg-blue-500/5 p-4 relative z-10">
+              <label htmlFor="hotspot-loader" className="block text-xs font-bold uppercase tracking-wider text-blue-300 mb-2">Load Real Hotspot</label>
+              <select id="hotspot-loader" value={selectedHotspot} onChange={(event) => loadHotspot(event.target.value)} className="w-full rounded-lg border border-white/10 bg-[#171923] px-3 py-2.5 text-sm text-gray-200 outline-none focus:border-blue-400">
+                <option value="">Choose a mapped hotspot...</option>
+                {hotspots.map(hotspot => <option key={hotspot.id} value={hotspot.id}>{hotspot.locationName} · {hotspot.policeStation}</option>)}
+              </select>
+              <p className="text-[11px] leading-relaxed text-gray-500 mt-2">Prefills road width, obstruction class, traffic demand, and modeled incident duration from the selected cluster.</p>
+            </div>
 
             <div className="space-y-8 relative z-10">
               {/* Slider Group 1: Physical Limits */}
@@ -314,7 +378,7 @@ export default function EconomicCalculator() {
                   <div className="mt-2 p-4 bg-gradient-to-r from-red-500/10 to-orange-500/10 border-t border-red-500/20 flex justify-between items-center">
                     <span className="font-bold text-red-200">Total Fiscal Damage</span>
                     <span className="font-mono text-xl font-bold text-red-400 drop-shadow-[0_0_8px_rgba(248,113,113,0.5)]">
-                      ₹{Math.round(economicCost).toLocaleString()}
+                      ₹{animatedEconomicCost.toLocaleString()}
                     </span>
                   </div>
 
@@ -322,6 +386,9 @@ export default function EconomicCalculator() {
                     {excessDemand > 0 
                       ? `Traffic queue is growing at a rate of ${(queueGrowthPerMin).toFixed(1)} vehicles per minute.` 
                       : 'No queue is actively forming under these conditions.'}
+                  </div>
+                  <div className="px-4 pb-4 text-center text-[10px] text-gray-500">
+                    This card models one incident. The header projects capped savings across active hotspots at a 35% clearance rate.
                   </div>
 
                 </div>
@@ -370,6 +437,10 @@ export default function EconomicCalculator() {
                       <ReferenceLine x={arrivingFlow} stroke="#fbbf24" strokeDasharray="3 3" label={{ position: 'top', value: 'Arrival Flow', fill: '#fbbf24', fontSize: 11 }} />
                     </BarChart>
                   </ResponsiveContainer>
+                </div>
+                <div className={`mt-3 flex items-center gap-2 rounded-lg border px-3 py-2 text-xs ${isJamForming ? 'border-amber-400/30 bg-amber-400/10 text-amber-300' : 'border-emerald-400/20 bg-emerald-400/10 text-emerald-300'}`}>
+                  <span className={`h-2 w-2 rounded-full ${isJamForming ? 'bg-amber-400 animate-pulse' : 'bg-emerald-400'}`} />
+                  {isJamForming ? `Jam forming: arrivals exceed effective capacity by ${excessDemand} PCU/hr.` : 'Stable flow: effective capacity remains above arrivals.'}
                 </div>
               </div>
             </div>

@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useRef, useEffect } from 'react';
+import { useTheme } from '../lib/ThemeContext';
 
 interface Notification {
   id: number;
@@ -18,7 +19,7 @@ interface HeaderProps {
   activeDropdown: string | null;
   setActiveDropdown: (dropdown: string | null) => void;
   setShowLogoutConfirm: (show: boolean) => void;
-  totalDelayMins: number;
+  projectedDelaySavedMins: number;
   lossMitigatedInr: number;
   activeBlindspotsCount: number;
 }
@@ -32,11 +33,12 @@ export default function Header({
   activeDropdown,
   setActiveDropdown,
   setShowLogoutConfirm,
-  totalDelayMins,
+  projectedDelaySavedMins,
   lossMitigatedInr,
   activeBlindspotsCount
 }: HeaderProps) {
   const dropdownRef = useRef<HTMLDivElement>(null);
+  const { theme, toggleTheme } = useTheme();
 
   // Close dropdown when clicking outside
   useEffect(() => {
@@ -62,12 +64,12 @@ export default function Header({
       <div className="hidden xl:flex items-center gap-6 bg-white/5 border border-white/10 px-4 py-1.5 rounded-full text-xs font-mono text-white/80">
         <div className="flex items-center gap-1.5 border-r border-white/10 pr-4">
           <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
-          <span>DELAY SAVED:</span>
-          <span className="text-emerald-400 font-bold font-mono">+{Math.round(totalDelayMins * 0.35)}m</span>
+          <span>PROJECTED DELAY SAVED:</span>
+          <span className="text-emerald-400 font-bold font-mono">+{Math.round(projectedDelaySavedMins).toLocaleString()}m</span>
         </div>
         <div className="flex items-center gap-1.5 border-r border-white/10 pr-4">
           <span className="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
-          <span>LOSS MITIGATED:</span>
+          <span>PROJECTED VALUE SAVED:</span>
           <span className="text-emerald-400 font-bold font-mono">₹{Math.round(lossMitigatedInr).toLocaleString()}</span>
         </div>
         <div className="flex items-center gap-1.5">
@@ -112,6 +114,16 @@ export default function Header({
               />
             </div>
           )}
+
+          <button 
+            onClick={toggleTheme} 
+            className="w-10 h-10 rounded-full flex items-center justify-center text-on-surface-variant hover:bg-surface-container-high hover:text-primary transition-all duration-200"
+            title={`Switch to ${theme === 'dark' ? 'light' : 'dark'} mode`}
+          >
+            <span className="material-symbols-outlined">
+              {theme === 'dark' ? 'light_mode' : 'dark_mode'}
+            </span>
+          </button>
 
           <button 
             onClick={() => setActiveDropdown(activeDropdown === 'notifications' ? null : 'notifications')} 

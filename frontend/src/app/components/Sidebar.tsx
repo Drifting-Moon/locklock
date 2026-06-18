@@ -32,15 +32,15 @@ export default function Sidebar({
   ];
 
   return (
-    <nav className="bg-[#121626]/40 backdrop-blur-2xl h-screen w-[280px] shrink-0 border-r border-white/10 hidden md:flex flex-col py-md z-40 relative shadow-[10px_0_30px_rgba(0,0,0,0.5)]">
+    <nav className="bg-canvas h-screen w-[280px] shrink-0 border-r border-hairline hidden md:flex flex-col py-md z-40 relative">
       {/* Header */}
-      <div className="px-md pb-lg flex items-center gap-sm border-b border-outline-variant">
-        <div className="w-10 h-10 rounded bg-primary-container flex items-center justify-center shrink-0">
-          <span className="material-symbols-outlined text-on-primary-container" style={{ fontVariationSettings: "'FILL' 1" }}>domain</span>
+      <div className="px-md pb-lg flex items-center gap-sm border-b border-hairline">
+        <div className="w-10 h-10 rounded bg-accent-signal flex items-center justify-center shrink-0">
+          <span className="material-symbols-outlined text-canvas" style={{ fontVariationSettings: "'FILL' 1" }}>domain</span>
         </div>
         <div>
-          <h1 className="font-headline-md text-headline-md font-bold text-primary">Urban Intel</h1>
-          <p className="font-label-md text-label-md text-on-surface-variant">City Admin</p>
+          <h1 className="font-headline-md text-headline-md font-bold text-text-primary">Urban Intel</h1>
+          <p className="font-label-md text-label-md text-text-muted">City Admin</p>
         </div>
       </div>
 
@@ -50,10 +50,10 @@ export default function Sidebar({
           <button 
             key={tab.id}
             onClick={() => setActiveTab(tab.id)}
-            className={`flex items-center gap-md px-md py-sm rounded transition-colors duration-200 w-full text-left cursor-pointer ${
+            className={`flex items-center gap-md px-md py-sm rounded transition-colors duration-200 w-full text-left cursor-pointer border-l-4 ${
               activeTab === tab.id 
-                ? 'text-primary border-r-4 border-primary font-bold bg-surface-container-high/50' 
-                : 'text-on-surface-variant hover:bg-surface-container-high'
+                ? 'text-accent-signal border-accent-signal font-bold bg-surface' 
+                : 'text-text-muted border-transparent hover:bg-surface'
             }`}
           >
             <span className="material-symbols-outlined" style={tab.fill ? { fontVariationSettings: "'FILL' 1" } : {}}>{tab.icon}</span>
@@ -63,13 +63,13 @@ export default function Sidebar({
       </div>
 
       {/* CTA & Footer */}
-      <div className="px-md pt-md border-t border-outline-variant flex flex-col gap-sm">
+      <div className="px-md pt-md border-t border-hairline flex flex-col gap-sm">
         <button 
           onClick={() => setIsDispatchPanelOpen(!isDispatchPanelOpen)}
-          className={`w-full font-label-md text-label-md py-sm rounded transition-all cursor-pointer flex items-center justify-center gap-xs ${
+          className={`w-full font-label-md text-label-md py-sm rounded transition-all cursor-pointer flex items-center justify-center gap-xs font-bold ${
             isDispatchPanelOpen 
-              ? 'bg-[#f44336] text-white hover:brightness-110 shadow-lg shadow-[#f44336]/20' 
-              : 'bg-primary text-on-primary hover:brightness-110'
+              ? 'bg-accent-negative text-white' 
+              : 'bg-accent-signal text-white hover:brightness-110'
           }`}
         >
           <span className="material-symbols-outlined text-[18px]">emergency_share</span>
@@ -77,14 +77,14 @@ export default function Sidebar({
         </button>
         <button 
           onClick={onExportReport} 
-          className="w-full bg-surface-container-high text-on-surface font-label-md text-label-md py-sm rounded hover:brightness-110 transition-all cursor-pointer flex items-center justify-center gap-xs"
+          className="w-full bg-surface border border-hairline text-text-primary font-label-md text-label-md py-sm rounded hover:bg-canvas transition-all cursor-pointer flex items-center justify-center gap-xs"
         >
           <span className="material-symbols-outlined text-[18px]">download</span>
           Export Report
         </button>
         <button 
           onClick={onPrintBriefing} 
-          className="w-full bg-surface-container-high text-on-surface font-label-md text-label-md py-sm rounded hover:brightness-110 transition-all cursor-pointer flex items-center justify-center gap-xs"
+          className="w-full bg-surface border border-hairline text-text-primary font-label-md text-label-md py-sm rounded hover:bg-canvas transition-all cursor-pointer flex items-center justify-center gap-xs"
         >
           <span className="material-symbols-outlined text-[18px]">print</span>
           Print Briefing
@@ -92,7 +92,7 @@ export default function Sidebar({
         <div className="flex flex-col gap-xs mt-sm">
           <button 
             onClick={() => setShowSupportModal(true)}
-            className="flex items-center gap-md px-sm py-xs rounded text-on-surface-variant hover:bg-surface-container-high transition-colors duration-200 w-full text-left cursor-pointer"
+            className="flex items-center gap-md px-sm py-xs rounded text-text-muted hover:bg-surface transition-colors duration-200 w-full text-left cursor-pointer"
           >
             <span className="material-symbols-outlined text-[20px]">help</span>
             <span className="font-body-sm text-body-sm">Support</span>

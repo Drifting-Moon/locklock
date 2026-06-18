@@ -296,9 +296,14 @@ export default function TrafficDashboard() {
     }
   };
 
-  const totalDelayMins = hotspots?.features?.reduce((acc: number, f: any) => acc + (f.properties?.bprDelay || 0), 0) || 0;
-  // Dynamic projection of economic loss mitigated assuming a 35% clearance rate
-  const lossMitigatedInr = totalDelayMins * 1.4 * 5.8 * 60 * 0.35; 
+  // BPR grows rapidly beyond capacity. Cap each hotspot to a three-hour incident
+  // horizon so one extreme modeled ratio cannot dominate the citywide ticker.
+  const totalDelayMins = hotspots?.features?.reduce((acc: number, f: any) => {
+    const modeledDelay = Number(f.properties?.bprDelay) || 0;
+    return acc + Math.min(modeledDelay, 180);
+  }, 0) || 0;
+  const projectedDelaySavedMins = totalDelayMins * 0.35;
+  const lossMitigatedInr = (projectedDelaySavedMins / 60) * 1.4 * 120;
   const activeBlindspotsCount = blindspots ? blindspots.length : 0;
 
   return (
@@ -337,7 +342,7 @@ export default function TrafficDashboard() {
             activeDropdown={activeDropdown}
             setActiveDropdown={setActiveDropdown}
             setShowLogoutConfirm={setShowLogoutConfirm}
-            totalDelayMins={totalDelayMins}
+            projectedDelaySavedMins={projectedDelaySavedMins}
             lossMitigatedInr={lossMitigatedInr}
             activeBlindspotsCount={activeBlindspotsCount}
           />
