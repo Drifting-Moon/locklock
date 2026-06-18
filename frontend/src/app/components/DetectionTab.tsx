@@ -61,7 +61,8 @@ export default function DetectionTab() {
             const next = { ...prev };
             vList.forEach((v: Violation) => {
               if (!next[v.id]) {
-                next[v.id] = { step: 2, label: "🏍️ Interceptor En Route (ETA 4m)" }; // default state for older ones
+                const eta = (v.severity ? Math.floor(v.severity) % 7 + 2 : 4);
+                next[v.id] = { step: 2, label: `🏍️ Interceptor En Route (ETA ${eta}m)` }; // deterministic pseudo-random ETA
               }
             });
             return next;
@@ -98,7 +99,9 @@ export default function DetectionTab() {
             if (curr.step === 0) {
               next[id] = { step: 1, label: "🚨 Alert Pushed to BTP" };
             } else if (curr.step === 1) {
-              next[id] = { step: 2, label: "🏍️ Interceptor En Route (ETA 3m)" };
+              // We don't have access to v.severity here easily, so we just pick a random ETA between 2 and 8
+              const eta = Math.floor(Math.random() * 7) + 2;
+              next[id] = { step: 2, label: `🏍️ Interceptor En Route (ETA ${eta}m)` };
             }
           }
         });
@@ -177,10 +180,10 @@ export default function DetectionTab() {
   const criticalCount = violations.filter(v => v.severity_badge === 'Critical').length;
 
   // Selected stop data for formula inspectors
-  const matchedStop = stops.find(s => s.name === selectedViolation?.stop_name) || stops[0];
+  const matchedStop = stops.find(s => s.name === selectedViolation?.stop_name) || stops.find(s => s.lat.toString() === pingForm.lat && s.lng.toString() === pingForm.lng) || stops[0];
   const busFrequency = matchedStop ? matchedStop.routes_per_hour : 12;
   const simulatedDelay = selectedViolation ? (selectedViolation.severity > 70 ? 2.5 : 1.2) : 1.5;
-  const travelTimeCost = selectedViolation ? selectedViolation.cost_multiplier : 3510;
+  const travelTimeCost = selectedViolation ? selectedViolation.cost_multiplier : Math.round(((busFrequency * 65 * simulatedDelay) / 60) * 180);
 
   // Resolved Vahan lookup details for active vehicle
   const activeVehicleId = selectedViolation?.vehicle_id || pingForm.vehicle_id;
@@ -319,7 +322,7 @@ export default function DetectionTab() {
               <div className="p-4 border-b border-outline-variant flex justify-between items-center bg-surface-container-high">
                 <h3 className="font-bold flex items-center gap-2 text-white">
                   <span className="material-symbols-outlined text-[#4cd6ff]">local_police</span>
-                  BTP Interceptor Dispatch
+                  BTP Interceptor Dispatch <span className="text-xs font-normal text-white/50">(Simulated)</span>
                 </h3>
                 <div className="flex items-center gap-2">
                   <button 
@@ -356,7 +359,7 @@ export default function DetectionTab() {
                       </tr>
                     ) : violations.map((v) => {
                       const isSelected = selectedViolationId === v.id;
-                      const status = violationStatuses[v.id] || { step: 2, label: "🏍️ Interceptor En Route (ETA 4m)" };
+                      const status = violationStatuses[v.id] || { step: 2, label: `🏍️ Interceptor En Route (ETA ${(v.severity ? Math.floor(v.severity) % 7 + 2 : 4)}m)` };
                       return (
                         <tr 
                           key={v.id} 
@@ -438,11 +441,20 @@ export default function DetectionTab() {
              <p className="text-[11px] text-white/40 mb-3">Click on any of the dataset-derived hotspots below to copy its coordinates into the GPS simulator and test the proximity logic.</p>
              <div className="flex flex-wrap gap-2">
                 {stops.map(s => (
-                  <div key={s.id} className="bg-surface-container-high px-2 py-1.5 rounded-md text-[11px] border border-hairline hover:border-primary/50 hover:bg-primary/10 cursor-pointer text-white/80 transition-all flex items-center gap-1" 
-                       onClick={() => setPingForm({...pingForm, lat: s.lat.toString(), lng: s.lng.toString()})}
-                       title="Click to copy coordinates to simulator">
-                    <span className="w-1.5 h-1.5 bg-[#3e52ff] rounded-full inline-block"></span>
-                    <span className="truncate max-w-[120px]">{s.name.split(',')[0]}</span>
+                  <div key={s.id} className="bg-surface-container-high px-2 py-1.5 rounded-md border border-hairline hover:border-primary/50 hover:bg-primary/10 cursor-pointer transition-all flex items-start gap-1.5 min-w-[140px]" 
+                       onClick={() => { setPingForm({...pingForm, lat: s.lat.toString(), lng: s.lng.toString()}); setSelectedViolationId(null); }}
+                       title={s.name}>
+                    <span className="w-1.5 h-1.5 bg-[#3e52ff] rounded-full shrink-0 mt-[5px]"></span>
+                    <div className="flex flex-col min-w-0">
+                      <span className="text-white/90 text-[11px] font-medium truncate max-w-[160px]">
+                        {s.name.includes(',') ? s.name.substring(s.name.indexOf(',') + 1).trim() : s.name}
+                      </span>
+                      {s.name.includes(',') && (
+                        <span className="text-white/40 text-[9px] truncate max-w-[160px] leading-tight">
+                          {s.name.substring(0, s.name.indexOf(',')).trim()}
+                        </span>
+                      )}
+                    </div>
                   </div>
                 ))}
              </div>
@@ -462,7 +474,7 @@ export default function DetectionTab() {
                 <ul className="space-y-2">
                   <li className="flex justify-between border-b border-outline-variant/20 pb-1">
                     <span>Target Intersection:</span>
-                    <span className="text-[#14d1ff] font-bold font-mono truncate max-w-[150px]">{selectedViolation ? selectedViolation.stop_name.split(',')[0] : stops[0]?.name.split(',')[0]}</span>
+                    <span className="text-[#14d1ff] font-bold font-mono truncate max-w-[200px]" title={matchedStop?.name || 'Unknown'}>{matchedStop?.name || 'Unknown'}</span>
                   </li>
                   <li className="flex justify-between border-b border-outline-variant/20 pb-1">
                     <span>Buses / Hour (Frequency):</span>
@@ -470,7 +482,7 @@ export default function DetectionTab() {
                   </li>
                   <li className="flex justify-between border-b border-outline-variant/20 pb-1">
                     <span>Commuter Density / Bus:</span>
-                    <span className="text-white font-bold font-mono">65 Passengers</span>
+                    <span className="text-white font-bold font-mono">65 Passengers <span className="text-[10px] font-normal text-white/50">(City Avg)</span></span>
                   </li>
                   <li className="flex justify-between border-b border-outline-variant/20 pb-1">
                     <span>Average Delay added:</span>
@@ -478,7 +490,7 @@ export default function DetectionTab() {
                   </li>
                   <li className="flex justify-between">
                     <span>Value of Travel Time (VoTT):</span>
-                    <span className="text-[#4ade80] font-bold font-mono">₹180 / hr</span>
+                    <span className="text-[#4ade80] font-bold font-mono">₹180 / hr <span className="text-[10px] font-normal text-white/50">(City Avg)</span></span>
                   </li>
                 </ul>
               </div>

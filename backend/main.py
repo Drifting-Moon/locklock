@@ -544,8 +544,10 @@ def detect_violation(ping: GPSPing):
     
     cost_multiplier = (nearest_stop['routes_per_hour'] * 65 * 1.5 / 60) * 100
     
+    hash_seed = f"{ping.vehicle_id}-{datetime.now().timestamp()}"
+    
     violation = {
-        "id": f"VIO-{zlib.adler32(ping.vehicle_id.encode()) % 100000:05d}",
+        "id": f"VIO-{zlib.adler32(hash_seed.encode()) % 100000:05d}",
         "vehicle_id": ping.vehicle_id,
         "stop_name": nearest_stop['name'],
         "lat": ping.lat,

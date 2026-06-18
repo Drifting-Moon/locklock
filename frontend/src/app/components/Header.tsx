@@ -78,15 +78,21 @@ export default function Header({
 
       {/* Centered Global Metric Ticker */}
       <div className="hidden xl:flex items-center gap-6 bg-background border border-border px-4 py-1.5 rounded-full text-xs font-mono text-foreground/80">
-        <div className="flex items-center gap-1.5 border-r border-white/10 pr-4">
+        <div className="flex items-center gap-1.5 border-r border-white/10 pr-4 relative group cursor-help">
           <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
           <span>PROJECTED DELAY SAVED:</span>
           <span className="text-emerald-400 font-bold font-mono">+{Math.round(projectedDelaySavedMins).toLocaleString()}m</span>
+          <div className="absolute top-full left-0 mt-2 bg-surface-container-high border border-outline-variant p-2 rounded shadow-lg opacity-0 group-hover:opacity-100 transition-opacity z-50 text-[10px] w-56 text-on-surface pointer-events-none">
+            Cumulative across active violations, last 24 hours, assuming average clearance time of 12min.
+          </div>
         </div>
-        <div className="flex items-center gap-1.5 border-r border-white/10 pr-4">
+        <div className="flex items-center gap-1.5 border-r border-white/10 pr-4 relative group cursor-help">
           <span className="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
           <span>PROJECTED VALUE SAVED:</span>
           <span className="text-emerald-400 font-bold font-mono">₹{Math.round(lossMitigatedInr).toLocaleString()}</span>
+          <div className="absolute top-full left-0 mt-2 bg-surface-container-high border border-outline-variant p-2 rounded shadow-lg opacity-0 group-hover:opacity-100 transition-opacity z-50 text-[10px] w-56 text-on-surface pointer-events-none">
+            Cumulative economic value saved over the last 24 hours, based on a city-average VoTT of ₹180/hr.
+          </div>
         </div>
         <div className="flex items-center gap-1.5">
           <span className="w-1.5 h-1.5 rounded-full bg-amber-500"></span>
