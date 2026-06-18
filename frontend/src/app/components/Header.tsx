@@ -18,6 +18,9 @@ interface HeaderProps {
   activeDropdown: string | null;
   setActiveDropdown: (dropdown: string | null) => void;
   setShowLogoutConfirm: (show: boolean) => void;
+  totalDelayMins: number;
+  lossMitigatedInr: number;
+  activeBlindspotsCount: number;
 }
 
 export default function Header({
@@ -28,7 +31,10 @@ export default function Header({
   setNotifications,
   activeDropdown,
   setActiveDropdown,
-  setShowLogoutConfirm
+  setShowLogoutConfirm,
+  totalDelayMins,
+  lossMitigatedInr,
+  activeBlindspotsCount
 }: HeaderProps) {
   const dropdownRef = useRef<HTMLDivElement>(null);
 
@@ -50,6 +56,25 @@ export default function Header({
         <button className="lg:hidden text-on-surface-variant hover:text-primary transition-colors">
           <span className="material-symbols-outlined">menu</span>
         </button>
+      </div>
+
+      {/* Centered Global Metric Ticker */}
+      <div className="hidden xl:flex items-center gap-6 bg-white/5 border border-white/10 px-4 py-1.5 rounded-full text-xs font-mono text-white/80">
+        <div className="flex items-center gap-1.5 border-r border-white/10 pr-4">
+          <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
+          <span>DELAY SAVED:</span>
+          <span className="text-emerald-400 font-bold font-mono">+{Math.round(totalDelayMins * 0.35)}m</span>
+        </div>
+        <div className="flex items-center gap-1.5 border-r border-white/10 pr-4">
+          <span className="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
+          <span>LOSS MITIGATED:</span>
+          <span className="text-emerald-400 font-bold font-mono">₹{Math.round(lossMitigatedInr).toLocaleString()}</span>
+        </div>
+        <div className="flex items-center gap-1.5">
+          <span className="w-1.5 h-1.5 rounded-full bg-amber-500"></span>
+          <span>BLINDSPOTS:</span>
+          <span className="text-amber-400 font-bold font-mono">{activeBlindspotsCount}</span>
+        </div>
       </div>
 
       {/* Search Bar & Actions */}

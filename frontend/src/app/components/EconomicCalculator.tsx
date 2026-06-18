@@ -175,11 +175,34 @@ export default function EconomicCalculator() {
                 </div>
 
                 <div className="group">
-                  <div className="flex flex-col gap-2 mb-3">
+                  <div className="flex flex-col gap-1 mb-2">
                     <label className="text-xs font-medium text-gray-400">Value of Time (VoTT)</label>
                     <span className="text-sm font-bold text-gray-200">₹{vott} / hr</span>
                   </div>
-                  <input type="range" min="50" max="300" step="10" value={vott} onChange={(e) => setVott(parseInt(e.target.value))} className="w-full h-1.5 bg-gray-800 rounded-full appearance-none cursor-pointer accent-emerald-500 transition-all" />
+                  <div className="flex gap-1 mb-2.5 flex-wrap">
+                    <button 
+                      type="button"
+                      onClick={() => setVott(120)}
+                      className={`text-[9px] font-bold px-2 py-1 rounded transition-all cursor-pointer border ${vott === 120 ? 'bg-emerald-500/20 text-emerald-400 border-emerald-500/30' : 'bg-white/5 text-white/50 border-white/5 hover:text-white'}`}
+                    >
+                      Commuter (₹120)
+                    </button>
+                    <button 
+                      type="button"
+                      onClick={() => setVott(350)}
+                      className={`text-[9px] font-bold px-2 py-1 rounded transition-all cursor-pointer border ${vott === 350 ? 'bg-emerald-500/20 text-emerald-400 border-emerald-500/30' : 'bg-white/5 text-white/50 border-white/5 hover:text-white'}`}
+                    >
+                      IT Corridor (₹350)
+                    </button>
+                    <button 
+                      type="button"
+                      onClick={() => setVott(250)}
+                      className={`text-[9px] font-bold px-2 py-1 rounded transition-all cursor-pointer border ${vott === 250 ? 'bg-emerald-500/20 text-emerald-400 border-emerald-500/30' : 'bg-white/5 text-white/50 border-white/5 hover:text-white'}`}
+                    >
+                      Logistics (₹250)
+                    </button>
+                  </div>
+                  <input type="range" min="50" max="500" step="10" value={vott} onChange={(e) => setVott(parseInt(e.target.value))} className="w-full h-1.5 bg-gray-800 rounded-full appearance-none cursor-pointer accent-emerald-500 transition-all" />
                 </div>
               </div>
             </div>

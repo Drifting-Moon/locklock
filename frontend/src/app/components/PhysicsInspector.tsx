@@ -1,6 +1,6 @@
 "use client";
 
-import React from 'react';
+import React, { useState } from 'react';
 
 interface SelectedHotspot {
   id: number;
@@ -19,9 +19,28 @@ interface PhysicsInspectorProps {
 }
 
 export default function PhysicsInspector({ hotspot, onClose }: PhysicsInspectorProps) {
+  const [clearRate, setClearRate] = useState<number>(0);
+
   if (!hotspot) return null;
 
-  // Determine severity color/badge
+  // Simulate BPR delay based on enforcement clear rate
+  const lanes = hotspot.laneCount;
+  const baseCapacity = lanes * 1000;
+  const simulatedViolations = Math.max(0, Math.round(hotspot.violationCount * (1 - clearRate / 100)));
+  
+  // Model traffic parameters
+  const volume = simulatedViolations * 7;
+  const capacityObstructed = Math.max(1, lanes - (1 - clearRate / 100)) * 1000;
+  
+  const delayObstructed = 10.0 * (1.0 + 0.15 * Math.pow(volume / capacityObstructed, 4));
+  const delayFreeflow = 10.0 * (1.0 + 0.15 * Math.pow(volume / baseCapacity, 4));
+  const bprDelaySim = Math.max(0.0, delayObstructed - delayFreeflow);
+  
+  const savedDelay = Math.max(0, hotspot.bprDelay - bprDelaySim);
+  // Estimate savings: delay saved * occupancy (1.4) * standard commuter VoTT (₹120/hr) * volume scaling
+  const economicSavings = Math.round(savedDelay * 1.4 * (120 / 60) * Math.max(10, volume / 10));
+
+  // Determine severity color/badge for current state
   let severityBadge = "Moderate";
   let severityColor = "text-primary border-primary/30 bg-primary/10";
   if (hotspot.bprDelay >= 15) {
@@ -48,7 +67,7 @@ export default function PhysicsInspector({ hotspot, onClose }: PhysicsInspectorP
         </button>
       </div>
 
-      <div className="flex-1 overflow-y-auto flex flex-col gap-6 text-sm">
+      <div className="flex-1 overflow-y-auto flex flex-col gap-6 text-sm pb-4">
         {/* Section 1: Location & Severity */}
         <div>
           <div className="flex justify-between items-start mb-2">
@@ -101,6 +120,49 @@ export default function PhysicsInspector({ hotspot, onClose }: PhysicsInspectorP
           </div>
         </div>
 
+        {/* What-If Simulation Sandbox Panel */}
+        <div className="bg-gradient-to-br from-[#3e52ff]/10 to-indigo-600/10 rounded-xl p-4 border border-indigo-500/20">
+          <div className="flex items-center gap-2 text-white/50 font-bold text-[10px] tracking-wider uppercase mb-3">
+            <span className="material-symbols-outlined text-xs">tune</span>
+            <span>What-If Sandbox</span>
+          </div>
+          
+          <div className="space-y-4">
+            <div className="group">
+              <div className="flex justify-between items-center mb-1.5 text-xs">
+                <span className="text-white/60">Enforcement Clearance:</span>
+                <span className="font-bold text-primary">{clearRate}%</span>
+              </div>
+              <input 
+                type="range" 
+                min="0" 
+                max="100" 
+                step="5"
+                value={clearRate} 
+                onChange={(e) => setClearRate(parseInt(e.target.value))}
+                className="w-full h-1 bg-white/10 rounded appearance-none cursor-pointer accent-primary"
+              />
+            </div>
+
+            <div className="pt-2 border-t border-white/10 space-y-2 font-mono text-xs">
+              <div className="flex justify-between">
+                <span className="text-white/40">Simulated Delay:</span>
+                <span className={savedDelay > 0 ? "text-emerald-400 font-bold" : "text-white"}>
+                  {bprDelaySim.toFixed(1)} mins
+                </span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-white/40">Delay Mitigated:</span>
+                <span className="text-emerald-400 font-bold">-{savedDelay.toFixed(1)} mins</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-white/40">Economic Savings:</span>
+                <span className="text-emerald-400 font-bold">₹{economicSavings.toLocaleString()}</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
         {/* Section 4: Bureau of Public Roads Delay Math */}
         <div className="bg-gradient-to-br from-primary/10 to-[#f44336]/10 rounded-xl p-4 border border-primary/20">
           <div className="flex items-center gap-2 text-white/50 font-bold text-[10px] tracking-wider uppercase mb-2">
@@ -108,7 +170,6 @@ export default function PhysicsInspector({ hotspot, onClose }: PhysicsInspectorP
             <span>BPR delay equation</span>
           </div>
           
-          {/* Formula Display */}
           <div className="bg-black/30 rounded p-2.5 text-center font-mono text-[10px] text-primary mb-3">
             T_f = T_0 × (1 + 0.15 × (V/C)^4)
           </div>
@@ -119,7 +180,7 @@ export default function PhysicsInspector({ hotspot, onClose }: PhysicsInspectorP
               <span className="text-white">10.0 mins</span>
             </div>
             <div className="flex justify-between">
-              <span className="text-white/40">Projected Delay:</span>
+              <span className="text-white/40">Original BPR Delay:</span>
               <span className="text-[#ff9800] font-bold">+{hotspot.bprDelay.toFixed(1)} mins</span>
             </div>
           </div>

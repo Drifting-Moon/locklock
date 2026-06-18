@@ -184,6 +184,123 @@ export default function TrafficDashboard() {
 
 
 
+  const handlePrintBriefing = () => {
+    const activeHotspotsList = hotspots?.features?.map((f: any) => f.properties) || [];
+    (window as any).__printData = {
+      hotspots: activeHotspotsList,
+      delay: totalDelayMins,
+      loss: lossMitigatedInr
+    };
+    
+    const printWindow = window.open('', '_blank');
+    if (printWindow) {
+      printWindow.document.write(`
+        <html>
+          <head>
+            <title>Urban Intel - Traffic Commissioner Briefing</title>
+            <style>
+              body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; padding: 40px; color: #333; line-height: 1.5; }
+              h1 { margin-bottom: 5px; color: #111; font-weight: 800; }
+              .meta { font-size: 11px; color: #666; margin-bottom: 30px; border-bottom: 2px solid #3e52ff; padding-bottom: 10px; font-family: monospace; }
+              .grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; margin-bottom: 30px; }
+              .card { border: 1px solid #ddd; padding: 15px; border-radius: 8px; background: #fafafa; }
+              .card h3 { margin: 0 0 10px 0; font-size: 10px; text-transform: uppercase; color: #888; font-family: monospace; }
+              .card p { margin: 0; font-size: 24px; font-weight: 900; color: #111; }
+              table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+              th, td { text-align: left; padding: 10px; border-bottom: 1px solid #ddd; }
+              th { background-color: #f5f5f5; font-size: 11px; text-transform: uppercase; color: #555; font-family: monospace; }
+              td { font-size: 12px; }
+              .badge { padding: 3px 8px; border-radius: 4px; font-size: 9px; font-weight: bold; text-transform: uppercase; }
+              .critical { background: #fee2e2; color: #ef4444; }
+              .high { background: #fef3c7; color: #d97706; }
+              .moderate { background: #dbeafe; color: #2563eb; }
+              .footer { margin-top: 50px; font-size: 10px; text-align: center; color: #999; border-top: 1px dashed #ccc; padding-top: 15px; }
+            </style>
+          </head>
+          <body>
+            <h1>Urban Intel Executive Briefing</h1>
+            <div class="meta">
+              CONFIDENTIAL &bull; BENGALURU TRAFFIC DEPARTMENT COMMISSIONER SUMMARY &bull; GENERATED: ${new Date().toLocaleDateString()} ${new Date().toLocaleTimeString()}
+            </div>
+            
+            <div class="grid">
+              <div class="card">
+                <h3>Active Hotspots Identified</h3>
+                <p id="hotspot-count">0</p>
+              </div>
+              <div class="card">
+                <h3>Est. Delays Prevented</h3>
+                <p id="total-delay">0 mins</p>
+              </div>
+              <div class="card">
+                <h3>Loss Mitigated (Projected)</h3>
+                <p id="loss-mitigated">₹0</p>
+              </div>
+            </div>
+            
+            <h2>Prioritized Hotspot Clearance Queue</h2>
+            <table id="hotspots-table">
+              <thead>
+                <tr>
+                  <th>Location</th>
+                  <th>Police Jurisdiction</th>
+                  <th>Road lanes</th>
+                  <th>Violations count</th>
+                  <th>Delay Penalty</th>
+                  <th>Severity</th>
+                </tr>
+              </thead>
+              <tbody>
+              </tbody>
+            </table>
+            
+            <div class="footer">
+              Report generated dynamically from the Urban Intel analytics platform using live Overpass OSM datasets and BPR traffic congestion physics.
+            </div>
+            
+            <script>
+              const data = window.opener.__printData || { hotspots: [], delay: 0, loss: 0 };
+              document.getElementById('total-delay').innerText = '-' + Math.round(data.delay * 0.35) + ' mins';
+              document.getElementById('loss-mitigated').innerText = '₹' + Math.round(data.loss).toLocaleString();
+              document.getElementById('hotspot-count').innerText = data.hotspots.length;
+              
+              const tbody = document.querySelector('#hotspots-table tbody');
+              if (data.hotspots.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="6" style="text-align: center; color: #888; padding: 20px;">No active hotspots identified in the current filter.</td></tr>';
+              } else {
+                const sorted = [...data.hotspots].sort((a,b) => b.bprDelay - a.bprDelay);
+                sorted.forEach(h => {
+                  const sevClass = h.bprDelay >= 15 ? 'critical' : (h.bprDelay >= 5 ? 'high' : 'moderate');
+                  const sevBadge = h.bprDelay >= 15 ? 'Critical' : (h.bprDelay >= 5 ? 'High' : 'Moderate');
+                  const tr = document.createElement('tr');
+                  tr.innerHTML = \`
+                    <td><strong>\${h.locationName}</strong></td>
+                    <td>\${h.policeStation}</td>
+                    <td>\${h.laneCount} Lanes (\${h.highwayType})</td>
+                    <td>\${h.violationCount}</td>
+                    <td>+\${h.bprDelay.toFixed(1)} mins</td>
+                    <td><span class="badge \${sevClass}">\${sevBadge}</span></td>
+                  \`;
+                  tbody.appendChild(tr);
+                });
+              }
+              
+              setTimeout(() => {
+                window.print();
+              }, 400);
+            </script>
+          </body>
+        </html>
+      `);
+      printWindow.document.close();
+    }
+  };
+
+  const totalDelayMins = hotspots?.features?.reduce((acc: number, f: any) => acc + (f.properties?.bprDelay || 0), 0) || 0;
+  // Dynamic projection of economic loss mitigated assuming a 35% clearance rate
+  const lossMitigatedInr = totalDelayMins * 1.4 * 5.8 * 60 * 0.35; 
+  const activeBlindspotsCount = blindspots ? blindspots.length : 0;
+
   return (
     <div 
       className="text-on-surface font-body-md overflow-hidden h-screen w-full relative bg-cover bg-center bg-no-repeat"
@@ -202,6 +319,7 @@ export default function TrafficDashboard() {
           isDispatchPanelOpen={isDispatchPanelOpen}
           setIsDispatchPanelOpen={setIsDispatchPanelOpen}
           onExportReport={handleExportReport}
+          onPrintBriefing={handlePrintBriefing}
           setShowSupportModal={setShowSupportModal}
           setShowLogoutConfirm={setShowLogoutConfirm}
         />
@@ -219,6 +337,9 @@ export default function TrafficDashboard() {
             activeDropdown={activeDropdown}
             setActiveDropdown={setActiveDropdown}
             setShowLogoutConfirm={setShowLogoutConfirm}
+            totalDelayMins={totalDelayMins}
+            lossMitigatedInr={lossMitigatedInr}
+            activeBlindspotsCount={activeBlindspotsCount}
           />
 
           {/* Tab Content Canvas */}

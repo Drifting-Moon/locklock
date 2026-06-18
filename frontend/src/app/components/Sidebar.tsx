@@ -8,6 +8,7 @@ interface SidebarProps {
   isDispatchPanelOpen: boolean;
   setIsDispatchPanelOpen: (open: boolean) => void;
   onExportReport: () => void;
+  onPrintBriefing: () => void;
   setShowSupportModal: (show: boolean) => void;
   setShowLogoutConfirm: (show: boolean) => void;
 }
@@ -18,6 +19,7 @@ export default function Sidebar({
   isDispatchPanelOpen,
   setIsDispatchPanelOpen,
   onExportReport,
+  onPrintBriefing,
   setShowSupportModal,
   setShowLogoutConfirm
 }: SidebarProps) {
@@ -79,6 +81,13 @@ export default function Sidebar({
         >
           <span className="material-symbols-outlined text-[18px]">download</span>
           Export Report
+        </button>
+        <button 
+          onClick={onPrintBriefing} 
+          className="w-full bg-surface-container-high text-on-surface font-label-md text-label-md py-sm rounded hover:brightness-110 transition-all cursor-pointer flex items-center justify-center gap-xs"
+        >
+          <span className="material-symbols-outlined text-[18px]">print</span>
+          Print Briefing
         </button>
         <div className="flex flex-col gap-xs mt-sm">
           <button 

@@ -1,6 +1,6 @@
 "use client";
 
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import Map, { Source, Layer, MapRef, type LayerProps } from 'react-map-gl/maplibre';
 import type { StyleSpecification } from 'maplibre-gl';
 import 'maplibre-gl/dist/maplibre-gl.css';
@@ -43,6 +43,19 @@ export default function MapComponent({
   blindspots = [],
   timeframe
 }: MapComponentProps) {
+  const [isPlaying, setIsPlaying] = useState(false);
+
+  useEffect(() => {
+    let interval: NodeJS.Timeout | null = null;
+    if (isPlaying) {
+      interval = setInterval(() => {
+        setSelectedHour((selectedHour + 1) % 24);
+      }, 1000);
+    }
+    return () => {
+      if (interval) clearInterval(interval);
+    };
+  }, [isPlaying, selectedHour, setSelectedHour]);
 
   const getMapStyleUrl = (theme: MapTheme): string | StyleSpecification => {
     if (theme === 'dark') return "https://basemaps.cartocdn.com/gl/dark-matter-gl-style/style.json";
@@ -361,13 +374,25 @@ export default function MapComponent({
           </div>
 
           <div className="flex items-center gap-2">
+            <button
+              onClick={() => setIsPlaying(!isPlaying)}
+              className="bg-primary/20 hover:bg-primary/30 text-primary border border-primary/30 w-6 h-6 rounded flex items-center justify-center cursor-pointer transition-all active:scale-95 shrink-0"
+              title={isPlaying ? "Pause Playback" : "Play Playback"}
+            >
+              <span className="material-symbols-outlined text-[16px]">
+                {isPlaying ? 'pause' : 'play_arrow'}
+              </span>
+            </button>
             <span className="text-[8px] text-white/30 font-mono select-none">00h</span>
             <input 
               type="range" 
               min="0" 
               max="23" 
               value={selectedHour} 
-              onChange={(e) => setSelectedHour(parseInt(e.target.value))}
+              onChange={(e) => {
+                setSelectedHour(parseInt(e.target.value));
+                setIsPlaying(false);
+              }}
               className="flex-1 accent-[#3e52ff] h-1 bg-white/10 rounded-lg appearance-none cursor-pointer"
             />
             <span className="text-[8px] text-white/30 font-mono select-none">23h</span>

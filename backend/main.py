@@ -315,33 +315,41 @@ def get_forecast():
         return {"forecasts": []}
 
 @app.get("/api/analytics")
-def get_analytics(timeframe: str = Query("Last 24 Hours")):
+def get_analytics(timeframe: str = Query("Last 30 Days")):
     if not DB_PATH.exists():
         return {"violation_breakdown": [], "vehicle_breakdown": [], "metrics": {}}
 
     try:
-        # Determine start time based on timeframe (matching the old Pandas logic)
-        # Note: Datetimes in our database range up to 2024-04-08
-        max_date = "2024-04-08 17:30:46"
-        if timeframe == "Live Data":
-            start_time = "2024-03-09 17:30:46"
-        elif timeframe == "Last 24 Hours":
-            start_time = "2024-01-09 17:30:46"  # 90 days prior (matching old Pandas days=90)
-        elif timeframe == "Last 7 Days":
-            start_time = "2023-04-09 17:30:46"  # 365 days prior (matching old Pandas days=365)
-        else:
-            start_time = "2024-01-09 17:30:46"
-
         conn = get_db_conn()
         cursor = conn.cursor()
+
+        cursor.execute("SELECT MAX(created_datetime) FROM violations")
+        dataset_end = cursor.fetchone()[0]
+        if not dataset_end:
+            conn.close()
+            return {"violation_breakdown": [], "vehicle_breakdown": [], "metrics": {}}
+
+        period_days = {
+            "Last 24 Hours": 1,
+            "Last 7 Days": 7,
+            "Last 30 Days": 30,
+        }.get(timeframe)
+        if period_days:
+            start_filter = "created_datetime >= datetime(?, ?)"
+            filter_params = (dataset_end, f"-{period_days} days")
+            period_label = timeframe
+        else:
+            start_filter = "1 = 1"
+            filter_params = ()
+            period_label = "All Dataset Records"
         
         # Total violations query
-        cursor.execute("SELECT COUNT(*) FROM violations WHERE created_datetime >= ?", (start_time,))
+        cursor.execute(f"SELECT COUNT(*) FROM violations WHERE {start_filter}", filter_params)
         total_violations = cursor.fetchone()[0]
         
         if total_violations == 0:
             conn.close()
-            return {"violation_breakdown": [], "vehicle_breakdown": [], "metrics": {"totalViolations": 0, "avgClearanceTime": "12m", "revenueImpact": "₹0"}}
+            return {"violation_breakdown": [], "vehicle_breakdown": [], "metrics": {"totalViolations": 0, "estimatedClearanceTime": "12 min", "revenueImpact": "₹0", "periodLabel": period_label, "datasetEnd": dataset_end}}
 
         # Clean label helper function (same as old Pandas cleanup)
         import ast
@@ -358,30 +366,59 @@ def get_analytics(timeframe: str = Query("Last 24 Hours")):
         cursor.execute("""
             SELECT violation_type, COUNT(*) as count 
             FROM violations 
-            WHERE created_datetime >= ? 
+            WHERE {start_filter}
             GROUP BY violation_type 
             ORDER BY count DESC 
             LIMIT 5
-        """, (start_time,))
+        """.format(start_filter=start_filter), filter_params)
         raw_violation_counts = cursor.fetchall()
         
         # Vehicle type count query
         cursor.execute("""
             SELECT vehicle_type, COUNT(*) as count 
             FROM violations 
-            WHERE created_datetime >= ? 
+            WHERE {start_filter}
             GROUP BY vehicle_type 
             ORDER BY count DESC 
             LIMIT 5
-        """, (start_time,))
+        """.format(start_filter=start_filter), filter_params)
         raw_vehicle_counts = cursor.fetchall()
+
+        # Hour-by-weekday matrix (SQLite: Sunday=0, Monday=1).
+        cursor.execute("""
+            SELECT CAST(strftime('%w', created_datetime) AS INTEGER) AS weekday,
+                   CAST(strftime('%H', created_datetime) AS INTEGER) AS hour,
+                   COUNT(*) AS count
+            FROM violations
+            WHERE {start_filter}
+            GROUP BY weekday, hour
+        """.format(start_filter=start_filter), filter_params)
+        time_distribution = [
+            {"day": (row["weekday"] + 6) % 7, "hour": row["hour"], "count": row["count"]}
+            for row in cursor.fetchall()
+        ]
+
+        if timeframe == "Last 24 Hours":
+            trend_bucket = "strftime('%Y-%m-%d %H:00', created_datetime)"
+        elif timeframe == "All Dataset Records":
+            trend_bucket = "strftime('%Y-%m', created_datetime)"
+        else:
+            trend_bucket = "date(created_datetime)"
+        cursor.execute(f"""
+            SELECT {trend_bucket} AS period, COUNT(*) AS count
+            FROM violations
+            WHERE {start_filter}
+            GROUP BY period
+            ORDER BY period
+        """, filter_params)
+        trend = [{"period": row["period"], "count": row["count"]} for row in cursor.fetchall()]
 
         # Dynamic Revenue Calculation based on BTP Fine Tiers
         cursor.execute("""
             SELECT violation_type 
             FROM violations 
-            WHERE created_datetime >= ?
-        """, (start_time,))
+            WHERE {start_filter}
+        """.format(start_filter=start_filter), filter_params)
         rows = cursor.fetchall()
         conn.close()
 
@@ -410,10 +447,14 @@ def get_analytics(timeframe: str = Query("Last 24 Hours")):
         return {
             "violation_breakdown": violation_breakdown,
             "vehicle_breakdown": vehicle_breakdown,
+            "time_distribution": time_distribution,
+            "trend": trend,
             "metrics": {
                 "totalViolations": total_violations,
-                "avgClearanceTime": "12m",
-                "revenueImpact": f"₹{total_revenue_inr:,}"
+                "estimatedClearanceTime": "12 min",
+                "revenueImpact": f"₹{total_revenue_inr:,}",
+                "periodLabel": period_label,
+                "datasetEnd": dataset_end
             }
         }
     except Exception as e:
