@@ -358,19 +358,7 @@ export default function CommandCenterTab({
                   </button>
                 </div>
 
-                {/* Hotspot Sort Select dropdown */}
-                <div className="flex items-center justify-between text-[10px] text-muted">
-                  <span className="font-bold">SORT BY:</span>
-                  <select 
-                    value={sortKey}
-                    onChange={(e) => setSortKey(e.target.value as any)}
-                    className="bg-background border border-border rounded px-1.5 py-0.5 focus:outline-none text-foreground font-semibold cursor-pointer text-[10px]"
-                  >
-                    <option value="violations">Violations Count</option>
-                    <option value="roi">Enforcement ROI</option>
-                    <option value="delay">BPR Delay Minutes</option>
-                  </select>
-                </div>
+
 
                 {/* Priority Dispatch Toggle Button */}
                 <button 

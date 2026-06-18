@@ -464,7 +464,7 @@ export default function LandingPage() {
       </section>
 
       {/* Physics Sandbox Section */}
-      <section id="simulator" className="relative z-10 py-20 bg-gradient-to-b from-transparent via-[#090c1f]/80 to-transparent">
+      <section id="simulator" className="relative z-10 py-20 bg-[#070913] border-t border-[#7C5CFF]/10">
         <div className="max-w-6xl mx-auto px-6">
           <div className="text-center mb-16">
             <span className="text-xs font-mono font-extrabold uppercase tracking-widest text-[#38BDF8] bg-[#38BDF8]/10 px-3 py-1.5 rounded-full">Interactive Sandbox</span>
@@ -608,224 +608,232 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* Comparison Matrix Section */}
-      <section id="comparison" className="relative z-10 py-20 max-w-6xl mx-auto px-6">
-        <div className="text-center mb-16">
-          <span className="text-xs font-mono font-extrabold uppercase tracking-widest text-[#7C5CFF] bg-[#7C5CFF]/10 px-3 py-1.5 rounded-full">Comparison System</span>
-          <h2 className="text-3xl md:text-5xl font-extrabold text-white tracking-tight mt-4">Legacy Sweeps vs. Smart Command</h2>
-          <p className="text-slate-300 mt-3 text-sm md:text-base font-light">Understanding the paradigm shift in traffic resource allocation.</p>
-        </div>
-
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-          
-          {/* Card 1: Legacy */}
-          <div className="bg-[#0b0c10]/80 backdrop-blur-md border border-slate-800 rounded-2xl p-6 relative overflow-hidden flex flex-col justify-between">
-            <div>
-              <div className="flex justify-between items-center pb-4 border-b border-white/5 mb-6">
-                <h3 className="text-lg font-bold text-slate-400 flex items-center gap-2">
-                  <span className="material-symbols-outlined text-rose-500">lock_open</span>
-                  Legacy Enforcement
-                </h3>
-                <span className="text-[10px] font-mono text-rose-400 font-bold bg-rose-500/10 px-2.5 py-1 rounded-full uppercase">Inefficient Loop</span>
-              </div>
-
-              <ul className="space-y-4 text-xs text-slate-400">
-                <li className="flex items-start gap-2.5">
-                  <span className="material-symbols-outlined text-rose-500 text-sm mt-0.5">cancel</span>
-                  <span><strong>Officer Ticket Spam:</strong> Officers write multiple tickets to vehicles parked close together, inflating stats without solving capacity flow.</span>
-                </li>
-                <li className="flex items-start gap-2.5">
-                  <span className="material-symbols-outlined text-rose-500 text-sm mt-0.5">cancel</span>
-                  <span><strong>Warden Dispatch Bias:</strong> Dispatches target zones where past citations were high, leading to enforcement gaps elsewhere.</span>
-                </li>
-                <li className="flex items-start gap-2.5">
-                  <span className="material-symbols-outlined text-rose-500 text-sm mt-0.5">cancel</span>
-                  <span><strong>Static Metric Goals:</strong> Performance judged on raw counts rather than commute hours recovered.</span>
-                </li>
-              </ul>
-            </div>
-            
-            <div className="mt-8 pt-4 border-t border-white/5 text-[10px] text-slate-500 font-mono">
-              Result: Wasted patrol fuel & unmanaged commuter bottlenecks
-            </div>
+      {/* Comparison Matrix Section (Opaque Light Background) */}
+      <section id="comparison" className="relative z-10 py-24 bg-white text-slate-900 border-y border-slate-200">
+        <div className="max-w-6xl mx-auto px-6">
+          <div className="text-center mb-16">
+            <span className="text-xs font-mono font-extrabold uppercase tracking-widest text-[#7C5CFF] bg-[#7C5CFF]/10 px-3 py-1.5 rounded-full">Comparison System</span>
+            <h2 className="text-3xl md:text-5xl font-extrabold text-slate-900 tracking-tight mt-4">Legacy Sweeps vs. Smart Command</h2>
+            <p className="text-slate-600 mt-3 text-sm md:text-base font-light">Understanding the paradigm shift in traffic resource allocation.</p>
           </div>
 
-          {/* Card 2: Urban Intel */}
-          <div className="relative group">
-            <div className="absolute -inset-0.5 bg-gradient-to-r from-[#7C5CFF] to-[#38BDF8] rounded-2xl blur opacity-30 group-hover:opacity-75 transition duration-500"></div>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
             
-            <div className="relative bg-[#0c1024]/90 backdrop-blur-md border border-[#7C5CFF]/20 rounded-2xl p-6 flex flex-col justify-between h-full">
+            {/* Card 1: Legacy */}
+            <div className="bg-slate-50 border border-slate-200 rounded-2xl p-6 relative overflow-hidden flex flex-col justify-between">
               <div>
-                <div className="flex justify-between items-center pb-4 border-b border-[#7C5CFF]/25 mb-6">
-                  <h3 className="text-lg font-bold text-white flex items-center gap-2">
-                    <span className="material-symbols-outlined text-[#38BDF8]">verified</span>
-                    Urban Intel System
+                <div className="flex justify-between items-center pb-4 border-b border-slate-200 mb-6">
+                  <h3 className="text-lg font-bold text-slate-800 flex items-center gap-2">
+                    <span className="material-symbols-outlined text-rose-500">lock_open</span>
+                    Legacy Enforcement
                   </h3>
-                  <span className="text-[10px] font-mono text-[#38BDF8] font-bold bg-[#38BDF8]/10 px-2.5 py-1 rounded-full uppercase">Optimized Flow</span>
+                  <span className="text-[10px] font-mono text-rose-500 font-bold bg-rose-500/10 px-2.5 py-1 rounded-full uppercase">Inefficient Loop</span>
                 </div>
 
-                <ul className="space-y-4 text-xs text-slate-200">
+                <ul className="space-y-4 text-xs text-slate-600">
                   <li className="flex items-start gap-2.5">
-                    <span className="material-symbols-outlined text-[#38BDF8] text-sm mt-0.5">check_circle</span>
-                    <span><strong>DBSCAN Event Aggregation:</strong> Deduplicates spatial sweeps. Grouping algorithm merges ticket loops into singular capacity bottlenecks.</span>
+                    <span className="material-symbols-outlined text-rose-500 text-sm mt-0.5">cancel</span>
+                    <span><strong>Officer Ticket Spam:</strong> Officers write multiple tickets to vehicles parked close together, inflating stats without solving capacity flow.</span>
                   </li>
                   <li className="flex items-start gap-2.5">
-                    <span className="material-symbols-outlined text-[#38BDF8] text-sm mt-0.5">check_circle</span>
-                    <span><strong>OSM Geospace Merging:</strong> Integrates OpenStreetMap features, scaling capacity losses against real lane width.</span>
+                    <span className="material-symbols-outlined text-rose-500 text-sm mt-0.5">cancel</span>
+                    <span><strong>Warden Dispatch Bias:</strong> Dispatches target zones where past citations were high, leading to enforcement gaps elsewhere.</span>
                   </li>
                   <li className="flex items-start gap-2.5">
-                    <span className="material-symbols-outlined text-[#38BDF8] text-sm mt-0.5">check_circle</span>
-                    <span><strong>Real-time Delay Routing:</strong> Prioritizes dispatcher tasks dynamically, routing officers to points where physical bottlenecks degrade speeds.</span>
+                    <span className="material-symbols-outlined text-rose-500 text-sm mt-0.5">cancel</span>
+                    <span><strong>Static Metric Goals:</strong> Performance judged on raw counts rather than commute hours recovered.</span>
                   </li>
                 </ul>
               </div>
-
-              <div className="mt-8 pt-4 border-t border-white/5 text-[10px] text-[#38BDF8] font-mono">
-                Result: Actionable physics routing & optimized warden dispatch queue
+              
+              <div className="mt-8 pt-4 border-t border-slate-200 text-[10px] text-slate-500 font-mono">
+                Result: Wasted patrol fuel & unmanaged commuter bottlenecks
               </div>
             </div>
-          </div>
 
-        </div>
-      </section>
+            {/* Card 2: Urban Intel */}
+            <div className="relative group">
+              <div className="absolute -inset-0.5 bg-gradient-to-r from-[#7C5CFF] to-[#38BDF8] rounded-2xl blur opacity-30 group-hover:opacity-75 transition duration-500"></div>
+              
+              <div className="relative bg-[#0c1024]/95 border border-[#7C5CFF]/25 rounded-2xl p-6 flex flex-col justify-between h-full">
+                <div>
+                  <div className="flex justify-between items-center pb-4 border-b border-[#7C5CFF]/25 mb-6">
+                    <h3 className="text-lg font-bold text-white flex items-center gap-2">
+                      <span className="material-symbols-outlined text-[#38BDF8]">verified</span>
+                      Urban Intel System
+                    </h3>
+                    <span className="text-[10px] font-mono text-[#38BDF8] font-bold bg-[#38BDF8]/10 px-2.5 py-1 rounded-full uppercase">Optimized Flow</span>
+                  </div>
 
-      {/* Methodology pipeline section */}
-      <section id="how-it-works" className="relative z-10 py-20 max-w-6xl mx-auto px-6">
-        <div className="text-center mb-16">
-          <span className="text-xs font-mono font-extrabold uppercase tracking-widest text-[#38BDF8] bg-[#38BDF8]/10 px-3 py-1.5 rounded-full">Methodology</span>
-          <h2 className="text-3xl md:text-5xl font-extrabold text-white tracking-tight mt-4">The 4-Step Pipeline</h2>
-          <p className="text-slate-300 mt-3 text-sm md:text-base font-light">From raw ticketing sweeps to physics-grounded commute-delay mapping.</p>
-        </div>
+                  <ul className="space-y-4 text-xs text-slate-200">
+                    <li className="flex items-start gap-2.5">
+                      <span className="material-symbols-outlined text-[#38BDF8] text-sm mt-0.5">check_circle</span>
+                      <span><strong>DBSCAN Event Aggregation:</strong> Deduplicates spatial sweeps. Grouping algorithm merges ticket loops into singular capacity bottlenecks.</span>
+                    </li>
+                    <li className="flex items-start gap-2.5">
+                      <span className="material-symbols-outlined text-[#38BDF8] text-sm mt-0.5">check_circle</span>
+                      <span><strong>OSM Geospace Merging:</strong> Integrates OpenStreetMap features, scaling capacity losses against real lane width.</span>
+                    </li>
+                    <li className="flex items-start gap-2.5">
+                      <span className="material-symbols-outlined text-[#38BDF8] text-sm mt-0.5">check_circle</span>
+                      <span><strong>Real-time Delay Routing:</strong> Prioritizes dispatcher tasks dynamically, routing officers to points where physical bottlenecks degrade speeds.</span>
+                    </li>
+                  </ul>
+                </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-          
-          {/* Card 1 */}
-          <div className="bg-[#7C5CFF]/10 border border-[#7C5CFF]/20 hover:border-[#7C5CFF]/60 text-white rounded-2xl p-6 shadow-xl relative flex flex-col justify-between h-72 transition-all duration-300">
-            <div className="flex justify-between items-start">
-              <div className="w-10 h-10 rounded-full bg-[#7C5CFF]/25 flex items-center justify-center font-mono font-black text-lg text-[#a78bfa] border border-[#7C5CFF]/30">01</div>
-              <span className="material-symbols-outlined text-[#a78bfa] text-[24px]">filter_alt</span>
-            </div>
-            <div>
-              <h3 className="text-lg font-bold tracking-tight mb-2 text-white">Deduplicate</h3>
-              <p className="text-slate-300 text-xs leading-relaxed font-light">
-                Sweep deduplication collapses officer ticket-spam (occurring within 15 minutes and 50 meters of a single device ID) into real events, filtering 298k records to 125k.
-              </p>
-            </div>
-          </div>
-
-          {/* Card 2 */}
-          <div className="bg-[#7C5CFF]/10 border border-[#7C5CFF]/20 hover:border-[#7C5CFF]/60 text-white rounded-2xl p-6 shadow-xl relative flex flex-col justify-between h-72 transition-all duration-300">
-            <div className="flex justify-between items-start">
-              <div className="w-10 h-10 rounded-full bg-[#7C5CFF]/25 flex items-center justify-center font-mono font-black text-lg text-[#a78bfa] border border-[#7C5CFF]/30">02</div>
-              <span className="material-symbols-outlined text-[#a78bfa] text-[24px]">group_work</span>
-            </div>
-            <div>
-              <h3 className="text-lg font-bold tracking-tight mb-2 text-white">Cluster</h3>
-              <p className="text-slate-300 text-xs leading-relaxed font-light">
-                DBSCAN spatial clustering groups nearby parking violations to extract true congestion hotspots and shapes boundaries using geometric convex hulls.
-              </p>
-            </div>
-          </div>
-
-          {/* Card 3 */}
-          <div className="bg-[#7C5CFF]/10 border border-[#7C5CFF]/20 hover:border-[#7C5CFF]/60 text-white rounded-2xl p-6 shadow-xl relative flex flex-col justify-between h-72 transition-all duration-300">
-            <div className="flex justify-between items-start">
-              <div className="w-10 h-10 rounded-full bg-[#7C5CFF]/25 flex items-center justify-center font-mono font-black text-lg text-[#a78bfa] border border-[#7C5CFF]/30">03</div>
-              <span className="material-symbols-outlined text-[#a78bfa] text-[24px]">map</span>
-            </div>
-            <div>
-              <h3 className="text-lg font-bold tracking-tight mb-2 text-white">Ground Truth</h3>
-              <p className="text-slate-300 text-xs leading-relaxed font-light">
-                Hotspots are mapped against real OpenStreetMap road classes and actual lane counts, ensuring capacity formulas use real physical data.
-              </p>
-            </div>
-          </div>
-
-          {/* Card 4 */}
-          <div className="bg-[#7C5CFF]/10 border border-[#7C5CFF]/20 hover:border-[#7C5CFF]/60 text-white rounded-2xl p-6 shadow-xl relative flex flex-col justify-between h-72 transition-all duration-300">
-            <div className="flex justify-between items-start">
-              <div className="w-10 h-10 rounded-full bg-[#7C5CFF]/25 flex items-center justify-center font-mono font-black text-lg text-[#a78bfa] border border-[#7C5CFF]/30">04</div>
-              <span className="material-symbols-outlined text-[#a78bfa] text-[24px]">calculate</span>
-            </div>
-            <div>
-              <h3 className="text-lg font-bold tracking-tight mb-2 text-white">Quantify</h3>
-              <p className="text-slate-300 text-xs leading-relaxed font-light">
-                The Bureau of Public Roads (BPR) traffic physics model converts capacity degradation into the exact minute-delay costs added to traffic streams.
-              </p>
-            </div>
-          </div>
-
-        </div>
-      </section>
-
-      {/* FAQ Section */}
-      <section id="faq" className="relative z-10 py-20 max-w-4xl mx-auto px-6">
-        <div className="text-center mb-12">
-          <span className="text-xs font-mono font-extrabold uppercase tracking-widest text-[#38BDF8] bg-[#38BDF8]/10 px-3 py-1.5 rounded-full">Questions & Answers</span>
-          <h2 className="text-3xl md:text-5xl font-extrabold text-white tracking-tight mt-4">Frequently Asked Questions</h2>
-          <p className="text-slate-300 mt-3 text-sm md:text-base font-light">Technical answers explaining the models powering Urban Intel.</p>
-        </div>
-
-        <div className="space-y-4">
-          {faqData.map((item, idx) => {
-            const isOpen = activeFaqIndex === idx;
-            return (
-              <div 
-                key={idx} 
-                className="bg-[#0b0c15]/80 border border-white/5 rounded-2xl overflow-hidden transition-all duration-300 hover:border-[#7C5CFF]/30"
-              >
-                <button
-                  onClick={() => toggleFaq(idx)}
-                  className="w-full px-6 py-5 flex items-center justify-between text-left focus:outline-none"
-                >
-                  <span className="font-bold text-sm md:text-base text-white tracking-wide">{item.q}</span>
-                  <span className={`material-symbols-outlined text-[#38BDF8] transition-transform duration-300 ${isOpen ? 'rotate-180' : ''}`}>
-                    keyboard_arrow_down
-                  </span>
-                </button>
-                <div 
-                  className={`px-6 overflow-hidden transition-all duration-300 ease-in-out ${
-                    isOpen ? 'pb-6 max-h-40 opacity-100' : 'max-h-0 opacity-0'
-                  }`}
-                >
-                  <p className="text-slate-300 text-xs md:text-sm leading-relaxed font-light border-t border-white/5 pt-4">
-                    {item.a}
-                  </p>
+                <div className="mt-8 pt-4 border-t border-white/5 text-[10px] text-[#38BDF8] font-mono">
+                  Result: Actionable physics routing & optimized warden dispatch queue
                 </div>
               </div>
-            );
-          })}
+            </div>
+
+          </div>
         </div>
       </section>
 
-      {/* High Contrast Callout banner */}
-      <section className="relative z-10 max-w-5xl mx-auto px-6 py-12">
-        <div className="bg-gradient-to-r from-[#7C5CFF] to-[#38BDF8] rounded-3xl p-8 md:p-12 shadow-2xl relative overflow-hidden text-left">
-          <div className="absolute right-0 top-0 bottom-0 w-1/3 opacity-10 pointer-events-none hidden md:block">
-            <span className="material-symbols-outlined text-[300px] text-white absolute right-[-50px] top-1/2 -translate-y-1/2">radar</span>
+      {/* Methodology Pipeline Section (Opaque Black Background) */}
+      <section id="how-it-works" className="relative z-10 py-24 bg-black text-white">
+        <div className="max-w-6xl mx-auto px-6">
+          <div className="text-center mb-16">
+            <span className="text-xs font-mono font-extrabold uppercase tracking-widest text-[#38BDF8] bg-[#38BDF8]/10 px-3 py-1.5 rounded-full">Methodology</span>
+            <h2 className="text-3xl md:text-5xl font-extrabold text-white tracking-tight mt-4">The 4-Step Pipeline</h2>
+            <p className="text-slate-300 mt-3 text-sm md:text-base font-light">From raw ticketing sweeps to physics-grounded commute-delay mapping.</p>
           </div>
 
-          <div className="max-w-2xl relative z-10">
-            <span className="text-xs font-mono font-black uppercase tracking-widest text-white bg-white/10 px-3.5 py-1.5 rounded-full">Exposing Patrol Blindspots</span>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
             
-            <h2 className="text-3xl md:text-5xl font-black text-white tracking-tight mt-6 leading-tight">
-              "The zones we are NOT watching may be worse than the ones we are."
-            </h2>
-            
-            <p className="mt-4 text-white/90 text-sm md:text-base leading-relaxed font-light">
-              Unlike static camera platforms that require massive capital investment, our **Blindspot Radar** parses spatial ticketing logs to pinpoint where expectations diverge from reality. By calculating Expected vs Observed violations, we expose the exact enforcement vacuums where patrols have created a feedback bias.
-            </p>
+            {/* Card 1 */}
+            <div className="bg-[#7C5CFF]/10 border border-[#7C5CFF]/20 hover:border-[#7C5CFF]/60 text-white rounded-2xl p-6 shadow-xl relative flex flex-col justify-between h-72 transition-all duration-300">
+              <div className="flex justify-between items-start">
+                <div className="w-10 h-10 rounded-full bg-[#7C5CFF]/25 flex items-center justify-center font-mono font-black text-lg text-[#a78bfa] border border-[#7C5CFF]/30">01</div>
+                <span className="material-symbols-outlined text-[#a78bfa] text-[24px]">filter_alt</span>
+              </div>
+              <div>
+                <h3 className="text-lg font-bold tracking-tight mb-2 text-white">Deduplicate</h3>
+                <p className="text-slate-300 text-xs leading-relaxed font-light">
+                  Sweep deduplication collapses officer ticket-spam (occurring within 15 minutes and 50 meters of a single device ID) into real events, filtering 298k records to 125k.
+                </p>
+              </div>
+            </div>
 
-            <div className="mt-8 flex flex-wrap gap-4">
-              <Link href="/dashboard" className="bg-white text-[#7C5CFF] hover:bg-[#dfe0ff] font-bold text-xs uppercase tracking-wider px-6 py-3.5 rounded-xl transition-all shadow-xl active:scale-[0.98]">
-                Open Blindspot Radar
-              </Link>
+            {/* Card 2 */}
+            <div className="bg-[#7C5CFF]/10 border border-[#7C5CFF]/20 hover:border-[#7C5CFF]/60 text-white rounded-2xl p-6 shadow-xl relative flex flex-col justify-between h-72 transition-all duration-300">
+              <div className="flex justify-between items-start">
+                <div className="w-10 h-10 rounded-full bg-[#7C5CFF]/25 flex items-center justify-center font-mono font-black text-lg text-[#a78bfa] border border-[#7C5CFF]/30">02</div>
+                <span className="material-symbols-outlined text-[#a78bfa] text-[24px]">group_work</span>
+              </div>
+              <div>
+                <h3 className="text-lg font-bold tracking-tight mb-2 text-white">Cluster</h3>
+                <p className="text-slate-300 text-xs leading-relaxed font-light">
+                  DBSCAN spatial clustering groups nearby parking violations to extract true congestion hotspots and shapes boundaries using geometric convex hulls.
+                </p>
+              </div>
+            </div>
+
+            {/* Card 3 */}
+            <div className="bg-[#7C5CFF]/10 border border-[#7C5CFF]/20 hover:border-[#7C5CFF]/60 text-white rounded-2xl p-6 shadow-xl relative flex flex-col justify-between h-72 transition-all duration-300">
+              <div className="flex justify-between items-start">
+                <div className="w-10 h-10 rounded-full bg-[#7C5CFF]/25 flex items-center justify-center font-mono font-black text-lg text-[#a78bfa] border border-[#7C5CFF]/30">03</div>
+                <span className="material-symbols-outlined text-[#a78bfa] text-[24px]">map</span>
+              </div>
+              <div>
+                <h3 className="text-lg font-bold tracking-tight mb-2 text-white">Ground Truth</h3>
+                <p className="text-slate-300 text-xs leading-relaxed font-light">
+                  Hotspots are mapped against real OpenStreetMap road classes and actual lane counts, ensuring capacity formulas use real physical data.
+                </p>
+              </div>
+            </div>
+
+            {/* Card 4 */}
+            <div className="bg-[#7C5CFF]/10 border border-[#7C5CFF]/20 hover:border-[#7C5CFF]/60 text-white rounded-2xl p-6 shadow-xl relative flex flex-col justify-between h-72 transition-all duration-300">
+              <div className="flex justify-between items-start">
+                <div className="w-10 h-10 rounded-full bg-[#7C5CFF]/25 flex items-center justify-center font-mono font-black text-lg text-[#a78bfa] border border-[#7C5CFF]/30">04</div>
+                <span className="material-symbols-outlined text-[#a78bfa] text-[24px]">calculate</span>
+              </div>
+              <div>
+                <h3 className="text-lg font-bold tracking-tight mb-2 text-white">Quantify</h3>
+                <p className="text-slate-300 text-xs leading-relaxed font-light">
+                  The Bureau of Public Roads (BPR) traffic physics model converts capacity degradation into the exact minute-delay costs added to traffic streams.
+                </p>
+              </div>
+            </div>
+
+          </div>
+        </div>
+      </section>
+
+      {/* FAQ Section (Opaque Light Background) */}
+      <section id="faq" className="relative z-10 py-24 bg-white text-slate-900 border-b border-slate-200">
+        <div className="max-w-4xl mx-auto px-6">
+          <div className="text-center mb-12">
+            <span className="text-xs font-mono font-extrabold uppercase tracking-widest text-[#38BDF8] bg-[#38BDF8]/10 px-3 py-1.5 rounded-full">Questions & Answers</span>
+            <h2 className="text-3xl md:text-5xl font-extrabold text-slate-900 tracking-tight mt-4">Frequently Asked Questions</h2>
+            <p className="text-slate-600 mt-3 text-sm md:text-base font-light">Technical answers explaining the models powering Urban Intel.</p>
+          </div>
+
+          <div className="space-y-4">
+            {faqData.map((item, idx) => {
+              const isOpen = activeFaqIndex === idx;
+              return (
+                <div 
+                  key={idx} 
+                  className="bg-slate-50 border border-slate-200 rounded-2xl overflow-hidden transition-all duration-300 hover:border-[#7C5CFF]/40"
+                >
+                  <button
+                    onClick={() => toggleFaq(idx)}
+                    className="w-full px-6 py-5 flex items-center justify-between text-left focus:outline-none"
+                  >
+                    <span className="font-bold text-sm md:text-base text-slate-800 tracking-wide">{item.q}</span>
+                    <span className={`material-symbols-outlined text-[#7C5CFF] transition-transform duration-300 ${isOpen ? 'rotate-180' : ''}`}>
+                      keyboard_arrow_down
+                    </span>
+                  </button>
+                  <div 
+                    className={`px-6 overflow-hidden transition-all duration-300 ease-in-out ${
+                      isOpen ? 'pb-6 max-h-40 opacity-100' : 'max-h-0 opacity-0'
+                    }`}
+                  >
+                    <p className="text-slate-600 text-xs md:text-sm leading-relaxed font-light border-t border-slate-200 pt-4">
+                      {item.a}
+                    </p>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      </section>
+
+      {/* High Contrast Callout banner (Opaque Dark Background) */}
+      <section className="relative z-10 py-24 bg-[#05070f] border-t border-[#7C5CFF]/10">
+        <div className="max-w-5xl mx-auto px-6">
+          <div className="bg-gradient-to-r from-[#7C5CFF] to-[#38BDF8] rounded-3xl p-8 md:p-12 shadow-2xl relative overflow-hidden text-left">
+            <div className="absolute right-0 top-0 bottom-0 w-1/3 opacity-10 pointer-events-none hidden md:block">
+              <span className="material-symbols-outlined text-[300px] text-white absolute right-[-50px] top-1/2 -translate-y-1/2">radar</span>
+            </div>
+
+            <div className="max-w-2xl relative z-10">
+              <span className="text-xs font-mono font-black uppercase tracking-widest text-white bg-white/10 px-3.5 py-1.5 rounded-full">Exposing Patrol Blindspots</span>
+              
+              <h2 className="text-3xl md:text-5xl font-black text-white tracking-tight mt-6 leading-tight">
+                "The zones we are NOT watching may be worse than the ones we are."
+              </h2>
+              
+              <p className="mt-4 text-white/90 text-sm md:text-base leading-relaxed font-light">
+                Unlike static camera platforms that require massive capital investment, our **Blindspot Radar** parses spatial ticketing logs to pinpoint where expectations diverge from reality. By calculating Expected vs Observed violations, we expose the exact enforcement vacuums where patrols have created a feedback bias.
+              </p>
+
+              <div className="mt-8 flex flex-wrap gap-4">
+                <Link href="/dashboard" className="bg-white text-[#7C5CFF] hover:bg-[#dfe0ff] font-bold text-xs uppercase tracking-wider px-6 py-3.5 rounded-xl transition-all shadow-xl active:scale-[0.98]">
+                  Open Blindspot Radar
+                </Link>
+              </div>
             </div>
           </div>
         </div>
       </section>
 
-      {/* Footer */}
+      {/* Footer (Opaque Dark Footer) */}
       <footer className="bg-[#030409] border-t border-white/5 py-12 relative z-10">
         <div className="max-w-6xl mx-auto px-6 flex flex-col md:flex-row justify-between items-center gap-6">
           <div className="flex flex-col items-center md:items-start gap-1">

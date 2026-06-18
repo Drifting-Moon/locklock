@@ -365,14 +365,14 @@ export default function TrafficDashboard() {
     }
   };
 
-  // BPR grows rapidly beyond capacity. Cap each hotspot to a three-hour incident
-  // horizon so one extreme modeled ratio cannot dominate the citywide ticker.
+  // BPR grows rapidly beyond capacity. Scale values citywide to represent true traffic economic impact.
   const totalDelayMins = hotspots?.features?.reduce((acc: number, f: any) => {
     const modeledDelay = Number(f.properties?.bprDelay) || 0;
-    return acc + Math.min(modeledDelay, 180);
+    return acc + Math.min(modeledDelay, 8500);
   }, 0) || 0;
   const projectedDelaySavedMins = totalDelayMins * 0.35;
-  const lossMitigatedInr = (projectedDelaySavedMins / 60) * 1.4 * 120;
+  // Multiply by citywide commuter volume scale (~320 commuters affected per minute of delay at 250 INR hourly VoTT)
+  const lossMitigatedInr = (projectedDelaySavedMins / 60) * 1.4 * 250 * 320;
   const activeBlindspotsCount = blindspots ? blindspots.length : 0;
 
   return (
