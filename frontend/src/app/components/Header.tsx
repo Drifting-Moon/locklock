@@ -155,15 +155,6 @@ export default function Header({
               </div>
               <ul className="py-1 text-sm text-on-surface">
                 <li className="px-4 py-2 hover:bg-surface-container-low cursor-pointer">View Profile</li>
-                <li 
-                  onClick={() => {
-                    setShowLogoutConfirm(true);
-                    setActiveDropdown(null);
-                  }} 
-                  className="px-4 py-2 hover:bg-surface-container-low cursor-pointer text-error"
-                >
-                  Sign out
-                </li>
               </ul>
             </div>
           )}

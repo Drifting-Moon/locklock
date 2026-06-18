@@ -88,13 +88,6 @@ export default function Sidebar({
             <span className="material-symbols-outlined text-[20px]">help</span>
             <span className="font-body-sm text-body-sm">Support</span>
           </button>
-          <button 
-            onClick={() => setShowLogoutConfirm(true)}
-            className="flex items-center gap-md px-sm py-xs rounded text-on-surface-variant hover:bg-surface-container-high transition-colors duration-200 w-full text-left cursor-pointer"
-          >
-            <span className="material-symbols-outlined text-[20px]">logout</span>
-            <span className="font-body-sm text-body-sm">Log Out</span>
-          </button>
         </div>
       </div>
     </nav>

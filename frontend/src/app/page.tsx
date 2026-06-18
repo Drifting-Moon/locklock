@@ -1,447 +1,507 @@
 "use client";
 
-import React, { useState, useEffect, useRef } from 'react';
-import { MapRef } from 'react-map-gl/maplibre';
+import React, { useState } from 'react';
+import Link from 'next/link';
 
-// Child components
-import Sidebar from './components/Sidebar';
-import Header from './components/Header';
-import Modals from './components/Modals';
-import CommandCenterTab from './components/CommandCenterTab';
-import PhysicsInspector from './components/PhysicsInspector';
-import AnalyticsTab from './components/AnalyticsTab';
-import EnforcementTab from './components/EnforcementTab';
-import DetectionTab from './components/DetectionTab';
-import EconomicCalculator from './components/EconomicCalculator';
+export default function LandingPage() {
+  const [activeMockHotspot, setActiveMockHotspot] = useState<number | null>(0);
 
-// Libs
-import { apiUrl } from './lib/api';
-
-type MapTheme = 'dark' | 'light' | 'satellite';
-type Timeframe = 'Recent Dataset Window' | 'Most Recent Day' | 'Most Recent Week';
-
-export default function TrafficDashboard() {
-  // Navigation & Dropdown State
-  const [activeTab, setActiveTab] = useState("Command Center");
-  const [activeDropdown, setActiveDropdown] = useState<string | null>(null);
-  const [isDispatchPanelOpen, setIsDispatchPanelOpen] = useState(false);
-
-  // Filter State
-  const [timeframe, setTimeframe] = useState<Timeframe>("Recent Dataset Window");
-  const [district, setDistrict] = useState("");
-  const [availableDistricts, setAvailableDistricts] = useState<string[]>([]);
-  const [globalSearchQuery, setGlobalSearchQuery] = useState("");
-
-  // Map Theme & Prediction Mode
-  const [mapTheme, setMapTheme] = useState<MapTheme>('dark');
-  const [isPredictiveMode, setIsPredictiveMode] = useState(false);
-  const [selectedHour, setSelectedHour] = useState<number>(9);
-
-  // Data State
-  const [loading, setLoading] = useState(false);
-  const [hotspots, setHotspots] = useState<any | null>(null);
-  const [blindspots, setBlindspots] = useState<any[]>([]);
-  const [selectedHotspot, setSelectedHotspot] = useState<any | null>(null);
-  const [forecastData, setForecastData] = useState<any | null>(null);
-  const [stats, setStats] = useState({ totalViolations: 0, avgSpeed: 0, busBlocks: 0, loadingZones: 0 });
-
-  // Notifications State
-  const [notifications, setNotifications] = useState([
-    { id: 1, text: 'Severe Congestion in CBD', time: '2 mins ago', read: false },
-  ]);
-
-  // Support Help & Login Modals State
-  const [isLoggedIn, setIsLoggedIn] = useState(true);
-  const [showSupportModal, setShowSupportModal] = useState(false);
-  const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
-  const [supportSuccess, setSupportSuccess] = useState(false);
-  const [supportForm, setSupportForm] = useState({ category: 'Technical Issue', message: '' });
-  const [isSubmittingSupport, setIsSubmittingSupport] = useState(false);
-  const [faqOpenIndex, setFaqOpenIndex] = useState<number | null>(null);
-  
-  // Login Details State
-  const [loginEmail, setLoginEmail] = useState('admin@gridlock.app');
-  const [loginPassword, setLoginPassword] = useState('••••••••');
-  const [isLoggingIn, setIsLoggingIn] = useState(false);
-
-  // Map reference
-  const mapRef = useRef<MapRef>(null);
-
-  // 1. Fetch available districts on startup
-  useEffect(() => {
-    fetch(apiUrl("/api/districts"))
-      .then(res => res.json())
-      .then(data => {
-        if (data.districts) setAvailableDistricts(data.districts);
-      })
-      .catch(err => console.error("Error fetching districts:", err));
-  }, []);
-
-  // 2. Fetch active cluster polygons and calculate stats when timeframe, district, or selectedHour changes
-  useEffect(() => {
-    setLoading(true);
-    fetch(apiUrl(`/api/v1/clusters/active?timeframe=${encodeURIComponent(timeframe)}&district=${encodeURIComponent(district)}&hour=${selectedHour}`))
-      .then(res => res.json())
-      .then(data => {
-        setHotspots(data);
-        
-        let total = 0;
-        let busBlocks = 0;
-        let mainRoadBlocks = 0;
-        
-        if (data && data.features) {
-          data.features.forEach((f: any) => {
-            total += f.properties.violationCount;
-            if (f.properties.highwayType && f.properties.highwayType.toLowerCase().includes('primary')) {
-              mainRoadBlocks += f.properties.violationCount;
-            }
-            if (f.properties.locationName && f.properties.locationName.toLowerCase().includes('bus')) {
-              busBlocks += f.properties.violationCount;
-            }
-          });
-        }
-
-        setStats({
-          totalViolations: total,
-          avgSpeed: 14.2,
-          busBlocks: busBlocks || Math.floor(total * 0.12),
-          loadingZones: mainRoadBlocks || Math.floor(total * 0.18)
-        });
-      })
-      .catch(err => console.error("Error fetching active clusters:", err))
-      .finally(() => setLoading(false));
-  }, [timeframe, district, selectedHour]);
-
-  // 3. Fetch patrol bias blindspots when timeframe changes
-  useEffect(() => {
-    fetch(apiUrl(`/api/v1/intel/blindspots?timeframe=${encodeURIComponent(timeframe)}`))
-      .then(res => res.json())
-      .then(data => {
-        if (data.blindspots) {
-          setBlindspots(data.blindspots);
-        }
-      })
-      .catch(err => console.error("Error fetching blindspots:", err));
-  }, [timeframe]);
-
-  // 4. Fetch predictive forecasts on demand (maintained for predictability compatibility)
-  useEffect(() => {
-    if (isPredictiveMode && !forecastData) {
-      fetch(apiUrl('/api/forecast'))
-        .then(res => res.json())
-        .then(data => {
-          if (data.forecasts) {
-            setForecastData({
-              type: "FeatureCollection",
-              features: data.forecasts.map((f: any) => ({
-                type: "Feature",
-                geometry: { type: "Point", coordinates: [f.longitude, f.latitude] },
-                properties: { name: f.name, risk: f.risk, color: f.color, trigger: f.trigger }
-              }))
-            });
-          }
-        })
-        .catch(err => console.error("Error fetching forecast:", err));
-    }
-  }, [isPredictiveMode, forecastData]);
-
-  // Global Search Handler (searches and selects district)
-  const handleGlobalSearch = (e: React.KeyboardEvent<HTMLInputElement>) => {
-    if (e.key === 'Enter' && globalSearchQuery.trim() !== '') {
-      const matchedDistrict = availableDistricts.find(d => 
-        d.toLowerCase().includes(globalSearchQuery.toLowerCase().trim())
-      );
-      
-      if (matchedDistrict) {
-        setDistrict(matchedDistrict);
-      } else {
-        setDistrict(globalSearchQuery.trim());
-      }
-      setActiveTab("Command Center");
-      setActiveDropdown(null);
-    }
-  };
-
-  // CSV Report Exporter
-  const handleExportReport = () => {
-    if (!hotspots || !hotspots.features || hotspots.features.length === 0) {
-      alert("No data available to export.");
-      return;
-    }
-    const headers = ["ID", "Location Name", "Police Division", "OSM Class", "OSM Lanes", "BPR delay (mins)", "Violations count"];
-    const rows = hotspots.features.map((f: any) => 
-      `${f.properties.id},"${f.properties.locationName}","${f.properties.policeStation}","${f.properties.highwayType}",${f.properties.laneCount},${f.properties.bprDelay},${f.properties.violationCount}`
-    );
-    const csvContent = "data:text/csv;charset=utf-8," + [headers.join(","), ...rows].join("\n");
-    const encodedUri = encodeURI(csvContent);
-    const link = document.createElement("a");
-    link.setAttribute("href", encodedUri);
-    link.setAttribute("download", `gridlock_report_${new Date().toISOString().split('T')[0]}.csv`);
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-  };
-
-  // Render Login state first if not logged in
-  if (!isLoggedIn) {
-    return (
-      <div 
-        style={{
-          position: 'fixed',
-          top: 0,
-          left: 0,
-          width: '100vw',
-          height: '100vh',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          backgroundImage: 'url("/bg-hero.png")',
-          backgroundSize: 'cover',
-          backgroundPosition: 'center',
-          backgroundRepeat: 'no-repeat',
-          fontFamily: 'var(--font-body-md)',
-          color: '#dae2fd'
-        }}
-      >
-        <div 
-          style={{
-            position: 'absolute',
-            top: 0,
-            left: 0,
-            width: '100%',
-            height: '100%',
-            backgroundColor: 'rgba(6, 10, 22, 0.8)',
-            zIndex: 0,
-            pointerEvents: 'none'
-          }}
-        ></div>
-        
-        <div 
-          style={{
-            backgroundColor: 'rgba(18, 22, 38, 0.65)',
-            backdropFilter: 'blur(24px)',
-            WebkitBackdropFilter: 'blur(24px)',
-            border: '1px solid rgba(255, 255, 255, 0.1)',
-            borderRadius: '16px',
-            padding: '32px',
-            width: '100%',
-            maxWidth: '380px',
-            boxShadow: '0 20px 50px rgba(0,0,0,0.6)',
-            zIndex: 10,
-            display: 'flex',
-            flexDirection: 'column',
-            alignItems: 'center',
-            gap: '20px'
-          }}
-        >
-          <div 
-            style={{
-              width: '56px',
-              height: '56px',
-              borderRadius: '12px',
-              backgroundColor: '#3e52ff',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              boxShadow: '0 8px 16px rgba(62, 82, 255, 0.2)'
-            }}
-          >
-            <span className="material-symbols-outlined" style={{ fontSize: '32px', color: '#e9e9ff' }}>domain</span>
-          </div>
-          
-          <div style={{ textAlign: 'center' }}>
-            <h1 style={{ margin: 0, fontSize: '28px', fontWeight: 'bold', color: '#bdc2ff', letterSpacing: '-0.5px' }}>Urban Intel</h1>
-            <p style={{ margin: '4px 0 0 0', fontSize: '12px', color: '#c5c5d9', fontFamily: '"Geist", monospace' }}>Traffic & City Command Center</p>
-          </div>
-          
-          <form 
-            onSubmit={(e) => {
-              e.preventDefault();
-              setIsLoggingIn(true);
-              setTimeout(() => {
-                setIsLoggingIn(false);
-                setIsLoggedIn(true);
-              }, 1500);
-            }}
-            style={{ width: '100%', display: 'flex', flexDirection: 'column', gap: '16px' }}
-          >
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
-              <label style={{ fontSize: '10px', fontWeight: 'bold', color: 'rgba(255, 255, 255, 0.5)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Email Address</label>
-              <input 
-                type="email" 
-                value={loginEmail}
-                onChange={(e) => setLoginEmail(e.target.value)}
-                required
-                style={{
-                  width: '100%',
-                  backgroundColor: 'rgba(0,0,0,0.4)',
-                  border: '1px solid rgba(255, 255, 255, 0.1)',
-                  borderRadius: '8px',
-                  padding: '8px 12px',
-                  color: '#dae2fd',
-                  outline: 'none',
-                  fontSize: '13px'
-                }}
-              />
-            </div>
-            
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
-              <label style={{ fontSize: '10px', fontWeight: 'bold', color: 'rgba(255, 255, 255, 0.5)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Password</label>
-              <input 
-                type="password" 
-                value={loginPassword}
-                onChange={(e) => setLoginPassword(e.target.value)}
-                required
-                style={{
-                  width: '100%',
-                  backgroundColor: 'rgba(0,0,0,0.4)',
-                  border: '1px solid rgba(255, 255, 255, 0.1)',
-                  borderRadius: '8px',
-                  padding: '8px 12px',
-                  color: '#dae2fd',
-                  outline: 'none',
-                  fontSize: '13px'
-                }}
-              />
-            </div>
-            
-            <button 
-              type="submit"
-              disabled={isLoggingIn}
-              style={{
-                width: '100%',
-                backgroundColor: '#bdc2ff',
-                color: '#00149e',
-                fontWeight: 'bold',
-                padding: '10px',
-                borderRadius: '8px',
-                marginTop: '8px',
-                border: 'none',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                gap: '8px',
-                cursor: 'pointer',
-                fontSize: '14px',
-                fontFamily: '"Geist", monospace'
-              }}
-            >
-              {isLoggingIn ? (
-                <>
-                  <span className="material-symbols-outlined animate-spin" style={{ fontSize: '18px' }}>sync</span>
-                  <span>Verifying Session...</span>
-                </>
-              ) : (
-                <>
-                  <span className="material-symbols-outlined" style={{ fontSize: '18px' }}>login</span>
-                  <span>Sign In</span>
-                </>
-              )}
-            </button>
-          </form>
-          
-          <div style={{ marginTop: '8px', textAlign: 'center', fontSize: '11px', color: 'rgba(197, 197, 217, 0.7)' }}>
-            For assistance, contact <span style={{ color: '#bdc2ff', textDecoration: 'underline', cursor: 'pointer' }}>support@gridlock.app</span>
-          </div>
-        </div>
-      </div>
-    );
-  }
+  const mockHotspotsData = [
+    { id: 1, name: "Subedar Chatram Road", lanes: 2, delay: 18.4, violations: 4188, capLoss: "50%" },
+    { id: 2, name: "Kamaraj Road", lanes: 3, delay: 12.2, violations: 1449, capLoss: "33%" },
+    { id: 3, name: "80 Feet Ring Road", lanes: 2, delay: 5.6, violations: 1114, capLoss: "50%" },
+  ];
 
   return (
-    <div 
-      className="text-on-surface font-body-md overflow-hidden h-screen w-full relative bg-cover bg-center bg-no-repeat"
-      style={{ backgroundImage: 'url("/bg-hero.png")' }}
-    >
-      {/* Dark Overlay for Readability */}
-      <div className="absolute inset-0 bg-[#060a16]/70 z-0 pointer-events-none"></div>
+    <div className="h-screen w-screen overflow-y-auto scroll-smooth bg-[#060a16] text-[#dae2fd] font-sans selection:bg-[#7C5CFF]/30 selection:text-white relative">
       
-      {/* Main Dashboard Flex Layout Wrapper */}
-      <div className="flex h-full w-full relative z-10">
-        
-        {/* Sidebar Navigation */}
-        <Sidebar 
-          activeTab={activeTab}
-          setActiveTab={setActiveTab}
-          isDispatchPanelOpen={isDispatchPanelOpen}
-          setIsDispatchPanelOpen={setIsDispatchPanelOpen}
-          onExportReport={handleExportReport}
-          setShowSupportModal={setShowSupportModal}
-          setShowLogoutConfirm={setShowLogoutConfirm}
-        />
+      {/* Injecting CSS Keyframe Animations directly for the road grid */}
+      <style jsx global>{`
+        @keyframes subtle-fade {
+          0%, 100% { opacity: 0.15; }
+          50% { opacity: 0.35; }
+        }
+        .road-grid-container {
+          animation: subtle-fade 8s ease-in-out infinite;
+        }
+      `}</style>
 
-        {/* Main Content Area */}
-        <div className="flex-1 flex flex-col h-screen overflow-hidden relative">
+      {/* Beautiful Street Grid Live Wallpaper */}
+      <div className="absolute top-0 inset-x-0 h-screen overflow-hidden pointer-events-none z-0 bg-gradient-to-b from-[#060a16] via-[#09081f]/20 to-[#060a16]">
+        <svg 
+          className="absolute w-full h-full opacity-30 road-grid-container" 
+          viewBox="0 0 1440 600" 
+          preserveAspectRatio="none" 
+          xmlns="http://www.w3.org/2000/svg"
+        >
+          {/* Faint road grid pattern representing traffic network */}
+          <line x1="0" y1="120" x2="1440" y2="120" stroke="rgba(255,255,255,0.03)" strokeWidth="0.8" />
+          <line x1="0" y1="280" x2="1440" y2="280" stroke="rgba(255,255,255,0.03)" strokeWidth="0.8" />
+          <line x1="0" y1="440" x2="1440" y2="440" stroke="rgba(255,255,255,0.03)" strokeWidth="0.8" />
           
-          {/* Top Bar Header */}
-          <Header 
-            globalSearchQuery={globalSearchQuery}
-            setGlobalSearchQuery={setGlobalSearchQuery}
-            onGlobalSearch={handleGlobalSearch}
-            notifications={notifications}
-            setNotifications={setNotifications}
-            activeDropdown={activeDropdown}
-            setActiveDropdown={setActiveDropdown}
-            setShowLogoutConfirm={setShowLogoutConfirm}
-          />
-
-          {/* Tab Content Canvas */}
-          <main className="flex-1 overflow-y-auto p-4 md:p-8 bg-transparent flex flex-col relative z-10">
-            {activeTab === "Command Center" && (
-              <CommandCenterTab 
-                timeframe={timeframe}
-                setTimeframe={setTimeframe}
-                district={district}
-                setDistrict={setDistrict}
-                availableDistricts={availableDistricts}
-                stats={stats}
-                hotspots={hotspots}
-                blindspots={blindspots}
-                loading={loading}
-                mapRef={mapRef}
-                mapTheme={mapTheme}
-                setMapTheme={setMapTheme}
-                isPredictiveMode={isPredictiveMode}
-                setIsPredictiveMode={setIsPredictiveMode}
-                forecastData={forecastData}
-                isDispatchPanelOpen={isDispatchPanelOpen}
-                setIsDispatchPanelOpen={setIsDispatchPanelOpen}
-                onSelectHotspot={setSelectedHotspot}
-                selectedHour={selectedHour}
-                setSelectedHour={setSelectedHour}
-              />
-            )}
-
-            {activeTab === "Analytics" && <AnalyticsTab />}
-            {activeTab === "Economics" && <EconomicCalculator />}
-            {activeTab === "Enforcement" && <EnforcementTab />}
-            {activeTab === "Detection" && <DetectionTab />}
-          </main>
-        </div>
+          <line x1="180" y1="0" x2="180" y2="600" stroke="rgba(255,255,255,0.03)" strokeWidth="0.8" />
+          <line x1="580" y1="0" x2="580" y2="600" stroke="rgba(255,255,255,0.03)" strokeWidth="0.8" />
+          <line x1="980" y1="0" x2="980" y2="600" stroke="rgba(255,255,255,0.03)" strokeWidth="0.8" />
+          
+          {/* Curved avenue lines mimicking real geography */}
+          <path d="M -50,160 Q 400,240 800,100 T 1500,200" fill="none" stroke="rgba(124,92,255,0.08)" strokeWidth="1.2" />
+          <path d="M -50,220 Q 300,120 700,340 T 1500,280" fill="none" stroke="rgba(124,92,255,0.06)" strokeWidth="1" />
+          <path d="M -50,380 Q 500,250 900,450 T 1500,380" fill="none" stroke="rgba(124,92,255,0.08)" strokeWidth="1.2" />
+          
+          {/* Intersections (nodes) */}
+          <circle cx="180" cy="120" r="3" fill="#7C5CFF" opacity="0.3" />
+          <circle cx="580" cy="280" r="3.5" fill="#7C5CFF" opacity="0.4" />
+          <circle cx="980" cy="440" r="3" fill="#7C5CFF" opacity="0.3" />
+          <circle cx="700" cy="340" r="2.5" fill="#7C5CFF" opacity="0.25" />
+        </svg>
       </div>
 
-      {/* Global Modals overlay */}
-      <Modals 
-        showSupportModal={showSupportModal}
-        setShowSupportModal={setShowSupportModal}
-        supportSuccess={supportSuccess}
-        setSupportSuccess={setSupportSuccess}
-        supportForm={supportForm}
-        setSupportForm={setSupportForm}
-        isSubmittingSupport={isSubmittingSupport}
-        setIsSubmittingSupport={setIsSubmittingSupport}
-        faqOpenIndex={faqOpenIndex}
-        setFaqOpenIndex={setFaqOpenIndex}
-        showLogoutConfirm={showLogoutConfirm}
-        setShowLogoutConfirm={setShowLogoutConfirm}
-        setIsLoggedIn={setIsLoggedIn}
-      />
+      {/* Header / Navigation */}
+      <header className="sticky top-0 z-50 w-full bg-[#060a16]/80 backdrop-blur-md border-b border-white/5">
+        <div className="max-w-7xl mx-auto h-16 flex items-center justify-between px-6 md:px-12 w-full">
+          <div className="flex items-center gap-2">
+            <div className="w-8 h-8 rounded-lg bg-[#7C5CFF] flex items-center justify-center">
+              <span className="material-symbols-outlined text-white text-[20px]">traffic</span>
+            </div>
+            <span className="font-bold text-lg tracking-tight text-white font-mono uppercase">Urban Intel</span>
+          </div>
 
-      {/* Slide-out right panel Physics Inspector */}
-      <PhysicsInspector 
-        hotspot={selectedHotspot}
-        onClose={() => setSelectedHotspot(null)}
-      />
+          <nav className="hidden md:flex items-center gap-8 text-sm font-semibold text-[#c5c5d9]">
+            <a href="#how-it-works" className="hover:text-white transition-colors">How It Works</a>
+            <a href="#problem" className="hover:text-white transition-colors">The Problem</a>
+            <a href="#bias" className="hover:text-white transition-colors">Patrol Bias</a>
+            <a href="https://github.com/Drifting-Moon/locklock" target="_blank" rel="noopener noreferrer" className="hover:text-white transition-colors flex items-center gap-1">
+              GitHub <span className="material-symbols-outlined text-sm">open_in_new</span>
+            </a>
+          </nav>
+
+          <div className="flex items-center gap-4">
+            <Link href="/dashboard" className="bg-[#7C5CFF] hover:bg-[#6c4be0] hover:shadow-md hover:shadow-[#7C5CFF]/25 text-white text-xs font-bold uppercase tracking-wider px-5 py-2.5 rounded-lg transition-all active:scale-[0.98]">
+              View Live Demo
+            </Link>
+          </div>
+        </div>
+      </header>
+
+      {/* 1. HERO SECTION */}
+      <section className="relative z-10 max-w-7xl mx-auto px-6 min-h-[calc(100vh-64px)] flex items-center py-12">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 items-center w-full">
+          {/* Left Column: Text & CTAs */}
+          <div className="lg:col-span-7 flex flex-col items-start text-left">
+            <div className="inline-flex items-center gap-2 bg-[#7C5CFF]/15 border border-[#7C5CFF]/30 px-3.5 py-1 rounded-md text-xs font-semibold text-[#bdc2ff] mb-6">
+              <span className="w-1.5 h-1.5 rounded-full bg-[#7C5CFF]"></span>
+              Flipkart Gridlock Hackathon Project
+            </div>
+
+            <h1 className="text-4xl sm:text-5xl md:text-6xl font-bold tracking-tight text-white leading-[1.15] max-w-2xl">
+              We Don't Count Tickets.<br />
+              <span className="text-[#7C5CFF]">
+                We Measure Gridlock.
+              </span>
+            </h1>
+
+            <p className="mt-6 text-sm sm:text-base md:text-lg text-[#c5c5d9] max-w-xl font-light leading-relaxed">
+              Urban Intel integrates live <span className="text-white font-medium">OpenStreetMap (OSM)</span> lane profiles and 
+              <span className="text-white font-medium"> BPR traffic physics</span> to quantify exactly how illegal parking capacity losses translate into commuter delay minutes.
+            </p>
+
+            <div className="mt-8 flex flex-col sm:flex-row gap-4 w-full sm:w-auto">
+              <Link href="/dashboard" className="w-full sm:w-auto bg-[#7C5CFF] hover:bg-[#6c4be0] hover:shadow-md hover:shadow-[#7C5CFF]/25 text-white font-bold text-sm tracking-wide px-6 py-3 rounded-lg transition-all text-center">
+                View Live Demo
+              </Link>
+              <a href="#how-it-works" className="w-full sm:w-auto bg-white/5 hover:bg-white/10 text-white font-bold text-sm border border-white/10 px-6 py-3 rounded-lg transition-all hover:border-white/20 text-center">
+                How It Works
+              </a>
+            </div>
+
+            {/* Proof element */}
+            <div className="mt-12 pt-6 border-t border-white/5 w-full flex items-center gap-2 text-[10px] font-mono uppercase tracking-widest text-[#c5c5d9]/40">
+              <span>298k violations processed</span>
+              <span className="text-white/20">·</span>
+              <span>125k deduplicated</span>
+              <span className="text-white/20">·</span>
+              <span>Real OSM lane data</span>
+            </div>
+          </div>
+
+          {/* Right Column: Visual Dashboard Mockup Card */}
+          <div className="lg:col-span-5 flex justify-center w-full">
+            <div className="bg-[#121626]/80 backdrop-blur-xl border border-white/10 rounded-xl p-5 w-full max-w-md shadow-2xl relative overflow-hidden">
+              <div className="flex justify-between items-center pb-3 border-b border-white/5 mb-4">
+                <div className="flex items-center gap-2">
+                  <span className="w-2 h-2 rounded-full bg-emerald-500"></span>
+                  <span className="text-[10px] font-mono font-bold text-white/50 uppercase tracking-widest">LWR Capacity Analysis</span>
+                </div>
+                <span className="text-[9px] font-mono text-[#7C5CFF] font-bold">Live Model</span>
+              </div>
+
+              <div className="space-y-4">
+                <div>
+                  <span className="text-[9px] text-white/40 block font-mono">LOCATION</span>
+                  <span className="text-xs font-bold text-white">Kamaraj Road Bottleneck</span>
+                </div>
+
+                <div className="grid grid-cols-2 gap-3">
+                  <div className="bg-white/5 rounded-lg p-2.5 border border-white/5">
+                    <span className="text-[9px] text-white/40 block font-mono">BASE LANES</span>
+                    <span className="text-xs font-mono font-bold text-[#bdc2ff]">3 Lanes (OSM)</span>
+                  </div>
+                  <div className="bg-white/5 rounded-lg p-2.5 border border-white/5">
+                    <span className="text-[9px] text-white/40 block font-mono">CAPACITY LOSS</span>
+                    <span className="text-xs font-mono font-bold text-[#f44336]">-33.3%</span>
+                  </div>
+                </div>
+
+                <div className="p-3 bg-black/30 rounded-lg border border-white/5 font-mono text-[9px] text-white/70">
+                  <div className="text-white/35 font-bold mb-1">DELAY PENALTY (BPR FORMULA):</div>
+                  <div className="text-[#bdc2ff] text-[10px] font-bold mt-1">t = 10.0 × [ 1 + 0.15 × (V/C)⁴ ]</div>
+                  <div className="mt-2 text-emerald-400 font-bold">Result: +12.2 min delay per commuter</div>
+                </div>
+
+                {/* Micro Bar Graph */}
+                <div className="space-y-2">
+                  <div className="flex justify-between text-[9px] text-white/40 font-mono">
+                    <span>Capacity Blocked</span>
+                    <span className="text-white font-bold">1 / 3 Lanes</span>
+                  </div>
+                  <div className="w-full bg-white/5 h-2 rounded-full overflow-hidden border border-white/5">
+                    <div className="bg-[#7C5CFF] h-full rounded-full w-[33%]"></div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* 2. THE PROBLEM (Light Section) */}
+      <section id="problem" className="bg-[#f0f2fa] text-[#131b2e] py-20 md:py-28 relative z-10">
+        <div className="max-w-6xl mx-auto px-6 grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
+          
+          {/* Left Side: Mock Hotspot Map */}
+          <div className="lg:col-span-6 bg-[#0b1326] rounded-2xl p-4 md:p-6 shadow-2xl border border-[#c5c5d9]/30 relative overflow-hidden h-[420px] flex flex-col">
+            <div className="flex justify-between items-center pb-3 border-b border-white/5 mb-4">
+              <div className="flex items-center gap-2">
+                <span className="w-2.5 h-2.5 rounded-full bg-red-500"></span>
+                <span className="text-[11px] font-mono font-bold text-white/50 uppercase tracking-widest">Live Violations Hotspot Map</span>
+              </div>
+              <span className="text-[10px] font-mono text-[#7C5CFF] font-bold">11,810 Violations</span>
+            </div>
+            
+            {/* Stylized Canvas mockup */}
+            <div className="flex-1 rounded-xl bg-[#060a16] relative overflow-hidden border border-white/5">
+              {/* Grid Lines */}
+              <div className="absolute inset-0 bg-[linear-gradient(to_right,#ffffff03_1px,transparent_1px),linear-gradient(to_bottom,#ffffff03_1px,transparent_1px)] bg-[size:24px_24px]"></div>
+              
+              {/* Bengaluru Road Network Mimic */}
+              <svg className="absolute inset-0 w-full h-full opacity-25" xmlns="http://www.w3.org/2000/svg">
+                <path d="M 0,100 L 400,120 M 100,0 L 120,400 M 50,300 C 150,250 250,350 400,280 M 300,0 C 280,200 350,300 200,400" stroke="#ffffff" strokeWidth="2" fill="none"/>
+                <path d="M 0,220 C 150,220 200,100 400,100" stroke="#7C5CFF" strokeWidth="1" strokeDasharray="4 4" fill="none"/>
+              </svg>
+
+              {/* Glowing DBSCAN Hotspots */}
+              <div className="absolute top-[28%] left-[45%] -translate-x-1/2 -translate-y-1/2">
+                <div className="absolute inset-0 w-24 h-24 rounded-full bg-red-600/10 border-2 border-red-500/30 -translate-x-1/2 -translate-y-1/2 animate-ping"></div>
+                <div className="absolute inset-0 w-16 h-16 rounded-full bg-red-600/30 border border-red-500/40 -translate-x-1/2 -translate-y-1/2"></div>
+                <div className="w-4 h-4 rounded-full bg-red-500 shadow-[0_0_10px_#f44336] -translate-x-1/2 -translate-y-1/2"></div>
+              </div>
+
+              <div className="absolute top-[65%] left-[28%] -translate-x-1/2 -translate-y-1/2">
+                <div className="absolute inset-0 w-16 h-16 rounded-full bg-amber-500/15 border-2 border-amber-500/40 -translate-x-1/2 -translate-y-1/2"></div>
+                <div className="w-3.5 h-3.5 rounded-full bg-amber-500 shadow-[0_0_8px_#ff9800] -translate-x-1/2 -translate-y-1/2"></div>
+              </div>
+
+              <div className="absolute top-[48%] left-[72%] -translate-x-1/2 -translate-y-1/2">
+                <div className="absolute inset-0 w-12 h-12 rounded-full bg-yellow-400/20 border border-yellow-400/50 -translate-x-1/2 -translate-y-1/2"></div>
+                <div className="w-3 h-3 rounded-full bg-yellow-400 shadow-[0_0_6px_#ffeb3b] -translate-x-1/2 -translate-y-1/2"></div>
+              </div>
+
+              {/* Mini Overlay Map Label */}
+              <div className="absolute bottom-3 left-3 bg-[#121626]/90 border border-white/10 rounded-lg p-2 font-mono text-[9px] text-[#bdc2ff]">
+                <div className="font-bold text-white uppercase tracking-wider mb-1">DBSCAN Hotspots</div>
+                <div className="flex items-center gap-1.5"><span className="w-2 h-2 rounded bg-red-500"></span> Delay &gt; 15m</div>
+                <div className="flex items-center gap-1.5"><span className="w-2 h-2 rounded bg-amber-500"></span> Delay 5-15m</div>
+              </div>
+            </div>
+          </div>
+          
+          {/* Right Side: Copy */}
+          <div className="lg:col-span-6 flex flex-col justify-center">
+            <h2 className="text-3xl md:text-4xl font-extrabold tracking-tight text-[#060a16] leading-tight">
+              Reactive Patrols Mask the Real Impact
+            </h2>
+            <div className="w-16 h-1.5 bg-[#7C5CFF] rounded-full mt-4 mb-6"></div>
+            
+            <p className="text-[#3c485e] text-base md:text-lg leading-relaxed mb-6">
+              Traditional city traffic operations treat parking enforcement reactively. Traffic wardens write tickets where they are scheduled to go, creating an enforcement loop that ignores massive parts of the city.
+            </p>
+            
+            <div className="space-y-4">
+              <div className="flex items-start gap-3">
+                <span className="material-symbols-outlined text-[#7C5CFF] text-[22px] mt-0.5">warning</span>
+                <div>
+                  <h4 className="font-bold text-[#060a16] text-base">The Patrol Bias Blindspot</h4>
+                  <p className="text-xs text-[#3c485e]">Hotspots in standard databases only highlight regions where wardens are frequently dispatched, not where the network is actually suffering the most.</p>
+                </div>
+              </div>
+              <div className="flex items-start gap-3">
+                <span className="material-symbols-outlined text-[#7C5CFF] text-[22px] mt-0.5">safety_check</span>
+                <div>
+                  <h4 className="font-bold text-[#060a16] text-base">Unquantified Congestion Costs</h4>
+                  <p className="text-xs text-[#3c485e]">A single delivery truck blocking a primary lane degrades road capacity by 33%, but standard analytics fail to compute the minute-delay impact this causes.</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* 3. HOW IT WORKS (Violet Numbered Cards) */}
+      <section id="how-it-works" className="py-20 md:py-28 relative z-10 max-w-6xl mx-auto px-6">
+        <div className="text-center mb-16">
+          <h2 className="text-3xl md:text-5xl font-bold text-white tracking-tight">The 4-Step Pipeline</h2>
+          <p className="text-[#c5c5d9] mt-3 text-sm md:text-base font-light">From raw ticketing sweeps to physics-grounded commute-delay mapping.</p>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+          
+          {/* Card 1 */}
+          <div className="bg-[#7C5CFF] text-white rounded-2xl p-6 shadow-xl relative flex flex-col justify-between h-72 hover:scale-[1.03] transition-all duration-300">
+            <div className="flex justify-between items-start">
+              <div className="w-10 h-10 rounded-full bg-white/20 flex items-center justify-center font-mono font-black text-lg">01</div>
+              <span className="material-symbols-outlined text-white/60 text-[24px]">filter_alt</span>
+            </div>
+            <div>
+              <h3 className="text-lg font-bold tracking-tight mb-2">Deduplicate</h3>
+              <p className="text-white/80 text-xs leading-relaxed font-light">
+                Sweep deduplication collapses officer ticket-spam (occurring within 15 minutes and 50 meters of a single device ID) into real events, filtering 298k records to 125k.
+              </p>
+            </div>
+          </div>
+
+          {/* Card 2 */}
+          <div className="bg-[#7C5CFF] text-white rounded-2xl p-6 shadow-xl relative flex flex-col justify-between h-72 hover:scale-[1.03] transition-all duration-300">
+            <div className="flex justify-between items-start">
+              <div className="w-10 h-10 rounded-full bg-white/20 flex items-center justify-center font-mono font-black text-lg">02</div>
+              <span className="material-symbols-outlined text-white/60 text-[24px]">group_work</span>
+            </div>
+            <div>
+              <h3 className="text-lg font-bold tracking-tight mb-2">Cluster</h3>
+              <p className="text-white/80 text-xs leading-relaxed font-light">
+                DBSCAN spatial clustering groups nearby parking violations to extract true congestion hotspots and shapes boundaries using geometric convex hulls.
+              </p>
+            </div>
+          </div>
+
+          {/* Card 3 */}
+          <div className="bg-[#7C5CFF] text-white rounded-2xl p-6 shadow-xl relative flex flex-col justify-between h-72 hover:scale-[1.03] transition-all duration-300">
+            <div className="flex justify-between items-start">
+              <div className="w-10 h-10 rounded-full bg-white/20 flex items-center justify-center font-mono font-black text-lg">03</div>
+              <span className="material-symbols-outlined text-white/60 text-[24px]">map</span>
+            </div>
+            <div>
+              <h3 className="text-lg font-bold tracking-tight mb-2">Ground Truth</h3>
+              <p className="text-white/80 text-xs leading-relaxed font-light">
+                Hotspots are mapped against real OpenStreetMap road classes and actual lane counts, ensuring capacity formulas use real physical data.
+              </p>
+            </div>
+          </div>
+
+          {/* Card 4 */}
+          <div className="bg-[#7C5CFF] text-white rounded-2xl p-6 shadow-xl relative flex flex-col justify-between h-72 hover:scale-[1.03] transition-all duration-300">
+            <div className="flex justify-between items-start">
+              <div className="w-10 h-10 rounded-full bg-white/20 flex items-center justify-center font-mono font-black text-lg">04</div>
+              <span className="material-symbols-outlined text-white/60 text-[24px]">calculate</span>
+            </div>
+            <div>
+              <h3 className="text-lg font-bold tracking-tight mb-2">Quantify</h3>
+              <p className="text-white/80 text-xs leading-relaxed font-light">
+                The Bureau of Public Roads (BPR) traffic physics model converts capacity degradation into the exact minute-delay costs added to traffic streams.
+              </p>
+            </div>
+          </div>
+
+        </div>
+      </section>
+
+      {/* 4. DASHBOARD PREVIEW (Dark Mockup) */}
+      <section className="bg-[#0b1326] border-y border-white/5 py-20 md:py-28 relative z-10">
+        <div className="max-w-6xl mx-auto px-6">
+          <div className="text-center mb-12">
+            <h2 className="text-3xl md:text-5xl font-bold text-white tracking-tight">Interactive Command Center</h2>
+            <p className="text-[#c5c5d9] mt-3 text-sm md:text-base font-light">Every number on this map traces back to a real road and a real formula.</p>
+          </div>
+
+          {/* Large Interactive CSS Mockup */}
+          <div className="bg-[#060a16] border border-white/10 rounded-2xl p-3 md:p-5 shadow-2xl relative flex flex-col h-[550px] overflow-hidden">
+            {/* Header of Mock */}
+            <div className="flex justify-between items-center bg-white/5 border border-white/10 rounded-xl px-4 py-2 mb-4">
+              <div className="flex items-center gap-2">
+                <span className="material-symbols-outlined text-primary text-sm">map</span>
+                <span className="text-xs font-bold text-white">Urban Intel Dashboard</span>
+              </div>
+              <div className="flex gap-1">
+                <span className="w-2 h-2 rounded-full bg-red-500"></span>
+                <span className="w-2 h-2 rounded-full bg-yellow-500"></span>
+                <span className="w-2 h-2 rounded-full bg-green-500"></span>
+              </div>
+            </div>
+
+            <div className="flex-1 flex gap-4 overflow-hidden relative">
+              {/* Left Side: Mock Map */}
+              <div className="flex-1 rounded-xl bg-black/40 border border-white/5 relative overflow-hidden flex flex-col">
+                {/* SVG Map mockup */}
+                <div className="absolute inset-0 bg-[linear-gradient(to_right,#ffffff02_1px,transparent_1px),linear-gradient(to_bottom,#ffffff02_1px,transparent_1px)] bg-[size:32px_32px]"></div>
+                
+                {/* Hotspot Polygons (Convex Hulls) */}
+                <div className="absolute inset-0 p-4">
+                  {mockHotspotsData.map((hotspot, idx) => {
+                    const positions = [
+                      "top-[35%] left-[30%]",
+                      "top-[55%] left-[58%]",
+                      "top-[25%] left-[70%]"
+                    ];
+                    return (
+                      <div 
+                        key={hotspot.id} 
+                        onClick={() => setActiveMockHotspot(idx)}
+                        className={`absolute ${positions[idx]} p-3 rounded-lg border cursor-pointer transition-all duration-300 flex items-center gap-2 group ${
+                          activeMockHotspot === idx 
+                            ? 'bg-[#7C5CFF]/20 border-[#7C5CFF] shadow-[0_0_15px_rgba(124,92,255,0.3)] scale-[1.05]' 
+                            : 'bg-white/5 border-white/10 hover:border-white/20'
+                        }`}
+                      >
+                        <span className="w-2 h-2 rounded-full bg-[#ffeb3b] animate-pulse"></span>
+                        <div className="font-mono text-[9px]">
+                          <div className="font-bold text-white">{hotspot.name}</div>
+                          <div className="text-white/40">Delay: +{hotspot.delay}m</div>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+                
+                {/* Floating Map Legend (bottom-left) */}
+                <div className="absolute bottom-4 left-4 bg-[#121626]/90 border border-white/10 rounded-xl p-3 w-44 pointer-events-none font-mono text-[8px]">
+                  <div className="font-bold text-white mb-1.5 uppercase tracking-wider">Live Map Legend</div>
+                  <div className="flex justify-between mb-1"><span>Active Hotspots:</span> <span className="text-white font-bold">{mockHotspotsData.length}</span></div>
+                  <div className="flex justify-between mb-2"><span>Total Delay:</span> <span className="text-[#f44336] font-bold">+36.2m</span></div>
+                  <div className="w-full h-1 bg-gradient-to-r from-yellow-300 via-orange-500 to-red-500 rounded"></div>
+                </div>
+
+                {/* Scrubber at Bottom Center */}
+                <div className="absolute bottom-4 left-1/2 -translate-x-1/2 bg-[#121626]/90 border border-white/10 rounded-xl px-4 py-2 w-56 font-mono text-[8px] flex flex-col gap-1 pointer-events-none">
+                  <div className="flex justify-between items-center text-white/50">
+                    <span>Scrubber</span>
+                    <span className="text-[#bdc2ff] font-bold">09:00 (AM Peak)</span>
+                  </div>
+                  <div className="w-full bg-white/10 h-1 rounded relative">
+                    <div className="absolute left-[38%] top-1/2 -translate-y-1/2 w-2.5 h-2.5 rounded-full bg-[#3e52ff] border border-white"></div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Right Side: Mock Physics Inspector (Reacts to Map clicks!) */}
+              <div className="w-64 bg-white/5 border border-white/10 rounded-xl p-4 flex flex-col justify-between overflow-y-auto">
+                <div>
+                  <div className="flex items-center justify-between pb-2 border-b border-white/10 mb-4">
+                    <div className="flex items-center gap-1.5">
+                      <span className="material-symbols-outlined text-primary text-[16px]">analytics</span>
+                      <span className="text-[10px] font-bold uppercase tracking-widest text-white/50">Physics Inspector</span>
+                    </div>
+                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
+                  </div>
+
+                  {activeMockHotspot !== null ? (
+                    <div className="space-y-4">
+                      <div>
+                        <span className="text-[9px] text-white/40 block">OSM ROAD SEGMENT</span>
+                        <span className="text-xs font-bold text-white">{mockHotspotsData[activeMockHotspot].name}</span>
+                      </div>
+                      <div className="grid grid-cols-2 gap-2">
+                        <div>
+                          <span className="text-[9px] text-white/40 block">ACTUAL LANES</span>
+                          <span className="text-xs font-mono font-bold text-[#bdc2ff]">{mockHotspotsData[activeMockHotspot].lanes} Lanes</span>
+                        </div>
+                        <div>
+                          <span className="text-[9px] text-white/40 block">CAPACITY LOSS</span>
+                          <span className="text-xs font-mono font-bold text-[#f44336]">{mockHotspotsData[activeMockHotspot].capLoss}</span>
+                        </div>
+                      </div>
+                      <div className="p-3 bg-black/40 rounded-lg border border-white/5 font-mono text-[9px] text-white/75 leading-relaxed">
+                        <div className="text-white/40 font-bold mb-1">BPR DELAY FORMULA:</div>
+                        <span className="text-white">t = t₀ [ 1 + α(V/C)⁴ ]</span>
+                        <div className="mt-1.5 text-[#bdc2ff]">Calculated Delay: +{mockHotspotsData[activeMockHotspot].delay} mins</div>
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="text-center py-12 text-white/40 text-xs">
+                      Click any map hotspot to inspect its capacity calculations.
+                    </div>
+                  )}
+                </div>
+
+                <div className="pt-3 border-t border-white/10 mt-4 text-[9px] text-white/40 text-center font-mono">
+                  Click on map pins to switch zones
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* 5. PATROL BIAS CALLOUT (High Contrast Standalone Section) */}
+      <section id="bias" className="relative z-10 max-w-5xl mx-auto px-6 py-20">
+        <div className="bg-gradient-to-r from-[#7C5CFF] to-[#3e52ff] rounded-3xl p-8 md:p-12 shadow-2xl relative overflow-hidden">
+          {/* Abstract decorative graphic */}
+          <div className="absolute right-0 top-0 bottom-0 w-1/3 opacity-10 pointer-events-none hidden md:block">
+            <span className="material-symbols-outlined text-[300px] text-white absolute right-[-50px] top-1/2 -translate-y-1/2">radar</span>
+          </div>
+
+          <div className="max-w-2xl relative z-10">
+            <span className="text-xs font-mono font-black uppercase tracking-widest text-[#bdc2ff] bg-white/10 px-3 py-1 rounded-full">Exposing Patrol Blindspots</span>
+            
+            <h2 className="text-3xl md:text-5xl font-black text-white tracking-tight mt-6 leading-tight">
+              "The zones we are NOT watching may be worse than the ones we are."
+            </h2>
+            
+            <p className="mt-4 text-white/80 text-sm md:text-base leading-relaxed font-light">
+              Unlike static camera platforms that require massive capital investment, our **Blindspot Radar** parses spatial ticketing logs to pinpoint where expectations diverge from reality. By calculating Expected vs Observed violations, we expose the exact enforcement vacuums where patrols have created a feedback bias.
+            </p>
+
+            <div className="mt-8 flex flex-wrap gap-4">
+              <Link href="/dashboard" className="bg-white text-[#7C5CFF] hover:bg-[#dfe0ff] hover:shadow-md hover:shadow-[#7C5CFF]/10 font-bold text-xs uppercase tracking-wider px-6 py-3.5 rounded-lg transition-all active:scale-[0.98]">
+                Open Blindspot Radar
+              </Link>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* 6. FOOTER */}
+      <footer className="bg-[#03060f] border-t border-white/5 py-12 relative z-10">
+        <div className="max-w-6xl mx-auto px-6 flex flex-col md:flex-row justify-between items-center gap-6">
+          <div className="flex flex-col items-center md:items-start gap-1">
+            <div className="flex items-center gap-2">
+              <span className="material-symbols-outlined text-[#7C5CFF] text-xl">traffic</span>
+              <span className="font-bold text-white font-mono uppercase tracking-wider text-sm">Urban Intel</span>
+            </div>
+            <span className="text-[10px] text-white/30 uppercase tracking-widest font-mono">Theme 1: Parking-Induced Congestion</span>
+          </div>
+
+          <div className="flex gap-8 text-xs font-semibold text-[#c5c5d9] font-mono">
+            <a href="#how-it-works" className="hover:text-white transition-colors">How It Works</a>
+            <Link href="/dashboard" className="hover:text-white transition-colors">Live Demo</Link>
+            <a href="https://github.com/Drifting-Moon/locklock" target="_blank" rel="noopener noreferrer" className="hover:text-white transition-colors">GitHub</a>
+          </div>
+
+          <div className="text-[11px] text-[#c5c5d9]/60 font-mono text-center md:text-right">
+            <div>Flipkart Gridlock Hackathon Project</div>
+            <div className="text-[10px] text-white/30 mt-1">Built with OSM and BPR Physics</div>
+          </div>
+        </div>
+      </footer>
+
     </div>
   );
 }
