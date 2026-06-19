@@ -97,6 +97,60 @@ export default function CctvIntelTab() {
   const [analysisLoading, setAnalysisLoading] = useState(false);
   const [scanAngle, setScanAngle] = useState(0);
   const scanRef = useRef<number | null>(null);
+  const [cvLogs, setCvLogs] = useState<string[]>([]);
+  const logEndRef = useRef<HTMLDivElement | null>(null);
+
+  // Live CV event-stream simulation hook
+  useEffect(() => {
+    const initialLogs = [
+      `[SYSTEM] CV Engine v2.4 initialized on GPU_EDGE_07`,
+      `[SYSTEM] Target classes loaded: Sedan, SUV, Van, Auto Rickshaw, Mini Bus`,
+      `[SYSTEM] Calibration successful. Processing live camera feeds...`,
+    ];
+    setCvLogs(initialLogs);
+
+    const logTemplates = [
+      "Detected {vehicle} on Lane {lane} - Status: {status} ({conf}%)",
+      "Lane {lane} flow rate updated to {flow}%",
+      "Congestion severity index calculated: {sev}/100",
+      "Camera link check: OK (Ping {ping}ms)",
+      "Violation alert: {status} logged at {loc}",
+    ];
+
+    const vehicles = ["Sedan", "SUV", "Delivery Van", "Auto Rickshaw", "Mini Bus"];
+    const statuses = ["ILLEGAL_PARKING", "DOUBLE_PARKED", "SPILLOVER_PARKING", "MOVING"];
+    
+    const interval = setInterval(() => {
+      if (cameras.length === 0) return;
+      const cam = cameras[Math.floor(Math.random() * cameras.length)];
+      const template = logTemplates[Math.floor(Math.random() * logTemplates.length)];
+      
+      let msg = template
+        .replace("{vehicle}", vehicles[Math.floor(Math.random() * vehicles.length)])
+        .replace("{lane}", Math.floor(Math.random() * cam.lanes_total + 1).toString())
+        .replace("{status}", statuses[Math.floor(Math.random() * statuses.length)])
+        .replace("{conf}", (85 + Math.floor(Math.random() * 14)).toString())
+        .replace("{flow}", (10 + Math.floor(Math.random() * 80)).toString())
+        .replace("{sev}", Math.floor(cam.congestion_severity).toString())
+        .replace("{ping}", (12 + Math.floor(Math.random() * 25)).toString())
+        .replace("{loc}", cam.name);
+
+      const timestamp = new Date().toLocaleTimeString();
+      const formattedLog = `[${timestamp}] ${msg}`;
+
+      setCvLogs(prev => {
+        const next = [...prev, formattedLog];
+        return next.slice(-25); // keep last 25 logs
+      });
+    }, 4500);
+
+    return () => clearInterval(interval);
+  }, [cameras]);
+
+  // Auto scroll logs
+  useEffect(() => {
+    logEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+  }, [cvLogs]);
 
   // Fetch camera feeds
   useEffect(() => {
@@ -260,6 +314,85 @@ export default function CctvIntelTab() {
                 </div>
               );
             })}
+          </div>
+
+          {/* CV Model Parameters Card */}
+          <div className="rounded-lg border p-4" style={{ background: 'var(--panel-bg)', borderColor: 'var(--panel-border)' }}>
+            <h4 className="text-xs font-bold uppercase tracking-widest mb-3.5 flex items-center gap-2" style={{ color: 'var(--muted-text)' }}>
+              <span className="material-symbols-outlined text-[16px]">tune</span>
+              CV Engine Parameters
+            </h4>
+            <div className="space-y-3.5 text-xs">
+              <div className="flex justify-between items-center">
+                <span style={{ color: 'var(--muted-text)' }}>Model Core:</span>
+                <span className="font-mono px-2 py-0.5 rounded text-[10px] font-bold border" style={{
+                  background: 'rgba(16,185,129,0.08)',
+                  borderColor: 'rgba(16,185,129,0.25)',
+                  color: '#10B981'
+                }}>
+                  YOLOv8x-Traffic-v2.4
+                </span>
+              </div>
+              <div className="flex justify-between items-center">
+                <span style={{ color: 'var(--muted-text)' }}>Processor Node:</span>
+                <span className="font-mono text-[10px] text-foreground font-semibold">GPU-EDGE-07 (TensorRT)</span>
+              </div>
+              
+              {/* Confidence threshold slider */}
+              <div className="space-y-1.5 pt-1 border-t" style={{ borderColor: 'var(--panel-border)' }}>
+                <div className="flex justify-between text-[11px]">
+                  <span style={{ color: 'var(--muted-text)' }}>Confidence Threshold</span>
+                  <span className="font-mono font-bold text-emerald-400">85%</span>
+                </div>
+                <div className="w-full h-1.5 rounded-full overflow-hidden" style={{ background: 'var(--panel-border)' }}>
+                  <div className="h-full rounded-full bg-emerald-500" style={{ width: '85%' }}></div>
+                </div>
+              </div>
+
+              {/* Edge node metrics */}
+              <div className="grid grid-cols-3 gap-2 pt-2 border-t text-center text-[10px]" style={{ borderColor: 'var(--panel-border)' }}>
+                <div>
+                  <div style={{ color: 'var(--muted-text)' }}>Throughput</div>
+                  <div className="font-bold font-mono text-foreground mt-0.5">29.97 FPS</div>
+                </div>
+                <div>
+                  <div style={{ color: 'var(--muted-text)' }}>Latency</div>
+                  <div className="font-bold font-mono text-emerald-400 mt-0.5">● 14.2ms</div>
+                </div>
+                <div>
+                  <div style={{ color: 'var(--muted-text)' }}>GPU Load</div>
+                  <div className="font-bold font-mono text-foreground mt-0.5">42.8%</div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Live CV Event Stream Logs */}
+          <div className="rounded-lg border p-4" style={{ background: 'var(--panel-bg)', borderColor: 'var(--panel-border)' }}>
+            <h4 className="text-xs font-bold uppercase tracking-widest mb-3 flex items-center gap-2" style={{ color: 'var(--muted-text)' }}>
+              <span className="material-symbols-outlined text-[16px]">terminal</span>
+              Live Event Stream
+            </h4>
+            <div className="rounded border font-mono text-[9px] p-2.5 max-h-[170px] overflow-y-auto space-y-1" style={{ 
+              background: 'rgba(0,0,0,0.25)', 
+              borderColor: 'var(--panel-border)',
+              color: 'rgba(255,255,255,0.7)',
+              lineHeight: '1.4'
+            }}>
+              {cvLogs.map((log, idx) => {
+                let color = 'text-gray-400';
+                if (log.includes('Detected')) color = 'text-sky-300';
+                else if (log.includes('Violation') || log.includes('alert')) color = 'text-red-400';
+                else if (log.includes('flow rate') || log.includes('severity')) color = 'text-amber-400';
+                else if (log.includes('[SYSTEM]')) color = 'text-emerald-400';
+                return (
+                  <div key={idx} className={`${color} break-all font-mono`}>
+                    {log}
+                  </div>
+                );
+              })}
+              <div ref={logEndRef}></div>
+            </div>
           </div>
         </div>
 
