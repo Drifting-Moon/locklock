@@ -12,6 +12,7 @@ import PhysicsInspector from '../components/PhysicsInspector';
 import AnalyticsTab from '../components/AnalyticsTab';
 import EnforcementTab from '../components/EnforcementTab';
 import DetectionTab from '../components/DetectionTab';
+import CctvIntelTab from '../components/CctvIntelTab';
 import EconomicCalculator from '../components/EconomicCalculator';
 
 // Libs
@@ -487,6 +488,7 @@ export default function TrafficDashboard() {
             {activeTab === "Economics" && <EconomicCalculator />}
             {activeTab === "Enforcement" && <EnforcementTab />}
             {activeTab === "Detection" && <DetectionTab />}
+            {activeTab === "CCTV Intel" && <CctvIntelTab />}
           </main>
         </div>
       </div>

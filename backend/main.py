@@ -619,6 +619,269 @@ def clear_violations():
     except Exception as e:
         return {"status": "error", "message": str(e)}
 
+# --- CCTV Vision Intelligence Endpoints ---
+
+VEHICLE_TYPES = ["Heavy Truck", "Delivery Van", "Auto Rickshaw", "SUV", "Mini Bus", "Sedan", "Tempo", "Water Tanker"]
+VEHICLE_PLATES = ["KA-01-AB-1234", "KA-03-MM-8899", "KA-05-XY-5678", "KA-02-CD-4567", "KA-04-EF-7890", "KA-01-GH-2345", "KA-03-JK-6789", "KA-05-LM-0123"]
+VEHICLE_STATUSES = ["ILLEGAL_PARKING", "SPILLOVER_PARKING", "DOUBLE_PARKED", "ILLEGAL_PARKING", "MOVING", "SPILLOVER_PARKING", "DOUBLE_PARKED", "MOVING"]
+
+@app.get("/api/cctv/feeds")
+def get_cctv_feeds():
+    """Returns simulated CCTV camera feeds anchored to real hotspot locations."""
+    if not DB_PATH.exists():
+        return {"cameras": []}
+
+    try:
+        conn = get_db_conn()
+        cursor = conn.cursor()
+        cursor.execute("""
+            SELECT id, center_lat, center_lng, location_name, police_station, violation_count, lane_count, highway_type, bpr_delay
+            FROM hotspots
+            WHERE timeframe = 'Recent Dataset Window'
+            ORDER BY bpr_delay DESC
+            LIMIT 12
+        """)
+        rows = cursor.fetchall()
+        conn.close()
+
+        cameras = []
+        for i, row in enumerate(rows):
+            h = zlib.adler32(row["location_name"].encode())
+            lanes_total = max(2, row["lane_count"])
+            violation_count = row["violation_count"]
+            bpr_delay = row["bpr_delay"]
+
+            # Deterministic simulated CV metrics
+            vehicles_detected = max(1, min(12, 1 + (h % 8) + (violation_count % 5)))
+            lanes_blocked = max(1, min(lanes_total - 1, 1 + (h % (lanes_total))))
+            avg_dwell = round(3.0 + (h % 15) + min(15.0, bpr_delay * 0.00002), 1)
+
+            # Severity formula
+            dwell_score = min(40.0, avg_dwell * 1.8)
+            blockage_score = (lanes_blocked / lanes_total) * 30.0
+            freq_score = min(30.0, vehicles_detected * 2.5)
+            composite = round(dwell_score + blockage_score + freq_score, 1)
+
+            if composite >= 75:
+                sev_label = "Critical"
+            elif composite >= 50:
+                sev_label = "High"
+            elif composite >= 25:
+                sev_label = "Moderate"
+            else:
+                sev_label = "Low"
+
+            status_seed = (h + i) % 10
+            status = "ONLINE" if status_seed < 7 else ("DEGRADED" if status_seed < 9 else "OFFLINE")
+
+            contexts = [
+                {"type": "Metro Station Transit Hub", "primary_issue": "Cab/Auto Spillover Queue", "choke_factor": 1.4},
+                {"type": "Market Area Chokepoint", "primary_issue": "Loading Zone Encroachment", "choke_factor": 1.6},
+                {"type": "Commercial Zone Corridor", "primary_issue": "Illegal Double-Parking", "choke_factor": 1.5},
+                {"type": "Event Venue Spillover Zone", "primary_issue": "Vanguard Spillover Parking", "choke_factor": 1.3}
+            ]
+            cam_ctx = contexts[i % len(contexts)]
+
+            cameras.append({
+                "id": f"cam_{i+1:02d}",
+                "name": f"CAM-{row['police_station'][:2].upper()}{i+1:02d}",
+                "location": row["location_name"],
+                "police_station": row["police_station"],
+                "lat": row["center_lat"],
+                "lng": row["center_lng"],
+                "status": status,
+                "lanes_total": lanes_total,
+                "lanes_blocked": lanes_blocked,
+                "vehicles_detected": vehicles_detected,
+                "avg_dwell_mins": avg_dwell,
+                "congestion_severity": composite,
+                "severity_label": sev_label,
+                "highway_type": row["highway_type"],
+                "violation_count": violation_count,
+                "bpr_delay": bpr_delay,
+                "location_type": cam_ctx["type"],
+                "primary_issue": cam_ctx["primary_issue"],
+                "choke_factor": cam_ctx["choke_factor"],
+                "last_frame_ts": datetime.now().isoformat()
+            })
+
+        return {"cameras": cameras}
+    except Exception as e:
+        print(f"Error fetching CCTV feeds: {e}")
+        return {"cameras": []}
+
+
+@app.get("/api/cctv/analysis/{camera_id}")
+def get_cctv_analysis(camera_id: str):
+    """Returns detailed per-camera CV analysis with detections, lane status, and severity breakdown."""
+    # First get the camera from feeds
+    feeds = get_cctv_feeds()
+    camera = None
+    for c in feeds.get("cameras", []):
+        if c["id"] == camera_id:
+            camera = c
+            break
+
+    if not camera:
+        raise HTTPException(status_code=404, detail="Camera not found")
+
+    h = zlib.adler32(camera["location"].encode())
+    lanes_total = camera["lanes_total"]
+    num_vehicles = min(6, camera["vehicles_detected"])
+
+    # Pre-defined vehicle coordinates for Metro Station (original image)
+    METRO_VEHICLES = [
+        {"type": "Delivery Van", "bbox": [80, 180, 42, 38], "lane": 1, "status": "SPILLOVER_PARKING"},
+        {"type": "Delivery Van", "bbox": [112, 150, 36, 32], "lane": 1, "status": "DOUBLE_PARKED"},
+        {"type": "Delivery Van", "bbox": [136, 126, 30, 28], "lane": 1, "status": "SPILLOVER_PARKING"},
+        {"type": "Sedan", "bbox": [188, 212, 44, 40], "lane": 2, "status": "SPILLOVER_PARKING"},
+        {"type": "SUV", "bbox": [220, 175, 36, 36], "lane": 2, "status": "DOUBLE_PARKED"},
+        {"type": "Auto Rickshaw", "bbox": [268, 210, 30, 38], "lane": 3, "status": "ILLEGAL_PARKING"},
+        {"type": "SUV", "bbox": [220, 245, 48, 42], "lane": 2, "status": "MOVING"},
+        {"type": "SUV", "bbox": [310, 250, 52, 45], "lane": 3, "status": "ILLEGAL_PARKING"},
+        {"type": "Sedan", "bbox": [314, 218, 42, 36], "lane": 3, "status": "ILLEGAL_PARKING"},
+        {"type": "Sedan", "bbox": [250, 180, 34, 30], "lane": 2, "status": "MOVING"},
+        {"type": "Mini Bus", "bbox": [330, 172, 48, 40], "lane": 3, "status": "ILLEGAL_PARKING"},
+        {"type": "SUV", "bbox": [356, 148, 42, 34], "lane": 3, "status": "MOVING"}
+    ]
+
+    # Pre-defined vehicle coordinates for Commercial Corridor
+    COMMERCIAL_VEHICLES = [
+        {"type": "Sedan", "bbox": [104, 134, 72, 60], "lane": 1, "status": "DOUBLE_PARKED"},
+        {"type": "Sedan", "bbox": [142, 108, 48, 48], "lane": 1, "status": "SPILLOVER_PARKING"},
+        {"type": "Sedan", "bbox": [276, 154, 72, 70], "lane": 2, "status": "ILLEGAL_PARKING"},
+        {"type": "Sedan", "bbox": [252, 126, 52, 62], "lane": 2, "status": "DOUBLE_PARKED"},
+        {"type": "Auto Rickshaw", "bbox": [356, 162, 44, 80], "lane": 3, "status": "SPILLOVER_PARKING"},
+        {"type": "Auto Rickshaw", "bbox": [116, 96, 32, 40], "lane": 1, "status": "MOVING"}
+    ]
+
+    # Pre-defined vehicle coordinates for Market Chokepoint
+    MARKET_VEHICLES = [
+        {"type": "Auto Rickshaw", "bbox": [70, 160, 28, 28], "lane": 1, "status": "ILLEGAL_PARKING"},
+        {"type": "Sedan", "bbox": [115, 130, 30, 28], "lane": 1, "status": "SPILLOVER_PARKING"},
+        {"type": "Mini Bus", "bbox": [155, 180, 42, 35], "lane": 2, "status": "DOUBLE_PARKED"},
+        {"type": "Auto Rickshaw", "bbox": [220, 150, 28, 26], "lane": 2, "status": "DOUBLE_PARKED"},
+        {"type": "SUV", "bbox": [280, 195, 38, 32], "lane": 3, "status": "ILLEGAL_PARKING"},
+        {"type": "Delivery Van", "bbox": [325, 230, 40, 35], "lane": 3, "status": "MOVING"},
+        {"type": "Sedan", "bbox": [180, 140, 32, 28], "lane": 2, "status": "MOVING"}
+    ]
+
+    # Pre-defined vehicle coordinates for Event Venue
+    EVENT_VEHICLES = [
+        {"type": "Mini Bus", "bbox": [80, 140, 42, 35], "lane": 1, "status": "SPILLOVER_PARKING"},
+        {"type": "Sedan", "bbox": [130, 170, 32, 28], "lane": 1, "status": "DOUBLE_PARKED"},
+        {"type": "SUV", "bbox": [190, 130, 35, 28], "lane": 2, "status": "MOVING"},
+        {"type": "Sedan", "bbox": [240, 185, 30, 26], "lane": 2, "status": "DOUBLE_PARKED"},
+        {"type": "Delivery Van", "bbox": [290, 210, 38, 32], "lane": 3, "status": "ILLEGAL_PARKING"},
+        {"type": "Auto Rickshaw", "bbox": [340, 175, 28, 24], "lane": 3, "status": "MOVING"},
+        {"type": "SUV", "bbox": [150, 150, 32, 28], "lane": 2, "status": "MOVING"}
+    ]
+
+    # Select coordination pool based on camera's location type
+    location_type = camera.get("location_type", "")
+    if "Market" in location_type:
+        coord_pool = MARKET_VEHICLES
+    elif "Commercial" in location_type:
+        coord_pool = COMMERCIAL_VEHICLES
+    elif "Event" in location_type:
+        coord_pool = EVENT_VEHICLES
+    else:
+        coord_pool = METRO_VEHICLES
+
+    # Generate vehicle detections
+    detections = []
+    occupied_lanes = set()
+    for j in range(num_vehicles):
+        v_hash = zlib.adler32(f"{camera_id}_{j}".encode())
+        v_idx = (zlib.adler32(camera_id.encode()) + j) % len(coord_pool)
+        real_v = coord_pool[v_idx]
+
+        v_type = real_v["type"]
+        plate = VEHICLE_PLATES[v_hash % len(VEHICLE_PLATES)]
+        status = real_v["status"]
+        lane = real_v["lane"]
+
+        dwell = round(3.0 + (v_hash % 20) + ((v_hash % 5) * 1.2), 1) if status != "MOVING" else 0.0
+        confidence = round(0.85 + (v_hash % 14) / 100.0, 2)
+        bx, by, bw, bh = real_v["bbox"]
+
+        if status != "MOVING":
+            occupied_lanes.add(lane)
+
+        detections.append({
+            "id": f"det_{j+1:03d}",
+            "vehicle_type": v_type,
+            "plate": plate,
+            "bbox": [bx, by, bw, bh],
+            "dwell_mins": dwell,
+            "lane_occupied": lane,
+            "confidence": confidence,
+            "status": status
+        })
+
+    # Lane status
+    lane_status = []
+    for ln in range(1, lanes_total + 1):
+        if ln in occupied_lanes:
+            blocked_by = None
+            for d in detections:
+                if d["lane_occupied"] == ln and d["status"] != "MOVING":
+                    blocked_by = d["id"]
+                    break
+            lane_status.append({
+                "lane": ln,
+                "status": "BLOCKED",
+                "flow_pct": max(3, 5 + (h % 15)),
+                "blocked_by": blocked_by
+            })
+        else:
+            flow = 70 + (zlib.adler32(f"lane_{ln}_{camera_id}".encode()) % 25)
+            lane_status.append({
+                "lane": ln,
+                "status": "CLEAR" if flow > 80 else "SLOW",
+                "flow_pct": flow,
+                "blocked_by": None
+            })
+
+    # Severity breakdown
+    avg_dwell = camera["avg_dwell_mins"]
+    dwell_score = round(min(40.0, avg_dwell * 1.8), 1)
+    blockage_score = round((len(occupied_lanes) / lanes_total) * 30.0, 1)
+    freq_score = round(min(30.0, num_vehicles * 2.5), 1)
+    composite = round(dwell_score + blockage_score + freq_score, 1)
+
+    # Dwell histogram
+    dwell_values = [d["dwell_mins"] for d in detections if d["dwell_mins"] > 0]
+    histogram = [
+        {"range": "0-5 min", "count": len([d for d in dwell_values if d <= 5])},
+        {"range": "5-15 min", "count": len([d for d in dwell_values if 5 < d <= 15])},
+        {"range": "15-30 min", "count": len([d for d in dwell_values if 15 < d <= 30])},
+        {"range": "30+ min", "count": len([d for d in dwell_values if d > 30])}
+    ]
+
+    # 24-hour severity timeline (simulated)
+    timeline = []
+    for hr in range(24):
+        peak_factor = 0.15 + 0.85 * (math.exp(-((hr - 9)**2)/6.0) + math.exp(-((hr - 18)**2)/6.0))
+        sev = round(composite * peak_factor * (0.8 + (zlib.adler32(f"{camera_id}_{hr}".encode()) % 20) / 50.0), 1)
+        sev = min(100.0, sev)
+        timeline.append({"hour": hr, "severity": sev})
+
+    return {
+        "camera": camera,
+        "detections": detections,
+        "lane_status": lane_status,
+        "severity_breakdown": {
+            "dwell_score": dwell_score,
+            "blockage_score": blockage_score,
+            "frequency_score": freq_score,
+            "composite": composite
+        },
+        "dwell_histogram": histogram,
+        "severity_timeline": timeline
+    }
+
+
 if __name__ == "__main__":
     import uvicorn
     uvicorn.run("main:app", host="0.0.0.0", port=8000, reload=True)

@@ -32,7 +32,8 @@ export default function Sidebar({
     { id: "Analytics", icon: "insert_chart", fill: false },
     { id: "Economics", icon: "account_balance", fill: false },
     { id: "Enforcement", icon: "gavel", fill: false },
-    { id: "Detection", icon: "radar", fill: false }
+    { id: "Detection", icon: "radar", fill: false },
+    { id: "CCTV Intel", icon: "videocam", fill: false }
   ];
 
   return (
