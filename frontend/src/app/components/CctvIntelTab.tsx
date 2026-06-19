@@ -98,7 +98,7 @@ export default function CctvIntelTab() {
   const [scanAngle, setScanAngle] = useState(0);
   const scanRef = useRef<number | null>(null);
   const [cvLogs, setCvLogs] = useState<string[]>([]);
-  const logEndRef = useRef<HTMLDivElement | null>(null);
+  const logsContainerRef = useRef<HTMLDivElement | null>(null);
 
   // Live CV event-stream simulation hook
   useEffect(() => {
@@ -149,7 +149,9 @@ export default function CctvIntelTab() {
 
   // Auto scroll logs
   useEffect(() => {
-    logEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+    if (logsContainerRef.current) {
+      logsContainerRef.current.scrollTop = logsContainerRef.current.scrollHeight;
+    }
   }, [cvLogs]);
 
   // Fetch camera feeds
@@ -373,7 +375,7 @@ export default function CctvIntelTab() {
               <span className="material-symbols-outlined text-[16px]">terminal</span>
               Live Event Stream
             </h4>
-            <div className="rounded border font-mono text-[9px] p-2.5 max-h-[170px] overflow-y-auto space-y-1" style={{ 
+            <div ref={logsContainerRef} className="rounded border font-mono text-[9px] p-2.5 max-h-[170px] overflow-y-auto space-y-1" style={{ 
               background: 'rgba(0,0,0,0.25)', 
               borderColor: 'var(--panel-border)',
               color: 'rgba(255,255,255,0.7)',
@@ -391,7 +393,6 @@ export default function CctvIntelTab() {
                   </div>
                 );
               })}
-              <div ref={logEndRef}></div>
             </div>
           </div>
         </div>
