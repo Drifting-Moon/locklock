@@ -18,6 +18,7 @@ interface HeaderProps {
   activeDropdown: string | null;
   setActiveDropdown: (dropdown: string | null) => void;
   setShowLogoutConfirm: (show: boolean) => void;
+  setShowProfileModal: (show: boolean) => void;
   projectedDelaySavedMins: number;
   lossMitigatedInr: number;
   activeBlindspotsCount: number;
@@ -32,6 +33,7 @@ export default function Header({
   activeDropdown,
   setActiveDropdown,
   setShowLogoutConfirm,
+  setShowProfileModal,
   projectedDelaySavedMins,
   lossMitigatedInr,
   activeBlindspotsCount
@@ -211,7 +213,15 @@ export default function Header({
                 <p className="text-xs text-on-surface-variant truncate">admin@gridlock.app</p>
               </div>
               <ul className="py-1 text-sm text-on-surface">
-                <li className="px-4 py-2 hover:bg-surface-container-low cursor-pointer">View Profile</li>
+                <li 
+                  onClick={() => {
+                    setShowProfileModal(true);
+                    setActiveDropdown(null);
+                  }}
+                  className="px-4 py-2 hover:bg-surface-container-low cursor-pointer"
+                >
+                  View Profile
+                </li>
               </ul>
             </div>
           )}

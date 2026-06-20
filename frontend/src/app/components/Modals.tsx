@@ -21,6 +21,8 @@ interface ModalsProps {
   showLogoutConfirm: boolean;
   setShowLogoutConfirm: (show: boolean) => void;
   setIsLoggedIn: (loggedIn: boolean) => void;
+  showProfileModal?: boolean;
+  setShowProfileModal?: (show: boolean) => void;
 }
 
 export default function Modals({
@@ -36,7 +38,9 @@ export default function Modals({
   setFaqOpenIndex,
   showLogoutConfirm,
   setShowLogoutConfirm,
-  setIsLoggedIn
+  setIsLoggedIn,
+  showProfileModal = false,
+  setShowProfileModal = () => {}
 }: ModalsProps) {
 
   const handleSupportSubmit = (e: React.FormEvent) => {
@@ -349,6 +353,201 @@ export default function Modals({
                 }}
               >
                 Log Out
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Profile Modal */}
+      {showProfileModal && (
+        <div 
+          style={{
+            position: 'fixed',
+            top: 0,
+            left: 0,
+            width: '100vw',
+            height: '100vh',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            backgroundColor: 'rgba(0, 0, 0, 0.7)',
+            backdropFilter: 'blur(8px)',
+            WebkitBackdropFilter: 'blur(8px)',
+            zIndex: 9999,
+            padding: '16px'
+          }}
+        >
+          <div 
+            style={{
+              backgroundColor: 'var(--bg-surface)',
+              border: '1px solid var(--border-hairline)',
+              borderRadius: '16px',
+              width: '100%',
+              maxWidth: '420px',
+              boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.5)',
+              display: 'flex',
+              flexDirection: 'column',
+              position: 'relative',
+              overflow: 'hidden'
+            }}
+          >
+            {/* Top Gradient Banner */}
+            <div 
+              style={{
+                height: '100px',
+                background: 'linear-gradient(135deg, var(--accent) 0%, #7c3aed 100%)',
+                position: 'relative'
+              }}
+            >
+              <button 
+                onClick={() => setShowProfileModal(false)}
+                style={{
+                  position: 'absolute',
+                  top: '16px',
+                  right: '16px',
+                  background: 'rgba(0, 0, 0, 0.3)',
+                  border: 'none',
+                  color: 'white',
+                  cursor: 'pointer',
+                  width: '32px',
+                  height: '32px',
+                  borderRadius: '50%',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  transition: 'background-color 0.2s'
+                }}
+                onMouseOver={(e) => (e.currentTarget.style.backgroundColor = 'rgba(0, 0, 0, 0.5)')}
+                onMouseOut={(e) => (e.currentTarget.style.backgroundColor = 'rgba(0, 0, 0, 0.3)')}
+              >
+                <span className="material-symbols-outlined" style={{ fontSize: '18px' }}>close</span>
+              </button>
+            </div>
+
+            {/* Profile Content Container */}
+            <div style={{ padding: '24px', display: 'flex', flexDirection: 'column', gap: '20px', position: 'relative' }}>
+              {/* Avatar offset */}
+              <div 
+                style={{
+                  width: '84px',
+                  height: '84px',
+                  borderRadius: '50%',
+                  border: '4px solid var(--bg-surface)',
+                  backgroundColor: 'var(--accent-tint)',
+                  position: 'absolute',
+                  top: '-42px',
+                  left: '24px',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  overflow: 'hidden',
+                  boxShadow: '0 4px 10px rgba(0,0,0,0.1)'
+                }}
+              >
+                <span className="material-symbols-outlined" style={{ fontSize: '48px', color: 'var(--accent)' }}>account_circle</span>
+              </div>
+
+              {/* Space for absolute avatar */}
+              <div style={{ height: '36px' }}></div>
+
+              {/* Title & Email */}
+              <div>
+                <h3 style={{ margin: 0, fontSize: '20px', fontWeight: 'bold', color: 'var(--text-primary)', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                  Admin User
+                  <span 
+                    style={{
+                      fontSize: '10px',
+                      backgroundColor: 'rgba(16, 185, 129, 0.15)',
+                      color: 'var(--status-green)',
+                      padding: '2px 8px',
+                      borderRadius: '12px',
+                      fontWeight: 'normal'
+                    }}
+                  >
+                    Active Now
+                  </span>
+                </h3>
+                <p style={{ margin: '4px 0 0 0', fontSize: '13px', color: 'var(--text-muted)' }}>admin@gridlock.app</p>
+              </div>
+
+              {/* User Roles & Information Grid */}
+              <div 
+                style={{
+                  display: 'flex',
+                  flexDirection: 'column',
+                  gap: '12px',
+                  borderTop: '1px solid rgba(255, 255, 255, 0.1)',
+                  borderBottom: '1px solid rgba(255, 255, 255, 0.1)',
+                  padding: '16px 0',
+                  marginTop: '4px'
+                }}
+              >
+                <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '13px' }}>
+                  <span style={{ color: 'var(--text-muted)' }}>Designation</span>
+                  <span style={{ fontWeight: '600', color: 'var(--text-primary)' }}>Senior Traffic Commissioner</span>
+                </div>
+                <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '13px' }}>
+                  <span style={{ color: 'var(--text-muted)' }}>Jurisdiction</span>
+                  <span style={{ fontWeight: '600', color: 'var(--text-primary)' }}>Bengaluru City HQ</span>
+                </div>
+                <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '13px' }}>
+                  <span style={{ color: 'var(--text-muted)' }}>Security Level</span>
+                  <span style={{ fontWeight: '600', color: 'var(--text-primary)', display: 'flex', alignItems: 'center', gap: '4px' }}>
+                    <span className="material-symbols-outlined" style={{ fontSize: '14px', color: 'var(--status-amber)' }}>verified_user</span>
+                    Level 4 (Admin)
+                  </span>
+                </div>
+                <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '13px' }}>
+                  <span style={{ color: 'var(--text-muted)' }}>Node Integrations</span>
+                  <span style={{ fontWeight: '600', color: 'var(--text-primary)' }}>OSM & BPR Engines</span>
+                </div>
+              </div>
+
+              {/* Activity Stats */}
+              <div>
+                <h4 style={{ margin: '0 0 8px 0', fontSize: '11px', fontWeight: 'bold', color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Platform Activity</h4>
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '12px' }}>
+                  <div style={{ backgroundColor: 'rgba(255, 255, 255, 0.03)', border: '1px solid rgba(255, 255, 255, 0.05)', padding: '10px', borderRadius: '8px', textAlign: 'center' }}>
+                    <p style={{ margin: 0, fontSize: '18px', fontWeight: 'bold', color: 'var(--text-primary)' }}>1.2k</p>
+                    <p style={{ margin: '2px 0 0 0', fontSize: '10px', color: 'var(--text-muted)' }}>Reports Approved</p>
+                  </div>
+                  <div style={{ backgroundColor: 'rgba(255, 255, 255, 0.03)', border: '1px solid rgba(255, 255, 255, 0.05)', padding: '10px', borderRadius: '8px', textAlign: 'center' }}>
+                    <p style={{ margin: 0, fontSize: '18px', fontWeight: 'bold', color: 'var(--text-primary)' }}>342</p>
+                    <p style={{ margin: '2px 0 0 0', fontSize: '10px', color: 'var(--text-muted)' }}>Dispatches</p>
+                  </div>
+                  <div style={{ backgroundColor: 'rgba(255, 255, 255, 0.03)', border: '1px solid rgba(255, 255, 255, 0.05)', padding: '10px', borderRadius: '8px', textAlign: 'center' }}>
+                    <p style={{ margin: 0, fontSize: '18px', fontWeight: 'bold', color: 'var(--status-green)' }}>94%</p>
+                    <p style={{ margin: '2px 0 0 0', fontSize: '10px', color: 'var(--text-muted)' }}>Hotspots Resolved</p>
+                  </div>
+                </div>
+              </div>
+
+              {/* Close Button / Footer Action */}
+              <button 
+                onClick={() => setShowProfileModal(false)}
+                style={{
+                  width: '100%',
+                  backgroundColor: 'var(--accent)',
+                  color: 'white',
+                  fontWeight: 'bold',
+                  padding: '10px 16px',
+                  borderRadius: '8px',
+                  border: 'none',
+                  fontSize: '13px',
+                  cursor: 'pointer',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  gap: '6px',
+                  transition: 'opacity 0.2s',
+                  marginTop: '4px'
+                }}
+                onMouseOver={(e) => (e.currentTarget.style.opacity = '0.9')}
+                onMouseOut={(e) => (e.currentTarget.style.opacity = '1')}
+              >
+                <span className="material-symbols-outlined" style={{ fontSize: '18px' }}>check</span>
+                Close Profile
               </button>
             </div>
           </div>

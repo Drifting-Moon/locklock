@@ -94,6 +94,7 @@ export default function TrafficDashboard() {
   const [isLoggedIn, setIsLoggedIn] = useState(true);
   const [showSupportModal, setShowSupportModal] = useState(false);
   const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
+  const [showProfileModal, setShowProfileModal] = useState(false);
   const [supportSuccess, setSupportSuccess] = useState(false);
   const [supportForm, setSupportForm] = useState({ category: 'Technical Issue', message: '' });
   const [isSubmittingSupport, setIsSubmittingSupport] = useState(false);
@@ -447,6 +448,7 @@ export default function TrafficDashboard() {
             activeDropdown={activeDropdown}
             setActiveDropdown={setActiveDropdown}
             setShowLogoutConfirm={setShowLogoutConfirm}
+            setShowProfileModal={setShowProfileModal}
             projectedDelaySavedMins={projectedDelaySavedMins}
             lossMitigatedInr={lossMitigatedInr}
             activeBlindspotsCount={activeBlindspotsCount}
@@ -508,6 +510,8 @@ export default function TrafficDashboard() {
         showLogoutConfirm={showLogoutConfirm}
         setShowLogoutConfirm={setShowLogoutConfirm}
         setIsLoggedIn={setIsLoggedIn}
+        showProfileModal={showProfileModal}
+        setShowProfileModal={setShowProfileModal}
       />
 
       {/* Slide-out right panel Physics Inspector */}
