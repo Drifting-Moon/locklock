@@ -182,22 +182,7 @@ export default function Header({
             <span className="material-symbols-outlined">{isDark ? 'light_mode' : 'dark_mode'}</span>
           </button>
 
-          <button 
-            onClick={() => setActiveDropdown(activeDropdown === 'settings' ? null : 'settings')} 
-            className="w-10 h-10 rounded-full flex items-center justify-center text-on-surface-variant hover:bg-surface-container-high hover:text-primary transition-all duration-200"
-          >
-            <span className="material-symbols-outlined">settings_suggest</span>
-          </button>
-          
-          {activeDropdown === 'settings' && (
-            <div className="absolute top-12 right-0 mt-2 w-48 bg-surface-container-high border border-outline-variant rounded-xl shadow-lg overflow-hidden z-50">
-              <ul className="py-2 text-sm text-on-surface">
-                <li className="px-4 py-2 hover:bg-surface-container-low cursor-pointer">System Preferences</li>
-                <li className="px-4 py-2 hover:bg-surface-container-low cursor-pointer">API Integrations</li>
-                <li className="px-4 py-2 hover:bg-surface-container-low cursor-pointer">User Roles</li>
-              </ul>
-            </div>
-          )}
+
 
           <button 
             onClick={() => setActiveDropdown(activeDropdown === 'profile' ? null : 'profile')} 
