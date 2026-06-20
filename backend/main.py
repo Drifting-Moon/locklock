@@ -920,7 +920,7 @@ def ai_chat(req: ChatRequest):
         context = f"Top Hotspots: {[h['location_name'] + ' (Delay: ' + str(h['bpr_delay']) + 'm)' for h in hotspots]}. Top Blindspots: {[b['location_name'] for b in blindspots]}"
         
         genai.configure(api_key=api_key)
-        model = genai.GenerativeModel('gemini-1.5-flash')
+        model = genai.GenerativeModel('gemini-3.5-flash')
         prompt = f"You are the Gridlock AI Officer for Bengaluru Traffic Police. Reply in {req.language}. Context: {context}. Query: {req.message}. Provide a short 1-2 sentence response without markdown."
         
         response = model.generate_content(prompt)
@@ -944,7 +944,7 @@ def ai_cctv_analysis(camera_id: str):
 
     try:
         genai.configure(api_key=api_key)
-        model = genai.GenerativeModel('gemini-1.5-flash')
+        model = genai.GenerativeModel('gemini-3.5-flash')
         prompt = f"You are an expert AI Traffic Computer Vision Analyst. Camera '{camera['name']}'. Location Type: {camera.get('location_type', 'Street')}. Primary Issue: {camera.get('primary_issue', 'Congestion')}. Lanes Blocked: {camera['lanes_blocked']} out of {camera['lanes_total']}. Vehicles Detected: {camera['vehicles_detected']}. Congestion Severity Score: {camera['congestion_severity']}/100. Provide a short, 2-3 sentence highly technical and actionable insight report. No markdown."
         
         response = model.generate_content(prompt)
