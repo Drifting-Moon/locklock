@@ -939,7 +939,7 @@ Provide a helpful, direct, and short (1-2 sentences) response to the user's quer
 Do not use markdown. If asked for a solution, recommend deploying tow trucks, traffic police, or adjusting patrol paths.
 """
         response = client.models.generate_content(
-            model='gemini-1.5-flash',
+            model='gemini-2.5-flash',
             contents=prompt,
         )
         return {"response": response.text.strip()}
@@ -984,7 +984,7 @@ Context:
 Provide a short, 2-3 sentence highly technical and actionable insight report based on this data. Do not use markdown. Start with a direct observation.
 """
         response = client.models.generate_content(
-            model='gemini-1.5-flash',
+            model='gemini-2.5-flash',
             contents=prompt,
         )
         return {"response": response.text.strip()}
