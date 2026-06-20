@@ -990,7 +990,7 @@ Provide a short, 2-3 sentence highly technical and actionable insight report bas
         return {"response": response.text.strip()}
     except Exception as e:
         print(f"AI CCTV Error: {e}")
-        return {"response": "Failed to generate AI analysis for this camera."}
+        return {"response": f"Failed: {str(e)}"}
 
 if __name__ == "__main__":
     import uvicorn
