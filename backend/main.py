@@ -8,7 +8,14 @@ import math
 import zlib
 import json
 from pathlib import Path
+import os
+from dotenv import load_dotenv
 
+load_dotenv()
+try:
+    from google import genai
+except ImportError:
+    genai = None
 app = FastAPI()
 
 app.add_middleware(
@@ -880,6 +887,112 @@ def get_cctv_analysis(camera_id: str):
         "dwell_histogram": histogram,
         "severity_timeline": timeline
     }
+
+class ChatRequest(BaseModel):
+    message: str
+    language: str
+
+@app.get("/api/v1/ai/alerts")
+def get_ai_alerts():
+    if not genai:
+        return {"alerts": [{"text": "AI module not loaded.", "type": "system"}]}
+    api_key = os.getenv("GEMINI_API_KEY")
+    if not api_key or api_key == "YOUR_API_KEY_HERE":
+        return {"alerts": [{"text": "Gemini API key not configured in .env", "type": "system"}]}
+    
+    try:
+        conn = get_db_conn()
+        cursor = conn.cursor()
+        cursor.execute("""
+            SELECT location_name, bpr_delay 
+            FROM hotspots 
+            WHERE timeframe = 'Recent Dataset Window' 
+            ORDER BY bpr_delay DESC LIMIT 5
+        """)
+        hotspots = cursor.fetchall()
+        
+        cursor.execute("SELECT location_name FROM blindspots ORDER BY patrol_bias_ratio DESC LIMIT 3")
+        blindspots = cursor.fetchall()
+        conn.close()
+
+        context = f"Top Hotspots: {[h['location_name'] + ' (' + str(h['bpr_delay']) + 'm delay)' for h in hotspots]}. Top Blindspots: {[b['location_name'] for b in blindspots]}."
+        
+        client = genai.Client(api_key=api_key)
+        prompt = f"""
+You are the AI Traffic Analyst for Gridlock (Bengaluru Traffic Police).
+Based on this live data: {context}
+
+Generate exactly 3 short, punchy proactive alerts.
+Return ONLY valid JSON in this exact format, no markdown, no other text:
+[
+  {{"text": "Severe congestion detected at [Location]. Deploying tow trucks.", "type": "commercial"}},
+  {{"text": "Blindspot alert: High discrepancy at [Location].", "type": "transit"}},
+  {{"text": "Delay saving: 200 mins saved by recent interventions.", "type": "event"}}
+]
+Types can be: commercial, transit, or event. Keep text under 100 characters.
+"""
+        response = client.models.generate_content(
+            model='gemini-2.5-flash',
+            contents=prompt,
+        )
+        
+        raw_text = response.text.strip()
+        if raw_text.startswith("```json"):
+            raw_text = raw_text[7:-3].strip()
+        
+        import json
+        alerts = json.loads(raw_text)
+        return {"alerts": alerts}
+    except Exception as e:
+        print(f"AI Alert Error: {e}")
+        return {"alerts": [{"text": "AI generation failed. Check console.", "type": "system"}]}
+
+
+@app.post("/api/v1/ai/chat")
+def ai_chat(req: ChatRequest):
+    if not genai:
+        return {"response": "AI module not loaded."}
+    api_key = os.getenv("GEMINI_API_KEY")
+    if not api_key or api_key == "YOUR_API_KEY_HERE":
+        return {"response": "Gemini API key not configured in backend/.env"}
+        
+    try:
+        conn = get_db_conn()
+        cursor = conn.cursor()
+        cursor.execute("SELECT location_name, bpr_delay, violation_count FROM hotspots WHERE timeframe = 'Recent Dataset Window' ORDER BY bpr_delay DESC LIMIT 3")
+        hotspots = cursor.fetchall()
+        
+        cursor.execute("SELECT location_name, patrol_bias_ratio FROM blindspots ORDER BY patrol_bias_ratio DESC LIMIT 2")
+        blindspots = cursor.fetchall()
+        conn.close()
+
+        context = f"""
+Live Data Context:
+Top Hotspots: {[h['location_name'] + ' (Delay: ' + str(h['bpr_delay']) + 'm, Violations: ' + str(h['violation_count']) + ')' for h in hotspots]}
+Top Patrol Blindspots: {[b['location_name'] + ' (Bias Ratio: ' + str(b['patrol_bias_ratio']) + ')' for b in blindspots]}
+Total Delay Saved Today: 2,840 minutes
+Economic Loss Prevented: ₹4.24 Lakhs
+"""
+        client = genai.Client(api_key=api_key)
+        prompt = f"""
+You are the Gridlock AI Officer for the Bengaluru Traffic Police.
+You must reply in the user's requested language code: {req.language} (e.g. 'en' for English, 'hi' for Hindi, 'te' for Telugu, etc).
+
+{context}
+
+User query: "{req.message}"
+
+Provide a helpful, direct, and short (1-2 sentences) response to the user's query based strictly on the live data context provided.
+Do not use markdown. If asked for a solution, recommend deploying tow trucks, traffic police, or adjusting patrol paths.
+"""
+        response = client.models.generate_content(
+            model='gemini-2.5-flash',
+            contents=prompt,
+        )
+        return {"response": response.text.strip()}
+    except Exception as e:
+        print(f"AI Chat Error: {e}")
+        return {"response": "Sorry, I am currently unable to process your request."}
 
 
 if __name__ == "__main__":

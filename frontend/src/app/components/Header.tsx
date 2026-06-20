@@ -71,45 +71,47 @@ export default function Header({
 
   return (
     <header className="bg-panel top-0 sticky z-30 border-b border-border flex justify-between items-center h-16 px-4 md:px-6 lg:px-8 shrink-0 gap-4">
-      <div className="flex items-center gap-md shrink-0">
+      <div className="flex items-center gap-md shrink-0 lg:flex-1 min-w-0">
         <h2 className="font-headline-md text-headline-md font-bold text-on-surface hidden lg:block truncate">Urban Intelligence Platform</h2>
-        <button className="lg:hidden text-on-surface-variant hover:text-primary transition-colors">
+        <button className="lg:hidden text-on-surface-variant hover:text-primary transition-colors shrink-0">
           <span className="material-symbols-outlined">menu</span>
         </button>
       </div>
 
       {/* Centered Global Metric Ticker */}
-      <div className="hidden xl:flex items-center gap-6 bg-background border border-border px-4 py-1.5 rounded-full text-xs font-mono text-foreground/80">
-        <div className="flex items-center gap-1.5 border-r border-white/10 pr-4 relative group cursor-help">
+      <div className="hidden xl:flex items-center gap-4 2xl:gap-6 bg-background border border-border px-4 py-1.5 rounded-full text-xs font-mono text-foreground/80 shrink-0 min-w-0">
+        <div className="flex items-center gap-1.5 border-r border-white/10 pr-4 relative group cursor-help shrink-0">
           <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
-          <span>PROJECTED DELAY SAVED:</span>
+          <span className="truncate hidden 2xl:inline">PROJECTED DELAY SAVED:</span>
+          <span className="truncate 2xl:hidden">DELAY SAVED:</span>
           <span className="text-emerald-400 font-bold font-mono">+{Math.round(projectedDelaySavedMins).toLocaleString()}m</span>
           <div className="absolute top-full left-0 mt-2 bg-surface-container-high border border-outline-variant p-2 rounded shadow-lg opacity-0 group-hover:opacity-100 transition-opacity z-50 text-[10px] w-56 text-on-surface pointer-events-none">
             Cumulative across active violations, last 24 hours, assuming average clearance time of 12min.
           </div>
         </div>
-        <div className="flex items-center gap-1.5 border-r border-white/10 pr-4 relative group cursor-help">
+        <div className="flex items-center gap-1.5 border-r border-white/10 pr-4 relative group cursor-help shrink-0">
           <span className="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
-          <span>PROJECTED VALUE SAVED:</span>
+          <span className="truncate hidden 2xl:inline">PROJECTED VALUE SAVED:</span>
+          <span className="truncate 2xl:hidden">VALUE SAVED:</span>
           <span className="text-emerald-400 font-bold font-mono">₹{Math.round(lossMitigatedInr).toLocaleString()}</span>
           <div className="absolute top-full left-0 mt-2 bg-surface-container-high border border-outline-variant p-2 rounded shadow-lg opacity-0 group-hover:opacity-100 transition-opacity z-50 text-[10px] w-56 text-on-surface pointer-events-none">
             Cumulative economic value saved over the last 24 hours, based on a city-average VoTT of ₹180/hr.
           </div>
         </div>
-        <div className="flex items-center gap-1.5">
-          <span className="w-1.5 h-1.5 rounded-full bg-amber-500"></span>
-          <span>BLINDSPOTS:</span>
-          <span className="text-amber-400 font-bold font-mono">{activeBlindspotsCount}</span>
+        <div className="flex items-center gap-1.5 shrink-0 min-w-0">
+          <span className="w-1.5 h-1.5 rounded-full bg-amber-500 shrink-0"></span>
+          <span className="truncate">BLINDSPOTS:</span>
+          <span className="text-amber-400 font-bold font-mono shrink-0">{activeBlindspotsCount}</span>
         </div>
       </div>
 
       {/* Search Bar & Actions */}
-      <div className="flex items-center gap-4 lg:gap-lg flex-1 justify-end min-w-0">
-        <div className="relative hidden md:block max-w-md w-full min-w-[200px]">
+      <div className="flex items-center gap-2 lg:gap-4 flex-1 justify-end min-w-0 shrink">
+        <div className="relative hidden md:block max-w-md w-full shrink min-w-[120px]">
           <span className="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-on-surface-variant pointer-events-none">search</span>
           <input 
-            className="w-full bg-surface-container-low border border-outline-variant rounded-full py-2 pl-10 pr-4 text-body-sm text-on-surface focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-all" 
-            placeholder="Search districts, police stations..." 
+            className="w-full min-w-0 bg-surface-container-low border border-outline-variant rounded-full py-2 pl-10 pr-4 text-body-sm text-on-surface focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-all" 
+            placeholder="Search districts..." 
             type="text"
             value={globalSearchQuery}
             onChange={(e) => setGlobalSearchQuery(e.target.value)}
@@ -117,7 +119,7 @@ export default function Header({
           />
         </div>
         
-        <div className="flex items-center gap-1 sm:gap-sm shrink-0 relative" ref={dropdownRef}>
+        <div className="flex items-center gap-1 sm:gap-2 shrink-0 relative" ref={dropdownRef}>
           <button 
             onClick={() => setActiveDropdown(activeDropdown === 'search' ? null : 'search')} 
             className="md:hidden w-10 h-10 rounded-full flex items-center justify-center text-on-surface-variant hover:bg-surface-container-high hover:text-primary transition-all duration-200 relative"

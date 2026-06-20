@@ -122,141 +122,7 @@ export default function AiAssistantModal({ isOpen, onClose }: AiAssistantModalPr
     }
   };
 
-  const getAIResponse = (query: string): string => {
-    const q = query.toLowerCase().trim();
-    
-    // Auto-detect script to respond in the appropriate language
-    const isTe = language === 'te' || q.match(/(ఎలా|ఏ|జోన్|తనిఖీ|రద్దీ|హాట్‌స్పాట్|సమయం|ఆదా|పరిష్కారం|గారు|నమస్కారం)/);
-    const isKn = language === 'kn' || q.match(/(ಹೇಗೆ|ಯಾವ|ವಲಯ|ಪರಿಶೀಲಿಸಬೇಕು|ರದ್ದತಿ|ಹಾಟ್‌ಸ್ಪಾಟ್|ಸಮಯ|ಉಳಿಸಲಾಗಿದೆ|ಅವರೇ|ನಮಸ್ಕಾರ)/);
-    const isTa = language === 'ta' || q.match(/(எப்படி|எந்த|ஆய்வு|நெரிசல்|ஹாட்ஸ்பாட்|நேரம்|சேமிக்க|ஆணையர்|வணக்கம்)/);
-    const isHi = language === 'hi' || q.match(/(कहाँ|ज़ोन|निरीक्षण|देरी|बचत|हॉटस्पॉट|भीड़|गश्त|नमस्ते|हेलो|कमिश्नर|bheed|bhid|jam|kaise|theek|kya|kahan|per|hai|kis|jaga|thik)/);
-
-    // Q1: Solution / How to fix
-    if (q.includes('theek') || q.includes('thik') || q.includes('kaise') || q.includes('kya kare') || 
-        q.includes('kya karen') || q.includes('solution') || q.includes('fix') || q.includes('resolve') || 
-        q.includes('clearance') || q.includes('action') || q.includes('hata') || q.includes('పరిష్కారం') || 
-        q.includes('ఎలా') || q.includes('హేಗೆ') || q.includes('ಸರಿಪಡಿಸಲು') || q.includes('எப்படி') || q.includes('சரிசெய்ய')) {
-      
-      if (isTe) {
-        return "సుబేదార్ చత్రం రోడ్ వద్ద అక్రమ పార్కింగ్ ను వెంటనే క్లియర్ చేయడానికి అక్కడకు క్రేన్లు మరియు నివారణ బలగాలను పంపించండి.";
-      }
-      if (isKn) {
-        return "ಸುಬೇದಾರ್ ಚತ್ರಂ ರಸ್ತೆಯ ಅಕ್ರಮ ಪಾರ್ಕಿಂಗ್ ತೆರವುಗೊಳಿಸಲು ತಕ್ಷಣವೇ ಟೋಯಿಂಗ್ ಕ್ರೇನ್ ಕಳುಹಿಸಿ ಮತ್ತು ಸಂಚಾರ ಸುಗಮಗೊಳಿಸಿ.";
-      }
-      if (isTa) {
-        return "சுபேதார் சத்ரம் சாலையின் நெரிசலைச் சரிசெய்ய உடனடியாக கிறேன் அனுப்பி அங்குள்ள சட்டவிரோத பார்க்கிங்கை அகற்றவும்.";
-      }
-      if (isHi) {
-        return "सूबेदार चतरम रोड की भीड़ ठीक करने के लिए तुरंत क्रेन भेजकर अवैध पार्किंग हटवाएं और ट्रैफिक पुलिस बल तैनात करें।";
-      }
-      return "Deploy towing units to Subedar Chatram Road immediately to clear illegal double-parking and restore the blocked lane.";
-    }
-
-    // Q2: Where is the most bheed / crowd / jam
-    if (q.includes('bheed') || q.includes('bhid') || q.includes('jam') || q.includes('crowd') || 
-        q.includes('congestion') || q.includes('traffic') || q.includes('రద్దీ') || q.includes('రద్దీగా') || 
-        q.includes('ರದ್ದತಿ') || q.includes('ರಸ್ತೆ') || q.includes('நெரிசல்') || q.includes('போக்குவரத்து')) {
-      
-      if (isTe) {
-        return "అత్యంత రద్దీగా ఉండే ప్రాంతం సుబేదార్ చత్రం రోడ్, ఇక్కడ సగటు ఆలస్యం సమయం 18.4 నిమిషాలుగా నమోదైంది.";
-      }
-      if (isKn) {
-        return "ಅತಿ ಹೆಚ್ಚು ಟ್ರಾಫಿಕ್ ರದ್ದತಿ ಸುಬೇದಾರ್ ಚತ್ರಂ ರಸ್ತೆಯಲ್ಲಿದೆ, ಅಲ್ಲಿ ಸರಾಸರಿ 18.4 ನಿಮಿಷಗಳ ವಿಳಂಬವಿದೆ.";
-      }
-      if (isTa) {
-        return "சுபேதார் சத்ரம் சாலையில் மிக அதிக நெரிசல் உள்ளது, அங்கு சராசரியாக 18.4 நிமிடங்கள் தாமதம் ஏற்படுகிறது.";
-      }
-      if (isHi) {
-        return "सबसे ज्यादा भीड़ सूबेदार चतरम रोड (Subedar Chatram Road) पर है, जहां 18.4 मिनट की औसत देरी दर्ज की गई है।";
-      }
-      return "Subedar Chatram Road has the highest congestion, causing an average BPR delay of 18.4 minutes.";
-    }
-
-    // Q3: Inspect first
-    if (q.includes('inspect') || q.includes('first') || q.includes('priority') || q.includes('pehle') || 
-        q.includes('pahle') || q.includes('మొదట') || q.includes('తనిఖీ') || q.includes('ಮೊದಲು') || 
-        q.includes('ಪರಿಶೀಲಿಸಬೇಕು') || q.includes('முதலில்') || q.includes('ஆய்வு')) {
-      
-      if (isTe) {
-        return "మెట్రో స్టేషన్ ఈస్ట్ ఎగ్జిట్ ను మొదట తనిఖీ చేయండి. దీని ఇంపాక్ట్ స్కోర్ 91/100.";
-      }
-      if (isKn) {
-        return "ಮೆಟ್ರೋ ಸ್ಟೇಷನ್ ಈಸ್ಟ್ ಎಕ್ಸಿಟ್ ಅನ್ನು ಮೊದಲು ಪರಿಶೀಲಿಸಬೇಕು. ಇದರ ಇಂಪ್ಯಾಕ್ಟ್ ಸ್ಕೋರ್ 91/100 ಆಗಿದೆ.";
-      }
-      if (isTa) {
-        return "மெட்ரோ ஸ்டேஷன் கிழக்கு வெளியேறும் பகுதியை முதலில் ஆய்வு செய்யவும். அதன் தாக்க மதிப்பு 91/100.";
-      }
-      if (isHi) {
-        return "मेट्रो स्टेशन ईस्ट एग्जिट को सबसे पहले देखना चाहिए। इसका इम्पैक्ट स्कोर 91/100 है।";
-      }
-      return "Inspect Metro Station East Exit first. It has the highest impact score of 91/100.";
-    }
-
-    // Q4: Savings
-    if (q.includes('delay') || q.includes('saved') || q.includes('mitigat') || q.includes('economic') || 
-        q.includes('ఆదా') || q.includes('సమయం') || q.includes('ಉಳಿಸಲಾಗಿದೆ') || q.includes('சேமிக்க') || q.includes('சேமிப்பு')) {
-      
-      if (isTe) {
-        return "నేడు మొత్తం 2,840 నిమిషాల సమయం ఆదా అయింది, దీనివల్ల ₹4.24 లక్షల ఆర్థిక నష్టం నివారించబడింది.";
-      }
-      if (isKn) {
-        return "ಇಂದು ಒಟ್ಟು 2,840 ನಿಮಿಷಗಳ ಸಮಯ ಉಳಿಸಲಾಗಿದೆ, ಇದರ ಮೌಲ್ಯ ₹4.24 ಲಕ್ಷ ಆರ್ಥಿಕ ಉಳಿತಾಯವಾಗಿದೆ.";
-      }
-      if (isTa) {
-        return "இன்று 2,840 நிமிடங்கள் தாமதம் சேமிக்கப்பட்டு, ₹4.24 லட்சம் பொருளாதார இழப்பு தடுக்கப்பட்டுள்ளது.";
-      }
-      if (isHi) {
-        return "पिछले 24 घंटों में 2,840 मिनट की देरी बचाई गई है, जिससे ₹4.24 लाख का आर्थिक नुकसान टाला गया है।";
-      }
-      return "Commuters saved 2,840 minutes of delay today, preventing ₹4.24L in economic losses.";
-    }
-
-    // Q5: Blindspots
-    if (q.includes('blindspot') || q.includes('patrol') || q.includes('gashth') || 
-        q.includes('gasht') || q.includes('బ్లాइंडస్పాట్') || q.includes('బ్లైండ్‌స్పాట్') || 
-        q.includes('ಬ್ಲೈಂಡ್‌ಸ್ಪಾಟ್') || q.includes('பிளைண்ட்ஸ்பாட்')) {
-      
-      if (isTe) {
-        return "శివాజీనగర్ జంక్షన్ అత్యంత ప్రాధాన్యత కలిగిన గస్తీ బ్లైండ్‌స్పాట్. అక్కడ గస్తీ పెంచండి.";
-      }
-      if (isKn) {
-        return "ಶಿವಾಜಿನಗರ ಜಂಕ್ಷನ್ ನಮ್ಮ ಪ್ರಮುಖ ಗಸ್ತು ಬ್ಲೈಂಡ್‌ಸ್ಪಾಟ್ ಆಗಿದೆ. ಗಸ್ತು ನಿಯೋಜನೆ ಹೆಚ್ಚಿಸಿ.";
-      }
-      if (isTa) {
-        return "சிவாஜிநகர் சந்திப்பு மிக முக்கியமான பிளைண்ட்ஸ்பாட் ஆகும். அங்கு ரோந்துப் பணியை அதிகரிக்கவும்.";
-      }
-      if (isHi) {
-        return "शिवाजीनगर जंक्शन सबसे बड़ा गश्त ब्लाइंडस्पॉट है, जहां गश्त बढ़ाना आवश्यक है।";
-      }
-      return "Shivajinagar Junction is our highest priority blindspot with a 2.8x mismatch ratio.";
-    }
-
-    // Greetings
-    if (q.includes('hello') || q.includes('hi') || q.includes('namaste') || q.includes('வணக்கம்') || q.includes('ನಮಸ್ಕಾರ') || q.includes('నమస్కారం')) {
-      if (isTe) return "నమస్కారం కమిషనర్ గారు. నేను మీకు ఎలా సహాయపడగలను?";
-      if (isKn) return "ನಮಸ್ಕಾರ ಕಮೀಷನರ್ ಅವರೇ. ನಾನು ನಿಮಗೆ ಹೇಗೆ ಸಹಾಯ ಮಾಡಲಿ?";
-      if (isTa) return "வணக்கம் ஆணையர் அவர்களே. நான் உங்களுக்கு எவ்வாறு உதவ முடியும்?";
-      if (isHi) return "नमस्ते कमिश्नर साहब। मैं ग्रिडलॉक एआई असिस्टेंट हूँ। आदेश दें।";
-      return "Hello Commissioner. Standing by for dispatch instructions.";
-    }
-
-    // Generic fallbacks in chosen languages
-    if (isTe) {
-      return "నేను లైవ్ ట్రాఫిక్ క్లస్టర్లను విశ్లేషిస్తున్నాను. అత్యవసర గస్తీ కోసం సుబేదార్ చత్రం రోడ్ ను ప్రాధాన్యతగా తీసుకోండి.";
-    }
-    if (isKn) {
-      return "ನಾವು ಸಂಚಾರ ದಟ್ಟಣೆಯನ್ನು ವಿಶ್ಲೇಷಿಸುತ್ತಿದ್ದೇವೆ. ಸುಬೇದಾರ್ ಚತ್ರಂ ರಸ್ತೆಗೆ ಗಸ್ತು ಕಳುಹಿಸಲು ಆದ್ಯತೆ ನೀಡಿ.";
-    }
-    if (isTa) {
-      return "போக்குவரத்து நெரிசலை ஆய்வு செய்து வருகிறேன். சுபேதார் சத்ரம் சாலையில் ரோந்துப் பணிகளை மேற்கொள்ள முன்னுரிமை கொடுங்கள்.";
-    }
-    if (isHi) {
-      return "सूबेदार चतरम रोड सबसे बड़ा हॉटस्पॉट है (18.4 मिनट विलंब)। वहां क्रेन भेजकर अवैध पार्किंग साफ करवाएं।";
-    }
-    return `Understood. Analyzing live dataset coordination for [${currentLangObj.label}]. Recommend reviewing the congestion sandbox metrics.`;
-  };
-
-  const handleSend = (textToSend: string) => {
+  const handleSend = async (textToSend: string) => {
     if (!textToSend.trim()) return;
 
     const userMsg: Message = {
@@ -269,17 +135,43 @@ export default function AiAssistantModal({ isOpen, onClose }: AiAssistantModalPr
     setInputValue('');
     setIsThinking(true);
 
-    setTimeout(() => {
-      const responseText = getAIResponse(textToSend);
+    try {
+      const response = await fetch('http://localhost:8000/api/v1/ai/chat', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          message: textToSend,
+          language: currentLangObj.code
+        }),
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        const responseText = data.response;
+        
+        const aiMsg: Message = {
+          sender: 'ai',
+          text: responseText,
+          timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+        };
+        setMessages(prev => [...prev, aiMsg]);
+        setIsThinking(false);
+        speakText(responseText);
+      } else {
+        throw new Error('Failed to fetch AI response');
+      }
+    } catch (err) {
+      console.error(err);
       const aiMsg: Message = {
         sender: 'ai',
-        text: responseText,
+        text: "System communication error. Cannot reach AI server.",
         timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
       };
       setMessages(prev => [...prev, aiMsg]);
       setIsThinking(false);
-      speakText(responseText);
-    }, 1200);
+    }
   };
 
   const startVoiceRecording = () => {

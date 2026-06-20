@@ -109,18 +109,46 @@ export default function CommandCenterTab({
 
   // Proactive Alerts State
   const [currentAlertIdx, setCurrentAlertIdx] = useState(0);
-  const proactiveAlerts = [
-    { text: "Potential Encroachment forming near Indiranagar Metro Station. Speed degraded by 18%. Preemptive patrol queued.", type: "transit" },
-    { text: "Systemic commercial choke point building on Commercial Street. Commuter delay threshold exceeded.", type: "commercial" },
-    { text: "Spillover capacity loss detected near Chinnaswamy Stadium. Towing dispatch recommended.", type: "event" }
-  ];
+  const [proactiveAlerts, setProactiveAlerts] = useState([
+    { text: "Fetching live AI insights...", type: "system" }
+  ]);
 
   useEffect(() => {
+    const fetchAlerts = async () => {
+      try {
+        const res = await fetch('http://localhost:8000/api/v1/ai/alerts');
+        if (res.ok) {
+          const data = await res.json();
+          if (data.alerts && data.alerts.length > 0) {
+            setProactiveAlerts(data.alerts);
+            return;
+          }
+        }
+        setProactiveAlerts([
+          { text: "Potential Encroachment forming near Indiranagar Metro Station. Speed degraded by 18%. Preemptive patrol queued.", type: "transit" },
+          { text: "Systemic commercial choke point building on Commercial Street. Commuter delay threshold exceeded.", type: "commercial" },
+          { text: "Spillover capacity loss detected near Chinnaswamy Stadium. Towing dispatch recommended.", type: "event" }
+        ]);
+      } catch (err) {
+        setProactiveAlerts([
+          { text: "Potential Encroachment forming near Indiranagar Metro Station. Speed degraded by 18%. Preemptive patrol queued.", type: "transit" },
+          { text: "Systemic commercial choke point building on Commercial Street. Commuter delay threshold exceeded.", type: "commercial" },
+          { text: "Spillover capacity loss detected near Chinnaswamy Stadium. Towing dispatch recommended.", type: "event" }
+        ]);
+      }
+    };
+    fetchAlerts();
+    const fetchInterval = setInterval(fetchAlerts, 5 * 60 * 1000);
+    return () => clearInterval(fetchInterval);
+  }, []);
+
+  useEffect(() => {
+    if (proactiveAlerts.length === 0) return;
     const interval = setInterval(() => {
       setCurrentAlertIdx(prev => (prev + 1) % proactiveAlerts.length);
     }, 6000);
     return () => clearInterval(interval);
-  }, []);
+  }, [proactiveAlerts]);
 
   // Close filter dropdown when clicking outside
   useEffect(() => {
