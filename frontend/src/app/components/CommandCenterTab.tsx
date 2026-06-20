@@ -512,6 +512,10 @@ export default function CommandCenterTab({
                           <button
                             onClick={(e) => {
                               e.stopPropagation();
+                              setIsDispatchPanelOpen(true);
+                              setTimeout(() => {
+                                window.dispatchEvent(new CustomEvent('targetDispatched', { detail: feature.properties }));
+                              }, 100);
                               alert(`🚨 ENFORCEMENT DISPATCH SECTOR ACTION 🚨\n\nCommand Center dispatched nearest Warden Unit to ${customName} (${shortName})!\n\nMetrics Mitigation Details:\n- Projected Delay Mitigation: -35% (-${timeSaved.toFixed(0)} minutes)\n- Warden Proximity: ${dist} km (ETA ${Math.round(dist * 2.5)} mins)\n- GPS tracker locked. Clear-down active.`);
                             }}
                             className="mt-1 w-full bg-red-600 hover:bg-red-700 text-white font-bold py-1.5 rounded-lg text-[9px] uppercase tracking-widest transition-all cursor-pointer shadow-md shadow-red-600/15 group-hover:scale-[1.01] active:scale-95 text-center flex items-center justify-center gap-1"

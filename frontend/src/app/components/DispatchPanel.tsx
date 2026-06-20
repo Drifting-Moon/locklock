@@ -14,20 +14,52 @@ interface DispatchTarget {
   action: string;
 }
 
-export default function DispatchPanel({ isOpen, onClose, district }: { isOpen: boolean, onClose: () => void, district: string }) {
+export default function DispatchPanel({ isOpen, onClose, district, hotspots }: { isOpen: boolean, onClose: () => void, district: string, hotspots?: any }) {
   const [queue, setQueue] = useState<DispatchTarget[]>([]);
   const [loading, setLoading] = useState(false);
   const [dispatchedTargets, setDispatchedTargets] = useState<DispatchTarget[]>([]);
 
   useEffect(() => {
-    if (isOpen) {
-      fetch(apiUrl(`/api/dispatch?district=${encodeURIComponent(district)}`))
-        .then(res => res.json())
-        .then(data => setQueue(data.dispatch_queue || []))
-        .catch(err => console.error("Error fetching dispatch queue:", err))
-        .finally(() => setLoading(false));
+    if (isOpen && hotspots && hotspots.features) {
+      setLoading(true);
+      const q = hotspots.features.map((f: any) => ({
+        id: f.properties.id.toString(),
+        latitude: f.properties.centerLat,
+        longitude: f.properties.centerLng,
+        location: f.properties.locationName,
+        violations: f.properties.violationCount,
+        criticality: f.properties.bprDelay,
+        eta_mins: Math.round((f.properties.distanceToPatrol || 1.5) * 2.5),
+        roi_score: Number((f.properties.enforcementRoi || 0).toFixed(1)),
+        action: "Deploy Warden"
+      })).sort((a: any, b: any) => b.roi_score - a.roi_score);
+      setQueue(q.slice(0, 10));
+      setLoading(false);
     }
-  }, [isOpen, district]);
+  }, [isOpen, hotspots]);
+
+  useEffect(() => {
+    const handleEvent = (e: any) => {
+      const p = e.detail;
+      const newTarget: DispatchTarget = {
+        id: p.id.toString(),
+        latitude: p.centerLat,
+        longitude: p.centerLng,
+        location: p.locationName,
+        violations: p.violationCount,
+        criticality: p.bprDelay,
+        eta_mins: Math.round((p.distanceToPatrol || 1.5) * 2.5),
+        roi_score: Number((p.enforcementRoi || 0).toFixed(1)),
+        action: "Deploy Warden"
+      };
+      setDispatchedTargets(prev => {
+        if (!prev.some(t => t.id === newTarget.id)) return [...prev, newTarget];
+        return prev;
+      });
+    };
+    window.addEventListener('targetDispatched', handleEvent);
+    return () => window.removeEventListener('targetDispatched', handleEvent);
+  }, []);
 
   const handleDispatch = (target: DispatchTarget) => {
     setDispatchedTargets(prev => [...prev, target]);

@@ -597,6 +597,7 @@ export default function MapComponent({
           isOpen={isDispatchPanelOpen} 
           onClose={() => setIsDispatchPanelOpen(false)} 
           district={district}
+          hotspots={enrichedHotspots}
         />
 
         {/* Recenter Button */}
