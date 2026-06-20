@@ -3,6 +3,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { MapRef } from 'react-map-gl/maplibre';
 import MapComponent from './MapComponent';
+import AiAssistantModal from './AiAssistantModal';
 
 type Timeframe = 'Recent Dataset Window' | 'Most Recent Day' | 'Most Recent Week';
 type MapTheme = 'dark' | 'light' | 'satellite';
@@ -99,6 +100,7 @@ export default function CommandCenterTab({
 }: CommandCenterTabProps) {
   const [activeDropdown, setActiveDropdown] = useState<'filters' | null>(null);
   const [activeSidebarTab, setActiveSidebarTab] = useState<'hotspots' | 'blindspots'>('hotspots');
+  const [isAiAssistantOpen, setIsAiAssistantOpen] = useState(false);
   const filterDropdownRef = useRef<HTMLDivElement>(null);
 
   // Flipkart Gridlock Hackathon States
@@ -191,6 +193,16 @@ export default function CommandCenterTab({
               </div>
             )}
           </div>
+
+          {/* AI Traffic Officer Assistant Button */}
+          <button 
+            onClick={() => setIsAiAssistantOpen(true)}
+            className="bg-primary hover:opacity-90 border border-primary text-on-primary px-4 py-2 rounded-md transition-all flex items-center justify-center gap-2 h-[38px] cursor-pointer shadow-lg shadow-primary/20"
+            title="Ask AI Traffic Assistant"
+          >
+            <span className="material-symbols-outlined text-[18px] leading-none animate-pulse">mic</span>
+            <span className="font-label-md hidden sm:inline leading-none font-medium mt-[1px]">AI Officer</span>
+          </button>
         </div>
       </div>
 
@@ -563,6 +575,11 @@ export default function CommandCenterTab({
         </div>
 
       </div>
+
+      <AiAssistantModal 
+        isOpen={isAiAssistantOpen} 
+        onClose={() => setIsAiAssistantOpen(false)} 
+      />
     </>
   );
 }
