@@ -932,7 +932,7 @@ Return ONLY valid JSON in this exact format, no markdown, no other text:
 Types can be: commercial, transit, or event. Keep text under 100 characters.
 """
         response = client.models.generate_content(
-            model='gemini-2.5-flash',
+            model='gemini-1.5-flash',
             contents=prompt,
         )
         
