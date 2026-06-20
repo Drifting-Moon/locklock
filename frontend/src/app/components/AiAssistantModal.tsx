@@ -8,26 +8,89 @@ interface Message {
   timestamp: string;
 }
 
+interface LanguageOption {
+  code: string;
+  label: string;
+  native: string;
+  locale: string;
+}
+
 interface AiAssistantModalProps {
   isOpen: boolean;
   onClose: () => void;
 }
 
+// 22 Scheduled Indian Languages + English
+const languagesList: LanguageOption[] = [
+  { code: 'en', label: 'English', native: 'English (EN)', locale: 'en-IN' },
+  { code: 'hi', label: 'Hindi', native: 'हिंदी (HI)', locale: 'hi-IN' },
+  { code: 'te', label: 'Telugu', native: 'తెలుగు (TE)', locale: 'te-IN' },
+  { code: 'kn', label: 'Kannada', native: 'ಕನ್ನಡ (KN)', locale: 'kn-IN' },
+  { code: 'ta', label: 'Tamil', native: 'தமிழ் (TA)', locale: 'ta-IN' },
+  { code: 'bn', label: 'Bengali', native: 'বাংলা (BN)', locale: 'bn-IN' },
+  { code: 'mr', label: 'Marathi', native: 'मराठी (MR)', locale: 'mr-IN' },
+  { code: 'gu', label: 'Gujarati', native: 'ગુજરાતી (GU)', locale: 'gu-IN' },
+  { code: 'ml', label: 'Malayalam', native: 'മലയാളം (ML)', locale: 'ml-IN' },
+  { code: 'pa', label: 'Punjabi', native: 'ਪੰਜਾਬੀ (PA)', locale: 'pa-IN' },
+  { code: 'or', label: 'Odia', native: 'ଓଡ଼ିଆ (OR)', locale: 'or-IN' },
+  { code: 'ur', label: 'Urdu', native: 'اردو (UR)', locale: 'ur-IN' },
+  { code: 'as', label: 'Assamese', native: 'অসমীয়া (AS)', locale: 'as-IN' },
+  { code: 'ks', label: 'Kashmiri', native: 'کأشُر (KS)', locale: 'ks-IN' },
+  { code: 'ne', label: 'Nepali', native: 'नेपाली (NE)', locale: 'ne-IN' },
+  { code: 'sa', label: 'Sanskrit', native: 'संस्कृतम् (SA)', locale: 'sa-IN' },
+  { code: 'sd', label: 'Sindhi', native: 'सिंधी (SD)', locale: 'sd-IN' },
+  { code: 'kok', label: 'Konkani', native: 'कोंकणी (KOK)', locale: 'kok-IN' },
+  { code: 'brx', label: 'Bodo', native: 'बोडो (BRX)', locale: 'brx-IN' },
+  { code: 'doi', label: 'Dogri', native: 'डोगरी (DOI)', locale: 'doi-IN' },
+  { code: 'mai', label: 'Maithili', native: 'मैथिली (MAI)', locale: 'mai-IN' },
+  { code: 'mni', label: 'Manipuri', native: 'মণিপুরী (MNI)', locale: 'mni-IN' },
+  { code: 'sat', label: 'Santali', native: 'சந்தாலி (SAT)', locale: 'sat-IN' }
+];
+
 export default function AiAssistantModal({ isOpen, onClose }: AiAssistantModalProps) {
-  const [language, setLanguage] = useState<'en' | 'hi'>('en');
+  const [language, setLanguage] = useState<string>('en');
+  const [showLangDropdown, setShowLangDropdown] = useState(false);
   const [messages, setMessages] = useState<Message[]>([]);
   const [inputValue, setInputValue] = useState('');
   const [isListening, setIsListening] = useState(false);
   const [isMuted, setIsMuted] = useState(false);
   const [isThinking, setIsThinking] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const dropdownRef = useRef<HTMLDivElement>(null);
+
+  const currentLangObj = languagesList.find(l => l.code === language) || languagesList[0];
+
+  // Auto scroll to bottom of chat
+  useEffect(() => {
+    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+  }, [messages, isThinking]);
+
+  // Close language dropdown on clicking outside
+  useEffect(() => {
+    const handleClickOutside = (e: MouseEvent) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(e.target as Node)) {
+        setShowLangDropdown(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
 
   // Initialize greeting based on selected language
   useEffect(() => {
     if (isOpen) {
-      const greetingText = language === 'hi'
-        ? 'नमस्ते कमिश्नर साहब। मैं आपका ग्रिडलॉक एआई ऑफिसर हूँ। अवैध पार्किंग हॉटस्पॉट, देरी की बचत, या गश्त प्राथमिकताओं के बारे में मुझसे पूछें।'
-        : 'Hello Commissioner. I am your Gridlock AI Officer. Ask me about illegal parking hotspots, projected delay savings, or which zones need priority patrol action.';
+      let greetingText = '';
+      if (language === 'hi') {
+        greetingText = 'नमस्ते कमिश्नर साहब। मैं आपका ग्रिडलॉक एआई ऑफिसर हूँ। अवैध पार्किंग हॉटस्पॉट, देरी की बचत, या गश्त प्राथमिकताओं के बारे में मुझसे पूछें।';
+      } else if (language === 'te') {
+        greetingText = 'నమస్కారం కమిషనర్ గారు. నేను మీ గ్రిడ్‌లాక్ AI ఆఫీసర్‌ని. ట్రాఫిక్ హాట్‌స్పాట్‌లు, ఆలస్యం నివారణ లేదా ప్రాధాన్యత గల పెట్రోలింగ్ గురించి నన్ను అడగండి.';
+      } else if (language === 'kn') {
+        greetingText = 'ನಮಸ್ಕಾರ ಕಮೀಷನರ್ ಅವರೇ. ನಾನು ನಿಮ್ಮ ಗ್ರಿಡ್‌ಲಾಕ್ AI ಆಫೀಸರ್. ಅಕ್ರಮ ಪಾರ್ಕಿಂಗ್ ಹಾಟ್‌ಸ್ಪಾಟ್‌ಗಳು, ವಿಳಂಬ ಉಳಿತಾಯ ಅಥವಾ ಗಸ್ತು ಆದ್ಯತೆಗಳ ಬಗ್ಗೆ ನನ್ನನ್ನು ಕೇಳಿ.';
+      } else if (language === 'ta') {
+        greetingText = 'வணக்கம் ஆணையர் அவர்களே. நான் உங்கள் கிரிட்லாக் AI அதிகாரி. சட்டவிரோத பார்க்கிங், போக்குவரத்து தாமதம் பற்றி என்னிடம் கேளுங்கள்.';
+      } else {
+        greetingText = `Hello Commissioner. I am your Gridlock AI Officer. Ask me about illegal parking hotspots, projected delay savings, or which zones need priority patrol action. [Language: ${currentLangObj.label}]`;
+      }
       
       setMessages([
         {
@@ -38,11 +101,6 @@ export default function AiAssistantModal({ isOpen, onClose }: AiAssistantModalPr
       ]);
     }
   }, [isOpen, language]);
-
-  // Auto scroll to bottom of chat
-  useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-  }, [messages, isThinking]);
 
   // Cancel Speech Synthesis when modal closes
   useEffect(() => {
@@ -58,8 +116,8 @@ export default function AiAssistantModal({ isOpen, onClose }: AiAssistantModalPr
       window.speechSynthesis.cancel();
       const utterance = new SpeechSynthesisUtterance(text);
       utterance.rate = 1.0;
-      utterance.pitch = 1.05; // Clean clear pitch
-      utterance.lang = language === 'hi' ? 'hi-IN' : 'en-IN';
+      utterance.pitch = 1.05;
+      utterance.lang = currentLangObj.locale;
       window.speechSynthesis.speak(utterance);
     }
   };
@@ -67,65 +125,135 @@ export default function AiAssistantModal({ isOpen, onClose }: AiAssistantModalPr
   const getAIResponse = (query: string): string => {
     const q = query.toLowerCase().trim();
     
-    // Auto-detect Hindi or Hinglish keywords
-    const isHi = language === 'hi' || q.match(/(कहाँ|ज़ोन|निरीक्षण|देरी|बचत|हॉटस्पॉट|भीड़|गश्त|नमस्ते|हेलो|कमिश्नर|क्रेन|रोड|bheed|bhid|jam|kaise|theek|kya|kahan|per|hai|kis|jaga|thik)/);
+    // Auto-detect script to respond in the appropriate language
+    const isTe = language === 'te' || q.match(/(ఎలా|ఏ|జోన్|తనిఖీ|రద్దీ|హాట్‌స్పాట్|సమయం|ఆదా|పరిష్కారం|గారు|నమస్కారం)/);
+    const isKn = language === 'kn' || q.match(/(ಹೇಗೆ|ಯಾವ|ವಲಯ|ಪರಿಶೀಲಿಸಬೇಕು|ರದ್ದತಿ|ಹಾಟ್‌ಸ್ಪಾಟ್|ಸಮಯ|ಉಳಿಸಲಾಗಿದೆ|ಅವರೇ|ನಮಸ್ಕಾರ)/);
+    const isTa = language === 'ta' || q.match(/(எப்படி|எந்த|ஆய்வு|நெரிசல்|ஹாட்ஸ்பாட்|நேரம்|சேமிக்க|ஆணையர்|வணக்கம்)/);
+    const isHi = language === 'hi' || q.match(/(कहाँ|ज़ोन|निरीक्षण|देरी|बचत|हॉटस्पॉट|भीड़|गश्त|नमस्ते|हेलो|कमिश्नर|bheed|bhid|jam|kaise|theek|kya|kahan|per|hai|kis|jaga|thik)/);
 
-    // 1. "How to fix" / Solution / Action
-    if (q.includes('theek') || q.includes('thik') || q.includes('kaise') || q.includes('kya kare') || q.includes('kya karen') || q.includes('solution') || q.includes('fix') || q.includes('resolve') || q.includes('clearance') || q.includes('action') || q.includes('hata')) {
-      if (q.includes('bheed') || q.includes('jam') || q.includes('crowd') || q.includes('hotspot') || q.includes('subedar') || q.includes('road')) {
-        return isHi
-          ? "सूबेदार चतरम रोड की भीड़ ठीक करने के लिए तुरंत क्रेन भेजकर अवैध पार्किंग हटवाएं और ट्रैफिक पुलिस बल तैनात करें।"
-          : "Deploy towing units to Subedar Chatram Road immediately to clear illegal double-parking and restore the blocked lane.";
+    // Q1: Solution / How to fix
+    if (q.includes('theek') || q.includes('thik') || q.includes('kaise') || q.includes('kya kare') || 
+        q.includes('kya karen') || q.includes('solution') || q.includes('fix') || q.includes('resolve') || 
+        q.includes('clearance') || q.includes('action') || q.includes('hata') || q.includes('పరిష్కారం') || 
+        q.includes('ఎలా') || q.includes('హేಗೆ') || q.includes('ಸರಿಪಡಿಸಲು') || q.includes('எப்படி') || q.includes('சரிசெய்ய')) {
+      
+      if (isTe) {
+        return "సుబేదార్ చత్రం రోడ్ వద్ద అక్రమ పార్కింగ్ ను వెంటనే క్లియర్ చేయడానికి అక్కడకు క్రేన్లు మరియు నివారణ బలగాలను పంపించండి.";
       }
-      return isHi
-        ? "भीड़भाड़ को ठीक करने के लिए संबंधित हॉटस्पॉट पर क्रेन/टोइंग वाहन भेजें और उल्लंघन करने वाली गाड़ियों का चालान करें।"
-        : "Deploy towing dispatch units to the targeted hotspot, clear double-parked vehicles, and issue citations.";
-    }
-
-    // 2. "Where is the most bheed / crowd / jam"
-    if (q.includes('bheed') || q.includes('bhid') || q.includes('jam') || q.includes('crowd') || q.includes('congestion') || q.includes('traffic')) {
-      if (q.includes('kahan') || q.includes('where') || q.includes('kis') || q.includes('kaun') || q.includes('per') || q.includes('pe')) {
-        return isHi
-          ? "सबसे ज्यादा भीड़ सूबेदार चतरम रोड (Subedar Chatram Road) पर है, जहां 18.4 मिनट की औसत देरी दर्ज की गई है।"
-          : "Subedar Chatram Road has the highest congestion, causing an average BPR delay of 18.4 minutes.";
+      if (isKn) {
+        return "ಸುಬೇದಾರ್ ಚತ್ರಂ ರಸ್ತೆಯ ಅಕ್ರಮ ಪಾರ್ಕಿಂಗ್ ತೆರವುಗೊಳಿಸಲು ತಕ್ಷಣವೇ ಟೋಯಿಂಗ್ ಕ್ರೇನ್ ಕಳುಹಿಸಿ ಮತ್ತು ಸಂಚಾರ ಸುಗಮಗೊಳಿಸಿ.";
       }
-      return isHi
-        ? "सूबेदार चतरम रोड सबसे बड़ा हॉटस्पॉट है (4,188 उल्लंघन)। इसके बाद कामराज रोड (1,449 उल्लंघन) का नंबर आता है।"
-        : "Subedar Chatram Road is the top bottleneck with 4,188 violations, followed by Kamaraj Road with 1,449 violations.";
+      if (isTa) {
+        return "சுபேதார் சத்ரம் சாலையின் நெரிசலைச் சரிசெய்ய உடனடியாக கிறேன் அனுப்பி அங்குள்ள சட்டவிரோத பார்க்கிங்கை அகற்றவும்.";
+      }
+      if (isHi) {
+        return "सूबेदार चतरम रोड की भीड़ ठीक करने के लिए तुरंत क्रेन भेजकर अवैध पार्किंग हटवाएं और ट्रैफिक पुलिस बल तैनात करें।";
+      }
+      return "Deploy towing units to Subedar Chatram Road immediately to clear illegal double-parking and restore the blocked lane.";
     }
 
-    // 3. Inspect first / priorities
-    if (q.includes('inspect') || q.includes('first') || q.includes('priority') || q.includes('pehle') || q.includes('pahle') || q.includes('inspect first') || q.includes('inspect_first') || q.includes('निरीक्षण') || q.includes('पहले')) {
-      return isHi 
-        ? "मेट्रो स्टेशन ईस्ट एग्जिट को सबसे पहले देखना चाहिए। इसका इम्पैक्ट स्कोर 91/100 है।"
-        : "Inspect Metro Station East Exit first. It has the highest impact score of 91/100.";
-    }
-    
-    // 4. Delay saved / economic savings
-    if (q.includes('delay') || q.includes('saved') || q.includes('mitigat') || q.includes('economic') || q.includes('deery') || q.includes('deeri') || q.includes('देरी') || q.includes('बचत') || q.includes('bachat') || q.includes('faida') || q.includes('nuksan')) {
-      return isHi
-        ? "पिछले 24 घंटों में 2,840 मिनट की देरी बचाई गई है, जिससे ₹4.24 लाख का आर्थिक नुकसान टाला गया है।"
-        : "Commuters saved 2,840 minutes of delay today, preventing ₹4.24L in economic losses.";
+    // Q2: Where is the most bheed / crowd / jam
+    if (q.includes('bheed') || q.includes('bhid') || q.includes('jam') || q.includes('crowd') || 
+        q.includes('congestion') || q.includes('traffic') || q.includes('రద్దీ') || q.includes('రద్దీగా') || 
+        q.includes('ರದ್ದತಿ') || q.includes('ರಸ್ತೆ') || q.includes('நெரிசல்') || q.includes('போக்குவரத்து')) {
+      
+      if (isTe) {
+        return "అత్యంత రద్దీగా ఉండే ప్రాంతం సుబేదార్ చత్రం రోడ్, ఇక్కడ సగటు ఆలస్యం సమయం 18.4 నిమిషాలుగా నమోదైంది.";
+      }
+      if (isKn) {
+        return "ಅತಿ ಹೆಚ್ಚು ಟ್ರಾಫಿಕ್ ರದ್ದತಿ ಸುಬೇದಾರ್ ಚತ್ರಂ ರಸ್ತೆಯಲ್ಲಿದೆ, ಅಲ್ಲಿ ಸರಾಸರಿ 18.4 ನಿಮಿಷಗಳ ವಿಳಂಬವಿದೆ.";
+      }
+      if (isTa) {
+        return "சுபேதார் சத்ரம் சாலையில் மிக அதிக நெரிசல் உள்ளது, அங்கு சராசரியாக 18.4 நிமிடங்கள் தாமதம் ஏற்படுகிறது.";
+      }
+      if (isHi) {
+        return "सबसे ज्यादा भीड़ सूबेदार चतरम रोड (Subedar Chatram Road) पर है, जहां 18.4 मिनट की औसत देरी दर्ज की गई है।";
+      }
+      return "Subedar Chatram Road has the highest congestion, causing an average BPR delay of 18.4 minutes.";
     }
 
-    // 5. Blindspots / Patrols
-    if (q.includes('blindspot') || q.includes('patrol') || q.includes('gashth') || q.includes('gasht') || q.includes('gश्त') || q.includes('ब्लाइंडस्पॉट')) {
-      return isHi
-        ? "शिवाजीनगर जंक्शन सबसे बड़ा गश्त ब्लाइंडस्पॉट है, जहां गश्त बढ़ाना आवश्यक है।"
-        : "Shivajinagar Junction is our highest priority blindspot with a 2.8x mismatch ratio.";
+    // Q3: Inspect first
+    if (q.includes('inspect') || q.includes('first') || q.includes('priority') || q.includes('pehle') || 
+        q.includes('pahle') || q.includes('మొదట') || q.includes('తనిఖీ') || q.includes('ಮೊದಲು') || 
+        q.includes('ಪರಿಶೀಲಿಸಬೇಕು') || q.includes('முதலில்') || q.includes('ஆய்வு')) {
+      
+      if (isTe) {
+        return "మెట్రో స్టేషన్ ఈస్ట్ ఎగ్జిట్ ను మొదట తనిఖీ చేయండి. దీని ఇంపాక్ట్ స్కోర్ 91/100.";
+      }
+      if (isKn) {
+        return "ಮೆಟ್ರೋ ಸ್ಟೇಷನ್ ಈಸ್ಟ್ ಎಕ್ಸಿಟ್ ಅನ್ನು ಮೊದಲು ಪರಿಶೀಲಿಸಬೇಕು. ಇದರ ಇಂಪ್ಯಾಕ್ಟ್ ಸ್ಕೋರ್ 91/100 ಆಗಿದೆ.";
+      }
+      if (isTa) {
+        return "மெட்ரோ ஸ்டேஷன் கிழக்கு வெளியேறும் பகுதியை முதலில் ஆய்வு செய்யவும். அதன் தாக்க மதிப்பு 91/100.";
+      }
+      if (isHi) {
+        return "मेट्रो स्टेशन ईस्ट एग्जिट को सबसे पहले देखना चाहिए। इसका इम्पैक्ट स्कोर 91/100 है।";
+      }
+      return "Inspect Metro Station East Exit first. It has the highest impact score of 91/100.";
+    }
+
+    // Q4: Savings
+    if (q.includes('delay') || q.includes('saved') || q.includes('mitigat') || q.includes('economic') || 
+        q.includes('ఆదా') || q.includes('సమయం') || q.includes('ಉಳಿಸಲಾಗಿದೆ') || q.includes('சேமிக்க') || q.includes('சேமிப்பு')) {
+      
+      if (isTe) {
+        return "నేడు మొత్తం 2,840 నిమిషాల సమయం ఆదా అయింది, దీనివల్ల ₹4.24 లక్షల ఆర్థిక నష్టం నివారించబడింది.";
+      }
+      if (isKn) {
+        return "ಇಂದು ಒಟ್ಟು 2,840 ನಿಮಿಷಗಳ ಸಮಯ ಉಳಿಸಲಾಗಿದೆ, ಇದರ ಮೌಲ್ಯ ₹4.24 ಲಕ್ಷ ಆರ್ಥಿಕ ಉಳಿತಾಯವಾಗಿದೆ.";
+      }
+      if (isTa) {
+        return "இன்று 2,840 நிமிடங்கள் தாமதம் சேமிக்கப்பட்டு, ₹4.24 லட்சம் பொருளாதார இழப்பு தடுக்கப்பட்டுள்ளது.";
+      }
+      if (isHi) {
+        return "पिछले 24 घंटों में 2,840 मिनट की देरी बचाई गई है, जिससे ₹4.24 लाख का आर्थिक नुकसान टाला गया है।";
+      }
+      return "Commuters saved 2,840 minutes of delay today, preventing ₹4.24L in economic losses.";
+    }
+
+    // Q5: Blindspots
+    if (q.includes('blindspot') || q.includes('patrol') || q.includes('gashth') || 
+        q.includes('gasht') || q.includes('బ్లాइंडస్పాట్') || q.includes('బ్లైండ్‌స్పాట్') || 
+        q.includes('ಬ್ಲೈಂಡ್‌ಸ್ಪಾಟ್') || q.includes('பிளைண்ட்ஸ்பாட்')) {
+      
+      if (isTe) {
+        return "శివాజీనగర్ జంక్షన్ అత్యంత ప్రాధాన్యత కలిగిన గస్తీ బ్లైండ్‌స్పాట్. అక్కడ గస్తీ పెంచండి.";
+      }
+      if (isKn) {
+        return "ಶಿವಾಜಿನಗರ ಜಂಕ್ಷನ್ ನಮ್ಮ ಪ್ರಮುಖ ಗಸ್ತು ಬ್ಲೈಂಡ್‌ಸ್ಪಾಟ್ ಆಗಿದೆ. ಗಸ್ತು ನಿಯೋಜನೆ ಹೆಚ್ಚಿಸಿ.";
+      }
+      if (isTa) {
+        return "சிவாஜிநகர் சந்திப்பு மிக முக்கியமான பிளைண்ட்ஸ்பாட் ஆகும். அங்கு ரோந்துப் பணியை அதிகரிக்கவும்.";
+      }
+      if (isHi) {
+        return "शिवाजीनगर जंक्शन सबसे बड़ा गश्त ब्लाइंडस्पॉट है, जहां गश्त बढ़ाना आवश्यक है।";
+      }
+      return "Shivajinagar Junction is our highest priority blindspot with a 2.8x mismatch ratio.";
     }
 
     // Greetings
-    if (q.includes('hello') || q.includes('hi') || q.includes('namaste') || q.includes('नमस्ते') || q.includes('हेलो')) {
-      return isHi
-        ? "नमस्ते कमिश्नर साहब। मैं ग्रिडलॉक एआई असिस्टेंट हूँ। आदेश दें।"
-        : "Hello Commissioner. Standing by for dispatch instructions.";
+    if (q.includes('hello') || q.includes('hi') || q.includes('namaste') || q.includes('வணக்கம்') || q.includes('ನಮಸ್ಕಾರ') || q.includes('నమస్కారం')) {
+      if (isTe) return "నమస్కారం కమిషనర్ గారు. నేను మీకు ఎలా సహాయపడగలను?";
+      if (isKn) return "ನಮಸ್ಕಾರ ಕಮೀಷನರ್ ಅವರೇ. ನಾನು ನಿಮಗೆ ಹೇಗೆ ಸಹಾಯ ಮಾಡಲಿ?";
+      if (isTa) return "வணக்கம் ஆணையர் அவர்களே. நான் உங்களுக்கு எவ்வாறு உதவ முடியும்?";
+      if (isHi) return "नमस्ते कमिश्नर साहब। मैं ग्रिडलॉक एआई असिस्टेंट हूँ। आदेश दें।";
+      return "Hello Commissioner. Standing by for dispatch instructions.";
     }
-    
-    // Fallback
-    return isHi
-      ? "सूबेदार चतरम रोड सबसे बड़ा हॉटस्पॉट है (18.4 मिनट विलंब)। वहां क्रेन भेजकर अवैध पार्किंग साफ करवाएं।"
-      : "Subedar Chatram Road has the highest bottleneck (18.4m delay). Recommend deploying enforcement wardens to clear it.";
+
+    // Generic fallbacks in chosen languages
+    if (isTe) {
+      return "నేను లైవ్ ట్రాఫిక్ క్లస్టర్లను విశ్లేషిస్తున్నాను. అత్యవసర గస్తీ కోసం సుబేదార్ చత్రం రోడ్ ను ప్రాధాన్యతగా తీసుకోండి.";
+    }
+    if (isKn) {
+      return "ನಾವು ಸಂಚಾರ ದಟ್ಟಣೆಯನ್ನು ವಿಶ್ಲೇಷಿಸುತ್ತಿದ್ದೇವೆ. ಸುಬೇದಾರ್ ಚತ್ರಂ ರಸ್ತೆಗೆ ಗಸ್ತು ಕಳುಹಿಸಲು ಆದ್ಯತೆ ನೀಡಿ.";
+    }
+    if (isTa) {
+      return "போக்குவரத்து நெரிசலை ஆய்வு செய்து வருகிறேன். சுபேதார் சத்ரம் சாலையில் ரோந்துப் பணிகளை மேற்கொள்ள முன்னுரிமை கொடுங்கள்.";
+    }
+    if (isHi) {
+      return "सूबेदार चतरम रोड सबसे बड़ा हॉटस्पॉट है (18.4 मिनट विलंब)। वहां क्रेन भेजकर अवैध पार्किंग साफ करवाएं।";
+    }
+    return `Understood. Analyzing live dataset coordination for [${currentLangObj.label}]. Recommend reviewing the congestion sandbox metrics.`;
   };
 
   const handleSend = (textToSend: string) => {
@@ -164,7 +292,7 @@ export default function AiAssistantModal({ isOpen, onClose }: AiAssistantModalPr
           const recognition = new SpeechRecognition();
           recognition.continuous = false;
           recognition.interimResults = false;
-          recognition.lang = language === 'hi' ? 'hi-IN' : 'en-IN';
+          recognition.lang = currentLangObj.locale;
 
           recognition.onstart = () => {
             setIsListening(true);
@@ -183,7 +311,6 @@ export default function AiAssistantModal({ isOpen, onClose }: AiAssistantModalPr
           recognition.onerror = (event: any) => {
             console.error('Speech recognition error:', event.error);
             setIsListening(false);
-            // Fallback voice simulation
             runVoiceSimulation();
           };
 
@@ -194,7 +321,7 @@ export default function AiAssistantModal({ isOpen, onClose }: AiAssistantModalPr
           recognition.start();
           return;
         } catch (e) {
-          console.error('Speech recognition failed:', e);
+          console.error('Speech recognition failed to start:', e);
         }
       }
     }
@@ -209,26 +336,31 @@ export default function AiAssistantModal({ isOpen, onClose }: AiAssistantModalPr
     }
     setTimeout(() => {
       setIsListening(false);
-      const simulatedQuery = language === 'hi' 
-        ? "पहले किस ज़ोन का निरीक्षण करना चाहिए?" 
-        : "Which zone should we inspect first?";
+      let simulatedQuery = "Which zone should we inspect first?";
+      if (language === 'hi') simulatedQuery = "पहले किस ज़ोन का निरीक्षण करना चाहिए?";
+      else if (language === 'te') simulatedQuery = "మనం మొదట ఏ జోన్‌ను తనిఖీ చేయాలి?";
+      else if (language === 'kn') simulatedQuery = "ನಾವು ಮೊದಲು ಯಾವ ವಲಯವನ್ನು ಪರಿಶೀಲಿಸಬೇಕು?";
+      else if (language === 'ta') simulatedQuery = "நாம் முதலில் எந்தப் பகுதியை ஆய்வு செய்ய வேண்டும்?";
+      
       handleSend(simulatedQuery);
     }, 2500);
   };
 
-  const suggestedQuestions = language === 'hi'
-    ? [
-        "पहले किस ज़ोन का निरीक्षण करना चाहिए?",
-        "कुल कितनी देरी की बचत हुई है?",
-        "सीबीडी में हॉटस्पॉट दिखाएं",
-        "कोई गश्त ब्लाइंडस्पॉट है?"
-      ]
-    : [
-        "Which zone should we inspect first?",
-        "What is the total delay saved?",
-        "Show hotspots in CBD",
-        "Any patrol blindspots?"
-      ];
+  const suggestedQuestions = (() => {
+    if (language === 'hi') {
+      return ["पहले किस ज़ोन का निरीक्षण करना चाहिए?", "कुल कितनी देरी की बचत हुई है?", "सीबीडी में हॉटस्पॉट दिखाएं", "कोई गश्त ब्लाइंडस्पॉट है?"];
+    }
+    if (language === 'te') {
+      return ["మనం మొదట ఏ జోన్‌ను తనిఖీ చేయాలి?", "మొత్తం ఎంత సమయం ఆదా అయింది?", "CBD లో హాట్‌స్పాట్‌లను చూపించు", "ఏదైనా పెట్రోలింగ్ బ్లైండ్‌స్పాట్ ఉందా?"];
+    }
+    if (language === 'kn') {
+      return ["ನಾವು ಮೊದಲು ಯಾವ ವಲಯವನ್ನು ಪರಿಶೀಲಿಸಬೇಕು?", "ಒಟ್ಟು ಎಷ್ಟು ಸಮಯ ಉಳಿಸಲಾಗಿದೆ?", "CBD ಯಲ್ಲಿ ಹಾಟ್‌ಸ್ಪಾಟ್‌ಗಳನ್ನು ತೋರಿಸಿ", "ಯಾವುದೇ ಗಸ್ತು ಬ್ಲೈಂಡ್‌ಸ್ಪಾಟ್ ಇದೆಯೇ?"];
+    }
+    if (language === 'ta') {
+      return ["நாம் முதலில் எந்தப் பகுதியை ஆய்வு செய்ய வேண்டும்?", "மொத்தம் எவ்வளவு நேரம் சேமிக்கப்பட்டுள்ளது?", "சிபிடியில் உள்ள ஹாட்ஸ்பாட்களைக் காட்டு", "ஏதேனும் ரோந்து பிளைண்ட்ஸ்பாட் உள்ளதா?"];
+    }
+    return ["Which zone should we inspect first?", "What is the total delay saved?", "Show hotspots in CBD", "Any patrol blindspots?"];
+  })();
 
   return (
     <div className="fixed inset-0 bg-black/80 backdrop-blur-md flex items-center justify-center p-4 z-[9999]">
@@ -246,17 +378,42 @@ export default function AiAssistantModal({ isOpen, onClose }: AiAssistantModalPr
           </div>
           
           <div className="flex items-center gap-2">
-            {/* Language Selector */}
-            <button 
-              onClick={() => {
-                const nextLang = language === 'en' ? 'hi' : 'en';
-                setLanguage(nextLang);
-              }}
-              className="bg-white/10 hover:bg-white/20 text-white text-[11px] font-bold px-2.5 py-1 rounded transition-colors mr-1 uppercase cursor-pointer"
-              title="Switch language between English & Hindi"
-            >
-              {language === 'en' ? 'English (EN)' : 'हिंदी (HI)'}
-            </button>
+            {/* Custom Indian Scheduled Languages Dropdown */}
+            <div className="relative" ref={dropdownRef}>
+              <button 
+                onClick={() => setShowLangDropdown(!showLangDropdown)}
+                className="bg-white/10 hover:bg-white/20 text-white text-[11px] font-bold px-3 py-1.5 rounded transition-all cursor-pointer flex items-center gap-1 uppercase"
+                title="Select from 22 Scheduled Languages of India"
+              >
+                <span>{currentLangObj.label} ({currentLangObj.code.toUpperCase()})</span>
+                <span className="material-symbols-outlined text-[12px] leading-none">expand_more</span>
+              </button>
+
+              {showLangDropdown && (
+                <div className="absolute right-0 top-full mt-2 w-56 bg-[#16171A] border border-[#22252A] rounded-xl shadow-2xl overflow-y-auto max-h-[300px] z-50 p-1 flex flex-col gap-0.5">
+                  <div className="text-[9px] font-bold text-zinc-500 uppercase tracking-wider px-2 py-1 select-none border-b border-white/5 mb-1">
+                    Scheduled Languages
+                  </div>
+                  {languagesList.map(lang => (
+                    <button
+                      key={lang.code}
+                      onClick={() => {
+                        setLanguage(lang.code);
+                        setShowLangDropdown(false);
+                      }}
+                      className={`flex items-center justify-between px-3 py-1.5 text-xs rounded transition-colors text-left cursor-pointer w-full ${
+                        language === lang.code
+                          ? 'bg-blue-600 text-white font-bold'
+                          : 'text-[#F4F4F5] hover:bg-white/5'
+                      }`}
+                    >
+                      <span>{lang.label} ({lang.code.toUpperCase()})</span>
+                      <span className="text-[9px] opacity-60 font-mono">{lang.native.split(' (')[0]}</span>
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
 
             {/* Audio Toggle */}
             <button 
@@ -327,7 +484,11 @@ export default function AiAssistantModal({ isOpen, onClose }: AiAssistantModalPr
           {isListening && (
             <div className="bg-blue-600/10 border border-blue-500/20 rounded-2xl p-4 flex flex-col items-center gap-3">
               <p className="text-blue-400 text-xs font-mono animate-pulse">
-                {language === 'hi' ? 'सुन रहा हूँ... (बोलना शुरू करें)' : 'LISTENING (Speak now...)'}
+                {language === 'hi' ? 'सुन रहा हूँ... (बोलना शुरू करें)' : 
+                 language === 'te' ? 'వింటున్నాను... (మాట్లాడండి)' : 
+                 language === 'kn' ? 'ಕೇಳುತ್ತಿದ್ದೇನೆ... (ಮಾತನಾಡಿ)' : 
+                 language === 'ta' ? 'கேட்டுக்கொண்டிருக்கிறேன்... (பேசவும்)' : 
+                 'LISTENING (Speak now...)'}
               </p>
               
               {/* CSS Bouncing Bar Waveform */}
@@ -343,7 +504,11 @@ export default function AiAssistantModal({ isOpen, onClose }: AiAssistantModalPr
                 onClick={() => setIsListening(false)}
                 className="px-3 py-1 bg-blue-500/20 hover:bg-blue-500/30 text-blue-400 text-[10px] rounded font-semibold font-mono cursor-pointer"
               >
-                {language === 'hi' ? 'रद्द करें' : 'Cancel'}
+                {language === 'hi' ? 'रद्द करें' : 
+                 language === 'te' ? 'రద్దు చేయి' : 
+                 language === 'kn' ? 'ರದ್ದುಗೊಳಿಸಿ' : 
+                 language === 'ta' ? 'ரத்துசெய்' : 
+                 'Cancel'}
               </button>
             </div>
           )}
@@ -353,7 +518,11 @@ export default function AiAssistantModal({ isOpen, onClose }: AiAssistantModalPr
         {/* Quick Prompts Panel */}
         <div className="p-3 border-t border-[#22252A] bg-black/10">
           <p className="text-[10px] text-zinc-500 font-bold uppercase tracking-wider mb-2 px-1">
-            {language === 'hi' ? 'सुझाए गए प्रश्न' : 'Suggested Inquiries'}
+            {language === 'hi' ? 'सुझाए गए प्रश्न' : 
+             language === 'te' ? 'సూచించిన ప్రశ్నలు' : 
+             language === 'kn' ? 'ಸೂಚಿಸಲಾದ ಪ್ರಶ್ನೆಗಳು' : 
+             language === 'ta' ? 'பரிந்துரைக்கப்பட்ட கேள்விகள்' : 
+             'Suggested Inquiries'}
           </p>
           <div className="flex flex-wrap gap-1.5">
             {suggestedQuestions.map((q, idx) => (
@@ -376,8 +545,16 @@ export default function AiAssistantModal({ isOpen, onClose }: AiAssistantModalPr
             type="text"
             placeholder={
               isListening 
-                ? (language === 'hi' ? "सुन रहा हूँ..." : "Listening...") 
-                : (language === 'hi' ? "प्रश्न पूछें..." : "Ask AI Traffic Officer...")
+                ? (language === 'hi' ? "सुन रहा हूँ..." : 
+                   language === 'te' ? "వింటున్నాను..." : 
+                   language === 'kn' ? "ಕೇಳುತ್ತಿದ್ದೇನೆ..." : 
+                   language === 'ta' ? "கேட்டுக்கொண்டிருக்கிறேன்..." : 
+                   "Listening...") 
+                : (language === 'hi' ? "प्रश्न पूछें..." : 
+                   language === 'te' ? "ప్రశ్న అడగండి..." : 
+                   language === 'kn' ? "ಪ್ರಶ್ನೆ ಕೇಳಿ..." : 
+                   language === 'ta' ? "கேள்வி கேட்கவும்..." : 
+                   "Ask AI Traffic Officer...")
             }
             value={inputValue}
             onChange={(e) => setInputValue(e.target.value)}
@@ -397,7 +574,11 @@ export default function AiAssistantModal({ isOpen, onClose }: AiAssistantModalPr
                 ? 'bg-red-500 text-white animate-pulse'
                 : 'bg-blue-600 hover:bg-blue-500 text-white disabled:opacity-50'
             }`}
-            title={language === 'hi' ? "बोलें" : "Speak"}
+            title={language === 'hi' ? "बोलें" : 
+                   language === 'te' ? "మాట్లాడండి" : 
+                   language === 'kn' ? "ಮಾತನಾಡಿ" : 
+                   language === 'ta' ? "பேசவும்" : 
+                   "Speak"}
           >
             <span className="material-symbols-outlined text-[20px]">
               {isListening ? 'graphic_eq' : 'mic'}
