@@ -995,6 +995,50 @@ Do not use markdown. If asked for a solution, recommend deploying tow trucks, tr
         return {"response": "Sorry, I am currently unable to process your request."}
 
 
+@app.get("/api/v1/ai/cctv/{camera_id}")
+def ai_cctv_analysis(camera_id: str):
+    if not genai:
+        return {"response": "AI module not loaded."}
+    api_key = os.getenv("GEMINI_API_KEY")
+    if not api_key or api_key == "YOUR_API_KEY_HERE":
+        return {"response": "Gemini API key not configured in backend/.env"}
+
+    # Fetch camera data
+    feeds = get_cctv_feeds()
+    camera = None
+    for c in feeds.get("cameras", []):
+        if c["id"] == camera_id:
+            camera = c
+            break
+
+    if not camera:
+        raise HTTPException(status_code=404, detail="Camera not found")
+
+    try:
+        client = genai.Client(api_key=api_key)
+        prompt = f"""
+You are an expert AI Traffic Computer Vision Analyst for the Bengaluru Traffic Police.
+Analyze the following telemetry from CCTV camera '{camera['name']}' at {camera['location']}.
+
+Context:
+- Location Type: {camera.get('location_type', 'Street')}
+- Primary Issue: {camera.get('primary_issue', 'Congestion')}
+- Lanes Blocked: {camera['lanes_blocked']} out of {camera['lanes_total']}
+- Vehicles Detected: {camera['vehicles_detected']}
+- Average Dwell Time: {camera['avg_dwell_mins']} minutes
+- Congestion Severity Score: {camera['congestion_severity']}/100 ({camera['severity_label']})
+
+Provide a short, 2-3 sentence highly technical and actionable insight report based on this data. Do not use markdown. Start with a direct observation.
+"""
+        response = client.models.generate_content(
+            model='gemini-2.5-flash',
+            contents=prompt,
+        )
+        return {"response": response.text.strip()}
+    except Exception as e:
+        print(f"AI CCTV Error: {e}")
+        return {"response": "Failed to generate AI analysis for this camera."}
+
 if __name__ == "__main__":
     import uvicorn
     uvicorn.run("main:app", host="0.0.0.0", port=8000, reload=True)

@@ -100,6 +100,27 @@ export default function CctvIntelTab() {
   const [cvLogs, setCvLogs] = useState<string[]>([]);
   const logsContainerRef = useRef<HTMLDivElement | null>(null);
 
+  const [aiInsight, setAiInsight] = useState<string | null>(null);
+  const [aiLoading, setAiLoading] = useState(false);
+
+  useEffect(() => {
+    setAiInsight(null);
+  }, [selectedCamId]);
+
+  const fetchAiInsight = async () => {
+    if (!selectedCamId) return;
+    setAiLoading(true);
+    try {
+      const res = await fetch(apiUrl(`/api/v1/ai/cctv/${selectedCamId}`));
+      const data = await res.json();
+      setAiInsight(data.response);
+    } catch (err) {
+      setAiInsight("Failed to connect to AI server.");
+    } finally {
+      setAiLoading(false);
+    }
+  };
+
   // Live CV event-stream simulation hook
   useEffect(() => {
     const initialLogs = [
@@ -793,6 +814,37 @@ export default function CctvIntelTab() {
                     </p>
                   </div>
                 </div>
+              </div>
+
+              {/* Gemini AI Insight Card */}
+              <div className="rounded-lg border p-5 relative overflow-hidden mt-4" style={{ background: 'var(--panel-bg)', borderColor: 'var(--panel-border)' }}>
+                <div className="absolute top-0 left-0 w-full h-1" style={{ background: '#a855f7' }}></div>
+                <div className="flex justify-between items-center mb-4">
+                  <h4 className="text-xs font-bold uppercase tracking-widest flex items-center gap-2" style={{ color: '#a855f7' }}>
+                    <span className="material-symbols-outlined text-[16px]">auto_awesome</span>
+                    Gemini AI Vision Analysis
+                  </h4>
+                  {!aiInsight && !aiLoading && (
+                    <button onClick={fetchAiInsight} className="px-3 py-1.5 rounded-md text-xs font-bold uppercase tracking-wider cursor-pointer transition-all hover:bg-purple-500/20" style={{ background: 'rgba(168,85,247,0.1)', color: '#a855f7', border: '1px solid rgba(168,85,247,0.3)' }}>
+                      Generate Insight
+                    </button>
+                  )}
+                </div>
+                
+                {aiLoading ? (
+                   <div className="flex items-center gap-3 p-4 border rounded-lg" style={{ color: '#a855f7', background: 'rgba(168,85,247,0.05)', borderColor: 'rgba(168,85,247,0.2)' }}>
+                     <span className="material-symbols-outlined animate-spin">sync</span>
+                     <span className="text-sm font-mono">Gemini analyzing live camera telemetry...</span>
+                   </div>
+                ) : aiInsight ? (
+                   <div className="p-4 border rounded-lg text-sm font-mono leading-relaxed" style={{ color: '#e9d5ff', background: 'rgba(168,85,247,0.05)', borderColor: 'rgba(168,85,247,0.2)', boxShadow: 'inset 0 0 20px rgba(168,85,247,0.05)' }}>
+                     {aiInsight}
+                   </div>
+                ) : (
+                   <div className="text-xs italic" style={{ color: 'var(--muted-text)' }}>
+                     Click to generate a real-time AI analysis report of the current CCTV viewport using Gemini 2.5 Flash.
+                   </div>
+                )}
               </div>
             </>
           ) : (
