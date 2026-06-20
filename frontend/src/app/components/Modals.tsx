@@ -66,18 +66,18 @@ export default function Modals({
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
-            backgroundColor: 'rgba(0, 0, 0, 0.6)',
-            backdropFilter: 'none',
-            WebkitBackdropFilter: 'none',
+            backgroundColor: 'rgba(0, 0, 0, 0.7)',
+            backdropFilter: 'blur(8px)',
+            WebkitBackdropFilter: 'blur(8px)',
             zIndex: 9999,
             padding: '16px'
           }}
         >
           <div 
             style={{
-              backgroundColor: 'var(--bg-surface)',
-              border: '1px solid var(--border-hairline)',
-              borderRadius: '8px',
+              backgroundColor: 'var(--panel-bg)',
+              border: '1px solid var(--panel-border)',
+              borderRadius: '12px',
               padding: '24px',
               width: '100%',
               maxWidth: '600px',
@@ -273,18 +273,18 @@ export default function Modals({
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
-            backgroundColor: 'rgba(0, 0, 0, 0.6)',
-            backdropFilter: 'none',
-            WebkitBackdropFilter: 'none',
+            backgroundColor: 'rgba(0, 0, 0, 0.7)',
+            backdropFilter: 'blur(8px)',
+            WebkitBackdropFilter: 'blur(8px)',
             zIndex: 9999,
             padding: '16px'
           }}
         >
           <div 
             style={{
-              backgroundColor: 'var(--bg-surface)',
-              border: '1px solid var(--border-hairline)',
-              borderRadius: '8px',
+              backgroundColor: 'var(--panel-bg)',
+              border: '1px solid var(--panel-border)',
+              borderRadius: '12px',
               padding: '24px',
               width: '100%',
               maxWidth: '380px',
@@ -380,8 +380,8 @@ export default function Modals({
         >
           <div 
             style={{
-              backgroundColor: 'var(--bg-surface)',
-              border: '1px solid var(--border-hairline)',
+              backgroundColor: 'var(--panel-bg)',
+              border: '1px solid var(--panel-border)',
               borderRadius: '16px',
               width: '100%',
               maxWidth: '420px',
