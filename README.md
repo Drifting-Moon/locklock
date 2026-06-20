@@ -5,7 +5,7 @@
 [![FastAPI](https://img.shields.io/badge/FastAPI-0.115-009688?logo=fastapi)](https://fastapi.tiangolo.com/)
 [![Python](https://img.shields.io/badge/Python-3.11-3776AB?logo=python)](https://python.org/)
 [![TailwindCSS](https://img.shields.io/badge/Tailwind-v4-38B2AC?logo=tailwind-css)](https://tailwindcss.com/)
-[![Gemini](https://img.shields.io/badge/AI-Google_Gemini_2.5_Flash-F4B400?logo=google)](https://deepmind.google/technologies/gemini/)
+[![Gemini](https://img.shields.io/badge/AI-Google_Gemini_3.5_Flash-F4B400?logo=google)](https://deepmind.google/technologies/gemini/)
 
 > **Submission for the Flipkart Gridlock Hackathon**
 > 
@@ -36,7 +36,7 @@ This blind spot costs cities billions of dollars in lost productivity, fuel wast
 ## 💡 Our Solution
 **Gridlock** is an advanced, physics-driven Urban Command Center designed for city administrators and logistics networks. 
 
-Instead of guessing where traffic will be, Gridlock integrates the **BPR (Bureau of Public Roads) mathematical equation** to calculate the exact capacity-breaking point of a road segment. When combined with our simulated live CCTV metrics and **Google Gemini 2.5 Flash**, the platform doesn't just show you traffic—it tells you exactly how to fix it in real-time.
+Instead of guessing where traffic will be, Gridlock integrates the **BPR (Bureau of Public Roads) mathematical equation** to calculate the exact capacity-breaking point of a road segment. When combined with our simulated live CCTV metrics and **Google Gemini 3.5 Flash**, the platform doesn't just show you traffic—it tells you exactly how to fix it in real-time.
 
 ---
 
@@ -65,7 +65,7 @@ For a massive logistics network like Flipkart, Gridlock is a game-changer. By li
 ### Backend (Engine)
 * **Framework:** Python, FastAPI (Asynchronous processing)
 * **Math Engine:** Custom BPR implementation in pure Python
-* **AI Integration:** `google-genai` SDK for Gemini 2.5 Flash
+* **AI Integration:** `google-genai` SDK for Gemini 3.5 Flash
 * **Deployment:** Render Web Services
 
 ---
