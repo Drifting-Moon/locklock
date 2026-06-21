@@ -6,13 +6,13 @@ import Link from 'next/link';
 export default function LandingPage() {
   const [activeMockHotspot, setActiveMockHotspot] = useState<number | null>(0);
   const [activeFaqIndex, setActiveFaqIndex] = useState<number | null>(null);
-  
+
   // BPR Sandbox State
   const [volumeCapacity, setVolumeCapacity] = useState<number>(1.2);
   const [freeFlowTime, setFreeFlowTime] = useState<number>(10);
   const alpha = 0.15;
   const beta = 4;
-  
+
   // Calculated BPR delay
   const calculatedTime = freeFlowTime * (1 + alpha * Math.pow(volumeCapacity, beta));
   const delayMinutes = Math.max(0, calculatedTime - freeFlowTime);
@@ -134,7 +134,7 @@ export default function LandingPage() {
       particles.forEach(p => {
         // Smooth trig field coordinates to guide particle angle
         p.angle += Math.sin(p.x * 0.003) * Math.cos(p.y * 0.003) * 0.04;
-        
+
         // Mouse gravity pull (curves particles towards the cursor)
         const dx = p.x - mouseRef.current.x;
         const dy = p.y - mouseRef.current.y;
@@ -249,13 +249,13 @@ export default function LandingPage() {
   ];
 
   return (
-    <div className="min-h-screen w-screen overflow-x-hidden bg-[#05070f] text-[#e0e7ff] font-sans selection:bg-[#7C5CFF]/30 selection:text-white relative">
-      
+    <div className="h-screen w-screen overflow-x-hidden overflow-y-auto snap-y snap-mandatory bg-[#05070f] text-[#e0e7ff] font-sans selection:bg-[#7C5CFF]/30 selection:text-white relative scroll-smooth">
+
       {/* Canvas Live Wallpaper background */}
-      <canvas 
-        ref={canvasRef} 
+      <canvas
+        ref={canvasRef}
         style={{ opacity: scrollOpacity }}
-        className="fixed inset-0 w-full h-full pointer-events-auto z-0 transition-opacity duration-150" 
+        className="fixed inset-0 w-full h-full pointer-events-auto z-0 transition-opacity duration-150"
       />
 
       {/* Grid Overlay */}
@@ -290,7 +290,7 @@ export default function LandingPage() {
               FAQ
               <span className="absolute bottom-0 left-0 w-0 h-0.5 bg-[#38BDF8] transition-all group-hover:w-full"></span>
             </a>
-            <a href="https://github.com/Drifting-Moon/locklock" target="_blank" rel="noopener noreferrer" className="hover:text-white transition-colors flex items-center gap-1 font-mono text-xs text-slate-400 bg-white/5 px-2.5 py-1 rounded-md border border-white/5">
+            <a href="https://github.com/KrIsH72305/Gridlock" target="_blank" rel="noopener noreferrer" className="hover:text-white transition-colors flex items-center gap-1 font-mono text-xs text-slate-400 bg-white/5 px-2.5 py-1 rounded-md border border-white/5">
               GitHub <span className="material-symbols-outlined text-xs">open_in_new</span>
             </a>
           </nav>
@@ -304,9 +304,9 @@ export default function LandingPage() {
       </header>
 
       {/* Hero Section */}
-      <section className="relative z-10 max-w-7xl mx-auto px-6 min-h-[85vh] flex items-center py-12 md:py-24">
+      <section className="relative z-10 max-w-7xl mx-auto px-6 min-h-screen flex items-center py-12 md:py-24 snap-start scroll-mt-16">
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 items-center w-full">
-          
+
           {/* Left Text */}
           <div className="lg:col-span-7 flex flex-col items-start text-left">
             <div className="inline-flex items-center gap-2 bg-[#7C5CFF]/15 border border-[#7C5CFF]/30 px-3.5 py-1.5 rounded-full text-xs font-bold text-[#a78bfa] mb-6 shadow-sm">
@@ -358,7 +358,7 @@ export default function LandingPage() {
           {/* Right Card (LWR Dashboard Model Mockup) */}
           <div className="lg:col-span-5 flex justify-center w-full relative">
             <div className="absolute -inset-1.5 bg-gradient-to-r from-[#7C5CFF] to-[#38BDF8] rounded-2xl blur-xl opacity-30 group-hover:opacity-100 transition duration-1000 group-hover:duration-200 animate-tilt"></div>
-            
+
             <div className="bg-[#0b0e1f]/90 backdrop-blur-2xl border border-white/10 rounded-2xl p-6 w-full max-w-md shadow-2xl relative overflow-hidden">
               <div className="flex justify-between items-center pb-4 border-b border-white/5 mb-4">
                 <div className="flex items-center gap-2">
@@ -412,8 +412,8 @@ export default function LandingPage() {
       </section>
 
       {/* Physics Sandbox Section (Opaque White Background) */}
-      <section id="simulator" className="relative z-10 py-24 bg-white text-slate-900 border-t border-slate-200">
-        <div className="max-w-6xl mx-auto px-6">
+      <section id="simulator" className="relative z-10 min-h-screen flex items-center py-16 md:py-24 bg-white text-slate-900 border-t border-slate-200 w-full snap-start scroll-mt-16">
+        <div className="max-w-6xl mx-auto px-6 w-full">
           <div className="text-center mb-16">
             <span className="text-xs font-mono font-extrabold uppercase tracking-widest text-[#7C5CFF] bg-[#7C5CFF]/10 px-3 py-1.5 rounded-full">Interactive Sandbox</span>
             <h2 className="text-3xl md:text-5xl font-extrabold text-slate-900 tracking-tight mt-4 font-sans">The Mathematics of Traffic Delay</h2>
@@ -423,7 +423,7 @@ export default function LandingPage() {
           </div>
 
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-stretch">
-            
+
             {/* Control Panel */}
             <div className="lg:col-span-5 bg-slate-50 border border-slate-200 rounded-2xl p-6 flex flex-col justify-between shadow-sm">
               <div className="space-y-6">
@@ -438,12 +438,12 @@ export default function LandingPage() {
                     <span className="text-slate-600">Volume / Capacity Ratio (V/C)</span>
                     <span className="text-[#7C5CFF] font-bold">{volumeCapacity.toFixed(2)}x</span>
                   </div>
-                  <input 
-                    type="range" 
-                    min="0.5" 
-                    max="2.5" 
+                  <input
+                    type="range"
+                    min="0.5"
+                    max="2.5"
                     step="0.05"
-                    value={volumeCapacity} 
+                    value={volumeCapacity}
                     onChange={(e) => setVolumeCapacity(parseFloat(e.target.value))}
                     className="w-full accent-[#7C5CFF] bg-slate-200 h-2 rounded-lg cursor-pointer outline-none"
                   />
@@ -460,12 +460,12 @@ export default function LandingPage() {
                     <span className="text-slate-600">Free Flow Travel Time (t₀)</span>
                     <span className="text-[#7C5CFF] font-bold">{freeFlowTime} Minutes</span>
                   </div>
-                  <input 
-                    type="range" 
-                    min="2" 
-                    max="30" 
+                  <input
+                    type="range"
+                    min="2"
+                    max="30"
                     step="1"
-                    value={freeFlowTime} 
+                    value={freeFlowTime}
                     onChange={(e) => setFreeFlowTime(parseInt(e.target.value))}
                     className="w-full accent-[#7C5CFF] bg-slate-200 h-2 rounded-lg cursor-pointer outline-none"
                   />
@@ -501,7 +501,7 @@ export default function LandingPage() {
                   {/* Visual Bar representation */}
                   <div className="space-y-2">
                     <span className="text-xs text-slate-500 font-mono">Travel Time Comparison</span>
-                    
+
                     {/* Baseline */}
                     <div className="space-y-1">
                       <div className="flex justify-between text-[10px] text-slate-500">
@@ -551,14 +551,14 @@ export default function LandingPage() {
                 <span className="text-[#7C5CFF] font-bold">t = t₀(1 + 0.15·x⁴)</span>
               </div>
             </div>
-            
+
           </div>
         </div>
       </section>
 
       {/* Comparison Matrix Section (Opaque Black Background) */}
-      <section id="comparison" className="relative z-10 py-24 bg-black text-white border-y border-zinc-800">
-        <div className="max-w-6xl mx-auto px-6">
+      <section id="comparison" className="relative z-10 min-h-screen flex items-center py-16 md:py-24 bg-black text-white border-y border-zinc-800 w-full snap-start scroll-mt-16">
+        <div className="max-w-6xl mx-auto px-6 w-full">
           <div className="text-center mb-16">
             <span className="text-xs font-mono font-extrabold uppercase tracking-widest text-[#38BDF8] bg-[#38BDF8]/10 px-3 py-1.5 rounded-full">Comparison System</span>
             <h2 className="text-3xl md:text-5xl font-extrabold text-white tracking-tight mt-4">Legacy Sweeps vs. Smart Command</h2>
@@ -566,7 +566,7 @@ export default function LandingPage() {
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-            
+
             {/* Card 1: Legacy */}
             <div className="bg-[#0e122b]/85 border border-zinc-850 rounded-2xl p-6 relative overflow-hidden flex flex-col justify-between">
               <div>
@@ -593,7 +593,7 @@ export default function LandingPage() {
                   </li>
                 </ul>
               </div>
-              
+
               <div className="mt-8 pt-4 border-t border-zinc-800 text-[10px] text-slate-500 font-mono">
                 Result: Wasted patrol fuel & unmanaged commuter bottlenecks
               </div>
@@ -602,7 +602,7 @@ export default function LandingPage() {
             {/* Card 2: Urban Intel */}
             <div className="relative group">
               <div className="absolute -inset-0.5 bg-gradient-to-r from-[#7C5CFF] to-[#38BDF8] rounded-2xl blur opacity-30 group-hover:opacity-75 transition duration-500"></div>
-              
+
               <div className="relative bg-[#0c1024]/95 border border-[#7C5CFF]/25 rounded-2xl p-6 flex flex-col justify-between h-full">
                 <div>
                   <div className="flex justify-between items-center pb-4 border-b border-[#7C5CFF]/25 mb-6">
@@ -640,8 +640,8 @@ export default function LandingPage() {
       </section>
 
       {/* Methodology Pipeline Section (Opaque White Background) */}
-      <section id="how-it-works" className="relative z-10 py-24 bg-white text-slate-900 border-b border-slate-200">
-        <div className="max-w-6xl mx-auto px-6">
+      <section id="how-it-works" className="relative z-10 min-h-screen flex items-center py-16 md:py-24 bg-white text-slate-900 border-b border-slate-200 w-full snap-start scroll-mt-16">
+        <div className="max-w-6xl mx-auto px-6 w-full">
           <div className="text-center mb-16">
             <span className="text-xs font-mono font-extrabold uppercase tracking-widest text-[#7C5CFF] bg-[#7C5CFF]/10 px-3 py-1.5 rounded-full">Methodology</span>
             <h2 className="text-3xl md:text-5xl font-extrabold text-slate-900 tracking-tight mt-4">The 4-Step Pipeline</h2>
@@ -649,7 +649,7 @@ export default function LandingPage() {
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-            
+
             {/* Card 1 */}
             <div className="bg-slate-50 border border-slate-200 hover:border-[#7C5CFF]/50 text-slate-900 rounded-2xl p-6 shadow-sm relative flex flex-col justify-between h-72 transition-all duration-300">
               <div className="flex justify-between items-start">
@@ -711,8 +711,8 @@ export default function LandingPage() {
       </section>
 
       {/* FAQ Section (Opaque Black Background) */}
-      <section id="faq" className="relative z-10 py-24 bg-black text-white border-b border-zinc-800">
-        <div className="max-w-4xl mx-auto px-6">
+      <section id="faq" className="relative z-10 min-h-screen flex items-center py-16 md:py-24 bg-black text-white border-b border-zinc-800 w-full snap-start scroll-mt-16">
+        <div className="max-w-4xl mx-auto px-6 w-full">
           <div className="text-center mb-12">
             <span className="text-xs font-mono font-extrabold uppercase tracking-widest text-[#38BDF8] bg-[#38BDF8]/10 px-3 py-1.5 rounded-full">Questions & Answers</span>
             <h2 className="text-3xl md:text-5xl font-extrabold text-white tracking-tight mt-4">Frequently Asked Questions</h2>
@@ -723,8 +723,8 @@ export default function LandingPage() {
             {faqData.map((item, idx) => {
               const isOpen = activeFaqIndex === idx;
               return (
-                <div 
-                  key={idx} 
+                <div
+                  key={idx}
                   className="bg-zinc-900/60 border border-zinc-800 rounded-2xl overflow-hidden transition-all duration-300 hover:border-[#7C5CFF]/40"
                 >
                   <button
@@ -736,10 +736,9 @@ export default function LandingPage() {
                       keyboard_arrow_down
                     </span>
                   </button>
-                  <div 
-                    className={`px-6 overflow-hidden transition-all duration-300 ease-in-out ${
-                      isOpen ? 'pb-6 max-h-40 opacity-100' : 'max-h-0 opacity-0'
-                    }`}
+                  <div
+                    className={`px-6 overflow-hidden transition-all duration-300 ease-in-out ${isOpen ? 'pb-6 max-h-40 opacity-100' : 'max-h-0 opacity-0'
+                      }`}
                   >
                     <p className="text-slate-300 text-xs md:text-sm leading-relaxed font-light border-t border-zinc-800 pt-4 font-light">
                       {item.a}
@@ -753,8 +752,8 @@ export default function LandingPage() {
       </section>
 
       {/* High Contrast Callout banner (Opaque White Background) */}
-      <section className="relative z-10 py-24 bg-white border-t border-slate-200">
-        <div className="max-w-5xl mx-auto px-6">
+      <section className="relative z-10 min-h-screen flex items-center py-16 md:py-24 bg-white border-t border-slate-200 w-full snap-start scroll-mt-16">
+        <div className="max-w-5xl mx-auto px-6 w-full">
           <div className="bg-gradient-to-r from-[#7C5CFF] to-[#38BDF8] rounded-3xl p-8 md:p-12 shadow-xl relative overflow-hidden text-left">
             <div className="absolute right-0 top-0 bottom-0 w-1/3 opacity-10 pointer-events-none hidden md:block">
               <span className="material-symbols-outlined text-[300px] text-white absolute right-[-50px] top-1/2 -translate-y-1/2">radar</span>
@@ -762,11 +761,11 @@ export default function LandingPage() {
 
             <div className="max-w-2xl relative z-10">
               <span className="text-xs font-mono font-black uppercase tracking-widest text-white bg-white/10 px-3.5 py-1.5 rounded-full">Exposing Patrol Blindspots</span>
-              
+
               <h2 className="text-3xl md:text-5xl font-black text-white tracking-tight mt-6 leading-tight">
                 "The zones we are NOT watching may be worse than the ones we are."
               </h2>
-              
+
               <p className="mt-4 text-white/90 text-sm md:text-base leading-relaxed font-light">
                 Unlike static camera platforms that require massive capital investment, our **Blindspot Radar** parses spatial ticketing logs to pinpoint where expectations diverge from reality. By calculating Expected vs Observed violations, we expose the exact enforcement vacuums where patrols have created a feedback bias.
               </p>
@@ -782,7 +781,7 @@ export default function LandingPage() {
       </section>
 
       {/* Footer (Opaque Dark Footer) */}
-      <footer className="bg-black border-t border-zinc-900 py-12 relative z-10">
+      <footer className="bg-black border-t border-zinc-900 py-12 relative z-10 snap-start">
         <div className="max-w-6xl mx-auto px-6 flex flex-col md:flex-row justify-between items-center gap-6">
           <div className="flex flex-col items-center md:items-start gap-1">
             <div className="flex items-center gap-2">
@@ -795,7 +794,7 @@ export default function LandingPage() {
           <div className="flex gap-8 text-xs font-semibold text-slate-400 font-mono">
             <a href="#how-it-works" onClick={(e) => handleScrollTo(e, 'how-it-works')} className="hover:text-white transition-colors">How It Works</a>
             <Link href="/dashboard" className="hover:text-white transition-colors">Command Center</Link>
-            <a href="https://github.com/Drifting-Moon/locklock" target="_blank" rel="noopener noreferrer" className="hover:text-white transition-colors">GitHub</a>
+            <a href="https://github.com/KrIsH72305/Gridlock" target="_blank" rel="noopener noreferrer" className="hover:text-white transition-colors">GitHub</a>
           </div>
 
           <div className="text-[11px] text-slate-400 font-mono text-center md:text-right">

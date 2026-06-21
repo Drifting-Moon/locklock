@@ -107,7 +107,7 @@ export default function AnalyticsTab() {
 
   // Share breakdown data toggling
   const totalCountShare = data.violation_breakdown.reduce((sum, item) => sum + item.count, 0);
-  
+
   // Custom BPR Congestion Delay Share Data for target enforcement
   const delayShareData = [
     { type: "Bus Lane Blocks", value: 70.2, color: "#ffb4ab" },
@@ -124,8 +124,8 @@ export default function AnalyticsTab() {
   }));
 
   const activeShareData = shareMetric === 'count' ? countShareData : delayShareData;
-  const activeShareTotal = shareMetric === 'count' 
-    ? totalCountShare 
+  const activeShareTotal = shareMetric === 'count'
+    ? totalCountShare
     : 100; // Delay shares sum to 100%
 
   const dayNames = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
@@ -149,7 +149,7 @@ export default function AnalyticsTab() {
           </label>
         </div>
       </div>
-      
+
       {/* Metrics */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-md">
         <div className="glass-card p-md rounded-xl flex justify-between items-center bg-surface-container/50 border border-outline-variant">
@@ -158,10 +158,10 @@ export default function AnalyticsTab() {
             <h3 className="font-headline-lg text-headline-lg-mobile text-on-surface">{loading ? '...' : data.metrics?.totalViolations?.toLocaleString()}</h3>
           </div>
           <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center text-primary">
-            <span className="material-symbols-outlined text-[28px]" style={{fontVariationSettings: "'FILL' 1"}}>gavel</span>
+            <span className="material-symbols-outlined text-[28px]" style={{ fontVariationSettings: "'FILL' 1" }}>gavel</span>
           </div>
         </div>
-        
+
         <div className="flex gap-md pb-xs">
           <div className="glass-card p-md rounded-xl flex-1 bg-surface-container/50 border border-outline-variant">
             <p className="font-label-md text-label-md text-on-surface-variant uppercase mb-sm">Est. Clearance Time</p>
@@ -178,7 +178,7 @@ export default function AnalyticsTab() {
           </div>
         </div>
       </div>
-      
+
       <div className="grid grid-cols-1 xl:grid-cols-2 gap-md">
         {/* Toggleable Donut Chart (Violation Share vs Congestion Delay Share) */}
         <section className="glass-card rounded-xl p-md bg-surface-container/50 border border-outline-variant flex flex-col justify-between">
@@ -187,13 +187,13 @@ export default function AnalyticsTab() {
               {shareMetric === 'count' ? 'Violation Volume Share' : 'Congestion Delay Share (BPR)'}
             </h3>
             <div className="flex bg-surface-container-high p-0.5 rounded-lg border border-outline-variant">
-              <button 
+              <button
                 onClick={() => setShareMetric('count')}
                 className={`px-2.5 py-1 text-[10px] font-black uppercase rounded-md transition-all cursor-pointer ${shareMetric === 'count' ? 'bg-[#7d37ff] text-white' : 'text-on-surface-variant hover:text-on-surface'}`}
               >
                 Volume
               </button>
-              <button 
+              <button
                 onClick={() => setShareMetric('delay')}
                 className={`px-2.5 py-1 text-[10px] font-black uppercase rounded-md transition-all cursor-pointer ${shareMetric === 'delay' ? 'bg-[#7d37ff] text-white' : 'text-on-surface-variant hover:text-on-surface'}`}
               >
@@ -227,8 +227,8 @@ export default function AnalyticsTab() {
                   <span className="w-2.5 h-2.5 rounded-sm" style={{ backgroundColor: item.color }} />
                   <span className="text-on-surface-variant truncate" title={item.type}>{item.type}</span>
                   <span className="font-mono text-on-surface tabular-nums">
-                    {shareMetric === 'count' 
-                      ? `${item.value.toLocaleString()} · ${((item.value / activeShareTotal) * 100).toFixed(1)}%` 
+                    {shareMetric === 'count'
+                      ? `${item.value.toLocaleString()} · ${((item.value / activeShareTotal) * 100).toFixed(1)}%`
                       : `${item.value}% delay`}
                   </span>
                 </div>
@@ -251,19 +251,19 @@ export default function AnalyticsTab() {
               <AreaChart data={dualAxisTrendData} margin={{ top: 8, right: 8, left: -12, bottom: 0 }}>
                 <defs>
                   <linearGradient id="trendFill" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="0%" stopColor="#14d1ff" stopOpacity={0.4}/>
-                    <stop offset="100%" stopColor="#14d1ff" stopOpacity={0}/>
+                    <stop offset="0%" stopColor="#14d1ff" stopOpacity={0.4} />
+                    <stop offset="100%" stopColor="#14d1ff" stopOpacity={0} />
                   </linearGradient>
                   <linearGradient id="delayFill" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="0%" stopColor="#ffb4ab" stopOpacity={0.4}/>
-                    <stop offset="100%" stopColor="#ffb4ab" stopOpacity={0}/>
+                    <stop offset="0%" stopColor="#ffb4ab" stopOpacity={0.4} />
+                    <stop offset="100%" stopColor="#ffb4ab" stopOpacity={0} />
                   </linearGradient>
                 </defs>
                 <CartesianGrid stroke="#444656" strokeOpacity={0.35} vertical={false} />
                 <XAxis dataKey="period" tick={{ fill: '#aeb0bf', fontSize: 10 }} tickLine={false} axisLine={false} minTickGap={28} />
                 <YAxis yAxisId="left" tick={{ fill: '#14d1ff', fontSize: 10 }} tickLine={false} axisLine={false} />
                 <YAxis yAxisId="right" orientation="right" tick={{ fill: '#ffb4ab', fontSize: 10 }} tickLine={false} axisLine={false} />
-                <Tooltip 
+                <Tooltip
                   contentStyle={{ background: '#171a28', border: '1px solid #444656', borderRadius: 8 }}
                   formatter={(value, name) => {
                     if (name === 'count') return [Number(value).toLocaleString(), 'Violations (L)'];
@@ -289,7 +289,7 @@ export default function AnalyticsTab() {
             </div>
             <div className="flex items-center gap-xs text-[10px] text-on-surface-variant">
               <span>Low</span>
-              <span className="w-16 h-2 rounded-full bg-gradient-to-r from-[#252838] to-[#7d37ff]"/>
+              <span className="w-16 h-2 rounded-full bg-gradient-to-r from-[#252838] to-[#7d37ff]" />
               <span>High</span>
             </div>
           </div>
@@ -317,21 +317,21 @@ export default function AnalyticsTab() {
               </div>
               <span className="text-[10px] font-mono text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded font-bold">LIVE MODEL</span>
             </div>
-            
+
             <p className="text-[11px] text-on-surface-variant mb-md">Reallocate enforcement patrols from low-impact scooter tickets to Tuesday peak-hour arterial sweeps.</p>
-            
+
             <div className="space-y-md">
               <div>
                 <div className="flex justify-between text-xs font-mono mb-1">
                   <span className="text-on-surface-variant">Reallocation Ratio</span>
                   <span className="text-[#7d37ff] font-bold">{reallocateRatio}%</span>
                 </div>
-                <input 
-                  type="range" 
-                  min="0" 
-                  max="50" 
+                <input
+                  type="range"
+                  min="0"
+                  max="50"
                   step="5"
-                  value={reallocateRatio} 
+                  value={reallocateRatio}
                   onChange={(e) => setReallocateRatio(parseInt(e.target.value))}
                   className="w-full accent-[#7d37ff] bg-surface-container-highest h-1.5 rounded-lg cursor-pointer outline-none"
                 />
@@ -350,7 +350,7 @@ export default function AnalyticsTab() {
 
               <div className="flex items-center justify-between text-xs pt-xs">
                 <span className="text-on-surface-variant">Auto Sweeps Optimizer</span>
-                <button 
+                <button
                   onClick={() => setAutoDispatch(!autoDispatch)}
                   className={`relative inline-flex h-5 w-9 items-center rounded-full transition-colors cursor-pointer ${autoDispatch ? 'bg-[#7d37ff]' : 'bg-surface-container-highest'}`}
                 >

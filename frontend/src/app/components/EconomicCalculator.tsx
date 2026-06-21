@@ -38,7 +38,7 @@ function useAnimatedNumber(target: number) {
   return Math.round(display);
 }
 
-export default function EconomicCalculator() {
+export default function EconomicCalculator({ selectedHotspot: globalHotspot }: { selectedHotspot?: any }) {
   const [laneWidth, setLaneWidth] = useState<number>(3.5);
   const [carWidth, setCarWidth] = useState<number>(1.8);
   const [arrivingFlow, setArrivingFlow] = useState<number>(1400);
@@ -57,6 +57,21 @@ export default function EconomicCalculator() {
       .catch(console.error);
   }, []);
 
+  useEffect(() => {
+    if (globalHotspot && hotspots.length > 0) {
+      loadHotspot(String(globalHotspot.properties.id));
+    }
+  }, [globalHotspot, hotspots]);
+
+  const [cascadeLevel, setCascadeLevel] = useState<number>(0);
+
+  const startCascade = () => {
+    if (cascadeLevel > 0) return;
+    setCascadeLevel(1);
+    setTimeout(() => setCascadeLevel(2), 1500);
+    setTimeout(() => setCascadeLevel(3), 3000);
+  };
+
   const BASE_CAPACITY = 1800;
   const effectiveWidth = Math.max(0, laneWidth - carWidth);
   const blockedCapacity = Math.floor(BASE_CAPACITY * (effectiveWidth / laneWidth));
@@ -66,7 +81,10 @@ export default function EconomicCalculator() {
   const totalDelayVehHours = 0.5 * excessDemand * Math.pow(durationHours, 2);
   const totalDelayVehMin = Math.round(totalDelayVehHours * 60);
   const personHoursLost = totalDelayVehHours * occupancy;
-  const economicCost = personHoursLost * vott;
+  
+  const cascadeMultiplier = cascadeLevel === 0 ? 1 : Math.pow(1.6, cascadeLevel);
+  const economicCost = personHoursLost * vott * cascadeMultiplier;
+  
   const animatedEconomicCost = useAnimatedNumber(economicCost);
   const queueGrowthPerMin = excessDemand / 60;
   const isJamForming = arrivingFlow > blockedCapacity;
@@ -87,7 +105,7 @@ export default function EconomicCalculator() {
   for (let m = 0; m <= maxMins; m += Math.max(1, Math.floor(maxMins / 10))) {
     const dHours = m / 60;
     const vehHours = 0.5 * excessDemand * Math.pow(dHours, 2);
-    const cost = Math.round(vehHours * occupancy * vott);
+    const cost = Math.round(vehHours * occupancy * vott * cascadeMultiplier);
     delayData.push({ minute: m, cost: cost });
   }
 
@@ -119,11 +137,29 @@ export default function EconomicCalculator() {
               </p>
             </div>
             <div className="bg-canvas border border-hairline backdrop-blur-xl border border-hairline rounded-2xl p-4 flex flex-col items-end min-w-[200px]">
-              <span className="text-xs text-gray-400 uppercase tracking-wider font-bold mb-1">Live Damage Estimate</span>
+              <span className="text-xs text-gray-400 uppercase tracking-wider font-bold mb-1 flex items-center gap-2">
+                {globalHotspot && (
+                  <span className="text-[9px] bg-blue-500/20 text-blue-400 border border-blue-500/30 px-1.5 py-0.5 rounded font-mono">
+                    ← Loaded from CC
+                  </span>
+                )}
+                Live Damage Estimate
+              </span>
               <div className="text-3xl font-extrabold bg-clip-text text-transparent bg-gradient-to-r from-red-500 to-orange-400">
                 ₹{animatedEconomicCost.toLocaleString()}
               </div>
-              <span className="text-[10px] text-gray-500 mt-1 text-right">Single-incident simulation</span>
+              <div className="flex justify-between w-full items-center mt-2">
+                <span className="text-[10px] text-gray-500">
+                  {cascadeLevel === 0 ? "Single-incident" : `Cascading (x${cascadeMultiplier.toFixed(1)})`}
+                </span>
+                <button 
+                  onClick={startCascade}
+                  disabled={cascadeLevel > 0}
+                  className="bg-purple-600 hover:bg-purple-500 text-white text-[10px] px-2 py-1 rounded disabled:opacity-50 transition-colors uppercase font-bold"
+                >
+                  {cascadeLevel > 0 ? "Cascading..." : "Cascade"}
+                </button>
+              </div>
             </div>
           </div>
         </div>

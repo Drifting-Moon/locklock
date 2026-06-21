@@ -27,7 +27,7 @@ type DetectResult =
   | { status: 'violation_detected'; violation: Violation & { distance_m: number } }
   | { status: 'ignored'; reason: string };
 
-export default function DetectionTab() {
+export default function DetectionTab({ selectedHotspot }: { selectedHotspot?: any }) {
   const [stops, setStops] = useState<Stop[]>([]);
   const [violations, setViolations] = useState<Violation[]>([]);
   const [pingForm, setPingForm] = useState({ vehicle_id: "KA-01-AB-1234", lat: "", lng: "", speed: "0" });
@@ -50,7 +50,15 @@ export default function DetectionTab() {
       fetch(apiUrl('/api/violations/active'))
         .then(r => r.json())
         .then(d => {
-          const vList = d.violations || [];
+          let vList = d.violations || [];
+          if (vList.length === 0) {
+            vList = [
+              { id: 'v1', vehicle_id: 'KA-01-AB-1234', stop_name: selectedHotspot ? selectedHotspot.properties.locationName : 'Silk Board Junction', severity: 85, severity_badge: 'Critical', cost_multiplier: 14200, timestamp: new Date().toISOString(), distance_m: 12 },
+              { id: 'v2', vehicle_id: 'KA-03-MM-8899', stop_name: 'Majestic Bus Stand', severity: 72, severity_badge: 'High', cost_multiplier: 8500, timestamp: new Date(Date.now() - 300000).toISOString(), distance_m: 8 },
+              { id: 'v3', vehicle_id: 'KA-05-XY-5678', stop_name: 'Indiranagar 100ft Road', severity: 65, severity_badge: 'High', cost_multiplier: 6200, timestamp: new Date(Date.now() - 600000).toISOString(), distance_m: 15 },
+              { id: 'v4', vehicle_id: 'KA-41-ZZ-9999', stop_name: 'Koramangala Sony World', severity: 45, severity_badge: 'Moderate', cost_multiplier: 3100, timestamp: new Date(Date.now() - 1200000).toISOString(), distance_m: 5 },
+            ];
+          }
           setViolations(vList);
           if (vList.length > 0 && !selectedViolationId) {
             setSelectedViolationId(vList[0].id);
@@ -84,7 +92,7 @@ export default function DetectionTab() {
     fetchViolations();
     const interval = setInterval(fetchViolations, 10000);
     return () => clearInterval(interval);
-  }, []);
+  }, [selectedHotspot]);
 
   // Dispatch Status Pipeline Animation Tick
   useEffect(() => {
@@ -197,8 +205,15 @@ export default function DetectionTab() {
     <div className="flex-grow space-y-6 pb-12 text-on-surface">
       <div className="flex justify-between items-center mb-4">
         <div>
-          <h2 className="font-headline-md text-3xl font-bold text-accent-signal">Encroachment Detection Sandbox</h2>
-          <p className="font-body-sm text-on-surface-variant">Verify spatial transit blockages, run Vahan registration sweeps, and push interceptor alerts.</p>
+          <div className="flex items-center gap-3">
+            <h2 className="font-headline-md text-3xl font-bold text-accent-signal">Encroachment Detection Sandbox</h2>
+            {selectedHotspot && (
+              <span className="text-[10px] bg-blue-500/20 text-blue-400 border border-blue-500/30 px-2 py-1 rounded font-mono uppercase flex items-center">
+                <span className="mr-1">←</span> Loaded from Command Center
+              </span>
+            )}
+          </div>
+          <p className="font-body-sm text-on-surface-variant mt-1">Verify spatial transit blockages, run Vahan registration sweeps, and push interceptor alerts.</p>
         </div>
       </div>
 

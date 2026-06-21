@@ -89,7 +89,7 @@ function statusDot(status: string) {
   return '#EF4444';
 }
 
-export default function CctvIntelTab() {
+export default function CctvIntelTab({ selectedHotspot }: { selectedHotspot?: any }) {
   const [cameras, setCameras] = useState<Camera[]>([]);
   const [selectedCamId, setSelectedCamId] = useState<string | null>(null);
   const [analysis, setAnalysis] = useState<AnalysisData | null>(null);
@@ -200,6 +200,19 @@ export default function CctvIntelTab() {
       .finally(() => setAnalysisLoading(false));
   }, [selectedCamId]);
 
+  // Sync with selectedHotspot
+  useEffect(() => {
+    if (selectedHotspot && cameras.length > 0) {
+      const locName = selectedHotspot.properties?.locationName || "";
+      const match = cameras.find(c => c.location.toLowerCase().includes(locName.toLowerCase().split(' ')[0]));
+      if (match) {
+        setSelectedCamId(match.id);
+      } else {
+        setSelectedCamId(cameras[0].id);
+      }
+    }
+  }, [selectedHotspot, cameras]);
+
   // Scan line animation
   useEffect(() => {
     const tick = () => {
@@ -222,10 +235,17 @@ export default function CctvIntelTab() {
       {/* Header */}
       <div className="flex justify-between items-center mb-2">
         <div>
-          <h2 className="text-3xl font-bold" style={{ color: 'var(--accent)' }}>
-            CCTV Vision Intelligence
-          </h2>
-          <p className="text-sm" style={{ color: 'var(--muted-text)' }}>
+          <div className="flex items-center gap-3">
+            <h2 className="text-3xl font-bold" style={{ color: 'var(--accent)' }}>
+              CCTV Vision Intelligence
+            </h2>
+            {selectedHotspot && (
+              <span className="text-[10px] bg-blue-500/20 text-blue-400 border border-blue-500/30 px-2 py-1 rounded font-mono uppercase flex items-center">
+                <span className="mr-1">←</span> Loaded from Command Center
+              </span>
+            )}
+          </div>
+          <p className="text-sm mt-1" style={{ color: 'var(--muted-text)' }}>
             Traffic-camera computer vision · Dwell time estimation · Lane blockage detection · Congestion severity scoring
           </p>
         </div>

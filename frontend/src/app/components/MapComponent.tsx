@@ -98,19 +98,53 @@ export default function MapComponent({
   const filteredHotspots = React.useMemo(() => {
     if (!hotspots) return null;
     if (isPriorityDispatchMode) {
-      // Sort and slice top 5 worst hotspots by BPR Delay
-      const sortedFeatures = [...hotspots.features].sort((a, b) => {
-        return (b.properties.bprDelay || 0) - (a.properties.bprDelay || 0);
-      });
-      return {
-        ...hotspots,
-        features: sortedFeatures.slice(0, 5)
-      };
+      const sorted = [...hotspots.features].sort((a: any, b: any) => b.properties.bprDelay - a.properties.bprDelay);
+      return { ...hotspots, features: sorted };
     }
     return hotspots;
   }, [hotspots, isPriorityDispatchMode]);
 
-  // Enrich hotspots with dispatch rank, custom labels, and approaches
+  // Warden Dots Animation Logic
+  const [wardenGeoJson, setWardenGeoJson] = useState<any>(null);
+
+  useEffect(() => {
+    if (isPriorityDispatchMode && hotspots?.features?.length > 0) {
+      const top5 = [...hotspots.features].sort((a: any, b: any) => b.properties.bprDelay - a.properties.bprDelay).slice(0, 5);
+
+      let positions = top5.map((h: any) => ({
+        targetLat: h.properties.centerLat,
+        targetLng: h.properties.centerLng,
+        lat: h.properties.centerLat - 0.05 + Math.random() * 0.1,
+        lng: h.properties.centerLng - 0.05 + Math.random() * 0.1,
+        progress: 0
+      }));
+
+      const interval = setInterval(() => {
+        positions = positions.map(p => {
+          if (p.progress < 1) {
+            p.progress += 0.05; // 20 steps over ~3 seconds
+            p.lat = p.lat + (p.targetLat - p.lat) * 0.05;
+            p.lng = p.lng + (p.targetLng - p.lng) * 0.05;
+          }
+          return p;
+        });
+
+        setWardenGeoJson({
+          type: "FeatureCollection",
+          features: positions.map(p => ({
+            type: "Feature",
+            geometry: { type: "Point", coordinates: [p.lng, p.lat] },
+            properties: {}
+          }))
+        });
+      }, 150);
+      return () => clearInterval(interval);
+    } else {
+      setWardenGeoJson(null);
+    }
+  }, [isPriorityDispatchMode, hotspots]);
+
+  // Transform Data based on modeispatch rank, custom labels, and approaches
   const enrichedHotspots = React.useMemo(() => {
     if (!filteredHotspots) return null;
     return {
@@ -119,7 +153,7 @@ export default function MapComponent({
         const name = (f.properties.locationName || "").toLowerCase();
         let dispatchLabel = "";
         let contextText = "";
-        
+
         if (name.includes("subedar") || name.includes("gandhi")) {
           dispatchLabel = "Subedar Chatram Transit Hub";
           contextText = "🚇 Transit Spillover";
@@ -161,7 +195,7 @@ export default function MapComponent({
       const id = feature.properties.id || 1;
       const count = Math.min(35, 8 + Math.floor((feature.properties.violationCount || 100) / 100));
       const rng = createRandom(id * 13);
-      
+
       // We will place points inside/around the polygon center
       for (let i = 0; i < count; i++) {
         const angle = rng() * 2 * Math.PI;
@@ -185,7 +219,7 @@ export default function MapComponent({
   const shockwaveLinesGeoJson = React.useMemo(() => {
     if (!enrichedHotspots) return { type: 'FeatureCollection' as const, features: [] };
     const points: any[] = [];
-    
+
     // Sort and only show shockwave pressure domes for the top 12 worst bottlenecks to prevent map clutter
     const sorted = [...enrichedHotspots.features]
       .sort((a, b) => Number(b.properties.bprDelay || 0) - Number(a.properties.bprDelay || 0))
@@ -340,6 +374,17 @@ export default function MapComponent({
     }
   };
 
+  const wardenLayer: LayerProps = {
+    id: 'warden-dots',
+    type: 'circle',
+    paint: {
+      'circle-radius': 6,
+      'circle-color': '#0ea5e9',
+      'circle-stroke-width': 2,
+      'circle-stroke-color': '#ffffff'
+    }
+  };
+
   const predictiveLayer: LayerProps = {
     id: 'predictive-zones',
     type: 'circle',
@@ -409,7 +454,7 @@ export default function MapComponent({
       const sortedHotspots = [...hotspots.features]
         .sort((a, b) => b.properties.violationCount - a.properties.violationCount)
         .slice(0, 5);
-      
+
       sortedHotspots.forEach((f) => {
         const p = f.properties;
         rows.push([
@@ -427,7 +472,7 @@ export default function MapComponent({
       const sortedBlindspots = [...blindspots]
         .sort((a, b) => b.patrolBiasRatio - a.patrolBiasRatio)
         .slice(0, 5);
-      
+
       sortedBlindspots.forEach((b) => {
         rows.push([
           "BIAS BLINDSPOT (RADAR)",
@@ -440,7 +485,7 @@ export default function MapComponent({
       });
     }
 
-    const csvContent = "data:text/csv;charset=utf-8," 
+    const csvContent = "data:text/csv;charset=utf-8,"
       + rows.map(e => e.map(val => `"${val.replace(/"/g, '""')}"`).join(",")).join("\n");
     const encodedUri = encodeURI(csvContent);
     const link = document.createElement("a");
@@ -453,6 +498,7 @@ export default function MapComponent({
 
   return (
     <div className="bg-surface-container-low border border-outline-variant rounded-lg flex-1 flex flex-col relative overflow-hidden min-h-[600px]">
+
       {/* Consolidated Slim Header */}
       <div className="bg-[#121626]/85 backdrop-blur-md px-4 py-2.5 border-b border-outline-variant shrink-0 flex items-center justify-between gap-4 z-20">
         {/* Title */}
@@ -463,13 +509,13 @@ export default function MapComponent({
 
         {/* Map View Mode Toggle (Standard vs. Delta-Impact BPR) */}
         <div className="flex bg-black/40 rounded-xl p-1 border border-white/5 shrink-0 ml-auto md:ml-0">
-          <button 
+          <button
             onClick={() => setImpactViewMode('density')}
             className={`px-3 py-1 rounded-lg text-[10px] font-black transition-all cursor-pointer ${impactViewMode === 'density' ? 'bg-[#3b82f6]/20 text-[#3b82f6] border border-[#3b82f6]/30' : 'text-white/60 hover:text-white border border-transparent'}`}
           >
             STANDARD DENSITY
           </button>
-          <button 
+          <button
             onClick={() => setImpactViewMode('impact')}
             className={`px-3 py-1 rounded-lg text-[10px] font-black transition-all cursor-pointer ${impactViewMode === 'impact' ? 'bg-error/20 text-error border border-error/30 shadow-md shadow-error/10' : 'text-white/60 hover:text-white border border-transparent'}`}
           >
@@ -479,14 +525,14 @@ export default function MapComponent({
 
         {/* Live/Forecast Toggle */}
         <div className="flex bg-black/40 rounded-xl p-1 border border-white/5 shrink-0">
-          <button 
+          <button
             onClick={() => setIsPredictiveMode(false)}
             className={`flex items-center gap-1.5 px-3 py-1 rounded-lg text-[10px] font-black transition-all cursor-pointer ${!isPredictiveMode ? 'bg-error/20 text-error border border-error/30 shadow-md shadow-error/10' : 'text-white/60 hover:text-white border border-transparent'}`}
           >
             <div className={`w-1.5 h-1.5 rounded-full ${!isPredictiveMode ? 'bg-error animate-pulse' : 'bg-transparent'}`}></div>
             LIVE
           </button>
-          <button 
+          <button
             onClick={() => setIsPredictiveMode(true)}
             className={`flex items-center gap-1.5 px-3 py-1 rounded-lg text-[10px] font-black transition-all cursor-pointer ${isPredictiveMode ? 'bg-amber-500/20 text-amber-400 border border-amber-500/30 shadow-md shadow-amber-500/10' : 'text-white/60 hover:text-white border border-transparent'}`}
           >
@@ -495,8 +541,16 @@ export default function MapComponent({
           </button>
         </div>
       </div>
-      
+
       <div className="flex-1 relative w-full h-full">
+        {isPredictiveMode && (
+          <div className="absolute top-4 left-4 z-10 pointer-events-none">
+            <div className="bg-purple-900/40 backdrop-blur-md border border-purple-500/30 text-purple-300 px-3 py-1.5 rounded-lg text-xs font-black tracking-widest uppercase font-mono shadow-xl flex items-center gap-2">
+              <span className="w-2 h-2 rounded-full bg-purple-400 animate-pulse"></span>
+              PREDICTED FORECAST
+            </div>
+          </div>
+        )}
         <Map
           ref={mapRef}
           initialViewState={{
@@ -539,16 +593,22 @@ export default function MapComponent({
               <Layer {...predictiveLabels} />
             </Source>
           )}
+
+          {wardenGeoJson && (
+            <Source type="geojson" data={wardenGeoJson}>
+              <Layer {...wardenLayer} />
+            </Source>
+          )}
         </Map>
 
         {/* Hover Interactive Tooltip Overlay */}
         {hoveredFeature && hoverCoords && (
-          <div 
-            style={{ 
-              position: 'absolute', 
-              left: hoverCoords.x + 15, 
-              top: hoverCoords.y + 15, 
-              pointerEvents: 'none' 
+          <div
+            style={{
+              position: 'absolute',
+              left: hoverCoords.x + 15,
+              top: hoverCoords.y + 15,
+              pointerEvents: 'none'
             }}
             className="bg-[#121626]/95 backdrop-blur-md border border-white/10 rounded-xl p-3 shadow-2xl z-50 text-[11px] font-mono text-white flex flex-col gap-1 w-64"
           >
@@ -585,23 +645,23 @@ export default function MapComponent({
             <div className="font-mono text-lg font-black text-white flex items-baseline gap-1">
               <span className="text-[10px] text-white/50">INR</span>
               <span className="text-emerald-400 font-bold">
-                ₹{((enrichedHotspots?.features?.reduce((acc: number, f: any) => acc + (f.properties?.bprDelay || 0), 0) || 0) * 35).toLocaleString(undefined, {maximumFractionDigits: 0})}
+                ₹{((enrichedHotspots?.features?.reduce((acc: number, f: any) => acc + (f.properties?.bprDelay || 0), 0) || 0) * 35).toLocaleString(undefined, { maximumFractionDigits: 0 })}
               </span>
             </div>
             <span className="text-[7px] text-white/40 font-mono mt-0.5">₹35 loss per vehicle-minute of delay</span>
           </div>
         )}
-        
+
         {/* Dispatch Panel Overlay */}
-        <DispatchPanel 
-          isOpen={isDispatchPanelOpen} 
-          onClose={() => setIsDispatchPanelOpen(false)} 
+        <DispatchPanel
+          isOpen={isDispatchPanelOpen}
+          onClose={() => setIsDispatchPanelOpen(false)}
           district={district}
           hotspots={enrichedHotspots}
         />
 
         {/* Recenter Button */}
-        <button 
+        <button
           onMouseDown={(e) => e.stopPropagation()}
           onPointerDown={(e) => e.stopPropagation()}
           onTouchStart={(e) => e.stopPropagation()}
@@ -616,28 +676,28 @@ export default function MapComponent({
         </button>
 
         {/* Map Style Switcher */}
-        <div 
+        <div
           onMouseDown={(e) => e.stopPropagation()}
           onPointerDown={(e) => e.stopPropagation()}
           onTouchStart={(e) => e.stopPropagation()}
           onClick={(e) => e.stopPropagation()}
           className="absolute top-16 right-4 bg-[#121626]/90 backdrop-blur-md border border-white/10 rounded-xl p-1 shadow-lg z-10 flex flex-col gap-1 w-12 overflow-hidden"
         >
-          <button 
+          <button
             onClick={() => setMapTheme('dark')}
             className={`py-1.5 rounded-lg text-[9px] font-black transition-all cursor-pointer ${mapTheme === 'dark' ? 'bg-[#3e52ff] text-white shadow-sm' : 'text-white/60 hover:text-white'}`}
             title="Dark Map"
           >
             DARK
           </button>
-          <button 
+          <button
             onClick={() => setMapTheme('light')}
             className={`py-1.5 rounded-lg text-[9px] font-black transition-all cursor-pointer ${mapTheme === 'light' ? 'bg-[#3e52ff] text-white shadow-sm' : 'text-white/60 hover:text-white'}`}
             title="Light Map"
           >
             LIGHT
           </button>
-          <button 
+          <button
             onClick={() => setMapTheme('satellite')}
             className={`py-1.5 rounded-lg text-[9px] font-black transition-all cursor-pointer ${mapTheme === 'satellite' ? 'bg-[#3e52ff] text-white shadow-sm' : 'text-white/60 hover:text-white'}`}
             title="Satellite Map"
@@ -653,7 +713,7 @@ export default function MapComponent({
             <span>{impactViewMode === 'impact' ? 'BPR Physics Metrics' : 'Violation Density Metrics'}</span>
             <span className="w-1.5 h-1.5 rounded-full animate-pulse bg-[#ef4444]"></span>
           </h4>
-          
+
           <div className="flex flex-col gap-2 mb-3">
             {impactViewMode === 'density' ? (
               <>
@@ -666,13 +726,13 @@ export default function MapComponent({
                           const coords = f.geometry.coordinates[0];
                           let area = 0;
                           for (let i = 0; i < coords.length - 1; i++) {
-                            area += (coords[i][0] * coords[i+1][1] - coords[i+1][0] * coords[i][1]);
+                            area += (coords[i][0] * coords[i + 1][1] - coords[i + 1][0] * coords[i][1]);
                           }
                           const areaDeg = Math.abs(area) / 2;
                           const areaSqKm = areaDeg * 12000;
                           return acc + (areaSqKm * (f.properties.laneCount || 2) * 8);
                         }
-                      } catch (e) {}
+                      } catch (e) { }
                       return acc + (((f.properties.violationCount || 100) * 0.002) * (f.properties.laneCount || 2));
                     }, 0) || 24.5).toFixed(1)} lane-km
                   </span>
@@ -699,7 +759,7 @@ export default function MapComponent({
                     <span className="text-[8px] text-white/40 font-bold uppercase tracking-wider font-mono">Avg Delay</span>
                     <span className="text-xs font-black text-white font-mono">
                       +{Math.round(
-                        (enrichedHotspots?.features?.reduce((acc: number, f: any) => acc + (f.properties?.bprDelay || 0), 0) || 0) / 
+                        (enrichedHotspots?.features?.reduce((acc: number, f: any) => acc + (f.properties?.bprDelay || 0), 0) || 0) /
                         (enrichedHotspots?.features?.length || 1)
                       ).toLocaleString()}m
                     </span>
@@ -714,7 +774,7 @@ export default function MapComponent({
               <div className={`w-3.5 h-1.5 rounded-sm ${impactViewMode === 'impact' ? 'bg-[#ef4444]/30 border border-[#ef4444]' : 'bg-[#f59e0b]/30 border border-[#f59e0b]'}`}></div>
               <span className="text-[9px] text-white/70">DBSCAN Convex Hull</span>
             </div>
-            
+
             <div className="flex flex-col gap-1 mt-0.5">
               <span className="mb-0.5 text-[8px] uppercase font-bold text-white/40 tracking-wider font-mono">
                 {impactViewMode === 'impact' ? 'BPR Delay Severity' : 'Violation Density'}
@@ -738,7 +798,7 @@ export default function MapComponent({
         </div>
 
         {/* Floating Bottom-Center Temporal Scrubber (YouTube-Scrubber style) */}
-        <div 
+        <div
           onMouseDown={(e) => e.stopPropagation()}
           onPointerDown={(e) => e.stopPropagation()}
           onTouchStart={(e) => e.stopPropagation()}
@@ -750,7 +810,7 @@ export default function MapComponent({
               <span className="material-symbols-outlined text-[10px] text-[#bdc2ff]">schedule</span>
               <span>Temporal Scrubber</span>
             </div>
-            
+
             <span className="font-mono text-primary text-[10px] font-black bg-primary/10 px-1.5 py-0.5 rounded border border-primary/20">
               {selectedHour.toString().padStart(2, '0')}:00
               {selectedHour >= 8 && selectedHour <= 10 && ' (AM Peak)'}
@@ -777,11 +837,10 @@ export default function MapComponent({
               onClick={() => {
                 setIsPeakPlaybackActive(!isPeakPlaybackActive);
               }}
-              className={`px-2 py-1 rounded text-[9px] font-black tracking-wider transition-all flex items-center gap-1 cursor-pointer shrink-0 border ${
-                isPeakPlaybackActive 
-                  ? 'bg-amber-500/20 text-amber-400 border-amber-500/30 animate-pulse font-mono' 
+              className={`px-2 py-1 rounded text-[9px] font-black tracking-wider transition-all flex items-center gap-1 cursor-pointer shrink-0 border ${isPeakPlaybackActive
+                  ? 'bg-amber-500/20 text-amber-400 border-amber-500/30 animate-pulse font-mono'
                   : 'bg-white/5 hover:bg-white/10 text-white/70 border-white/10 font-mono'
-              }`}
+                }`}
               title="Peak Commute Playback"
             >
               <span className="material-symbols-outlined text-[11px]">alarm_on</span>
@@ -789,11 +848,11 @@ export default function MapComponent({
             </button>
 
             <span className="text-[8px] text-white/30 font-mono select-none">00h</span>
-            <input 
-              type="range" 
-              min="0" 
-              max="23" 
-              value={selectedHour} 
+            <input
+              type="range"
+              min="0"
+              max="23"
+              value={selectedHour}
               onChange={(e) => {
                 setSelectedHour(parseInt(e.target.value));
                 setIsPlaying(false);

@@ -168,9 +168,9 @@ export default function EnforcementTab() {
 
           <div className="mt-4 pt-4 border-t border-hairline bg-white/[0.02] rounded-lg p-3 flex items-center justify-between">
             <div className="flex flex-col">
-              <span className="text-[9px] text-white/40 uppercase font-bold">Average Reduction</span>
+              <span className="text-[9px] text-white/40 uppercase font-bold">Violations Cleared Post-Dispatch</span>
               <span className="text-2xl font-black text-emerald-400 font-mono">
-                -{roiData.length > 0 ? Math.round(roiData.reduce((acc, curr) => acc + curr.effectivenessScore, 0) / roiData.length) : 34}%
+                +{roiData.length > 0 ? Math.round(roiData.reduce((acc, curr) => acc + curr.effectivenessScore, 0) / roiData.length) : 34}%
               </span>
             </div>
             <span className="text-[10px] bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 px-2 py-0.5 rounded font-mono uppercase">

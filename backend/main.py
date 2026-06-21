@@ -277,21 +277,21 @@ def get_districts():
 # --- Phase 3 Compatibility Endpoints ---
 
 @app.get("/api/forecast")
-def get_forecast():
+def get_forecast(timeframe: str = Query("Recent Dataset Window")):
     if not DB_PATH.exists():
         return {"forecasts": []}
 
     try:
         conn = get_db_conn()
         cursor = conn.cursor()
-        # Fetch top 4 hotspots from recent dataset window
+        # Fetch top 4 hotspots for the given timeframe
         cursor.execute("""
             SELECT center_lat, center_lng, location_name, violation_count 
             FROM hotspots 
-            WHERE timeframe = 'Recent Dataset Window' 
+            WHERE timeframe = ? 
             ORDER BY violation_count DESC 
             LIMIT 4
-        """)
+        """, (timeframe,))
         rows = cursor.fetchall()
         conn.close()
 
