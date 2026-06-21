@@ -40,6 +40,21 @@ def get_db_conn():
 @app.on_event("startup")
 def startup_event():
     global BMTC_STOPS_CACHE
+    
+    # Auto-extract database if compressed version exists and uncompressed doesn't
+    compressed_db_path = Path(__file__).parent / "gridlock.db.gz"
+    if not DB_PATH.exists() and compressed_db_path.exists():
+        print(f"Extracting compressed database from {compressed_db_path}...")
+        import gzip
+        import shutil
+        try:
+            with gzip.open(compressed_db_path, 'rb') as f_in:
+                with open(DB_PATH, 'wb') as f_out:
+                    shutil.copyfileobj(f_in, f_out)
+            print("Database extracted successfully.")
+        except Exception as e:
+            print(f"Failed to extract database: {e}")
+
     if not DB_PATH.exists():
         print(f"WARNING: SQLite database not found at {DB_PATH}. Please run etl_pipeline.py first!")
         return
