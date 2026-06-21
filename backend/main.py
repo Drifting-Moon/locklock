@@ -277,46 +277,119 @@ def get_districts():
 # --- Phase 3 Compatibility Endpoints ---
 
 @app.get("/api/forecast")
-def get_forecast(timeframe: str = Query("Recent Dataset Window")):
+def get_forecast(hour: int = Query(9), weekday: int = Query(1)):
     if not DB_PATH.exists():
         return {"forecasts": []}
 
     try:
         conn = get_db_conn()
         cursor = conn.cursor()
-        # Fetch top 4 hotspots for the given timeframe
+        
+        # Get active hotspots
         cursor.execute("""
-            SELECT center_lat, center_lng, location_name, violation_count 
+            SELECT id, center_lat as lat, center_lng as lng, location_name as name, lane_count 
             FROM hotspots 
-            WHERE timeframe = ? 
-            ORDER BY violation_count DESC 
-            LIMIT 4
-        """, (timeframe,))
-        rows = cursor.fetchall()
+            WHERE timeframe = 'Recent Dataset Window'
+        """)
+        hotspots = cursor.fetchall()
+
+        predictions = []
+        for h in hotspots:
+            # 1. Historical Rate
+            cursor.execute("""
+                SELECT COUNT(*) as violations
+                FROM violations
+                WHERE location = ?
+                AND CAST(strftime('%H', created_datetime) AS INTEGER) = ?
+                AND CAST(strftime('%w', created_datetime) AS INTEGER) = ?
+            """, (h['name'], hour, weekday))
+            hist_violations = cursor.fetchone()['violations']
+
+            # Capacity and Arrival Rate math
+            capacity = h['lane_count'] * 1800  # PCU/hr
+            
+            # Since historical violations is a count (e.g. 10-50), we infer real traffic flow:
+            # Base traffic assumes 85% capacity, plus pressure from historical violations
+            arrival_rate = (capacity * 0.85) + (hist_violations * 40)
+            
+            if arrival_rate <= capacity:
+                continue
+                
+            excess_demand = arrival_rate - capacity
+            
+            # Get dominant vehicle for multiplier
+            cursor.execute("""
+                SELECT vehicle_type, COUNT(*) as c 
+                FROM violations 
+                WHERE location = ? 
+                GROUP BY vehicle_type 
+                ORDER BY c DESC LIMIT 1
+            """, (h['name'],))
+            vehicle_row = cursor.fetchone()
+            dominant_vehicle = vehicle_row['vehicle_type'] if vehicle_row else None
+            
+            # 2. Real Spillover Time
+            buffer_vehicles = 200 / 7
+            spillover_mins = (buffer_vehicles / (excess_demand / 60))
+            
+            if dominant_vehicle in ['Maxi-Cab', 'Heavy Truck']:
+                spillover_mins *= 0.7
+                
+            spillover_mins = round(spillover_mins)
+
+            if spillover_mins > 90:
+                continue
+
+            # 3. Confidence Score (Anchored to dataset max date 2024-04-08)
+            cursor.execute("""
+                SELECT COUNT(DISTINCT date(created_datetime)) 
+                FROM violations 
+                WHERE location = ?
+                AND CAST(strftime('%H', created_datetime) AS INTEGER) = ?
+                AND CAST(strftime('%w', created_datetime) AS INTEGER) = ?
+                AND created_datetime >= datetime('2024-04-08', '-28 days')
+            """, (h['name'], hour, weekday))
+            occurrences = cursor.fetchone()[0]
+            confidence = (occurrences / 4) * 100
+            
+            if confidence < 50:
+                continue
+
+            # 4. Predict Damage
+            vehicles_affected = (arrival_rate * spillover_mins) / 60
+            damage = round(vehicles_affected * 1.4 * 180 / 60)
+            
+            # Severity Assignment
+            if spillover_mins < 20:
+                severity_label = f"Critical Spillover in {spillover_mins} mins"
+                color = "#a855f7"
+            elif spillover_mins < 45:
+                severity_label = f"High Risk in {spillover_mins} mins"
+                color = "#3b82f6"
+            else:
+                severity_label = f"Med Risk in {spillover_mins} mins"
+                color = "#eab308"
+
+            predictions.append({
+                "hotspot_id": h['id'],
+                "name": h['name'],
+                "latitude": h['lat'],
+                "longitude": h['lng'],
+                "spillover_minutes": spillover_mins,
+                "confidence": confidence,
+                "predicted_damage": damage,
+                "severity": severity_label,
+                "color": color,
+                "risk": severity_label,
+                "trigger": f"Conf: {confidence:.0f}% • Damage: ₹{damage:,}"
+            })
+            
         conn.close()
 
-        forecast_list = []
-        for i, row in enumerate(rows):
-            # Dynamically assign severity based on rank/weight
-            if i == 0:
-                risk = "Critical Spillover in 15 mins"
-                color = "#f44336" # Red
-            elif i == 1:
-                risk = "High Risk in 30 mins"
-                color = "#ff9800" # Orange
-            else:
-                risk = "Med Risk in 60 mins"
-                color = "#ffeb3b" # Yellow
+        # Sort by spillover time — soonest crisis first
+        predictions = sorted(predictions, key=lambda x: x['spillover_minutes'])
+        return {"forecasts": predictions}
 
-            forecast_list.append({
-                "latitude": row['center_lat'],
-                "longitude": row['center_lng'],
-                "name": row['location_name'],
-                "risk": risk,
-                "color": color,
-                "trigger": f"Trigger: {row['violation_count']} active violations"
-            })
-        return {"forecasts": forecast_list}
     except Exception as e:
         print(f"Error fetching forecast: {e}")
         return {"forecasts": []}

@@ -207,7 +207,8 @@ export default function TrafficDashboard() {
   // 4. Fetch predictive forecasts on demand (maintained for predictability compatibility)
   useEffect(() => {
     if (isPredictiveMode) {
-      fetch(apiUrl(`/api/forecast?timeframe=${encodeURIComponent(timeframe)}`))
+      const currentWeekday = new Date().getDay();
+      fetch(apiUrl(`/api/forecast?hour=${selectedHour}&weekday=${currentWeekday}`))
         .then(res => res.json())
         .then(data => {
           if (data.forecasts) {
@@ -216,14 +217,14 @@ export default function TrafficDashboard() {
               features: data.forecasts.map((f: any) => ({
                 type: "Feature",
                 geometry: { type: "Point", coordinates: [f.longitude, f.latitude] },
-                properties: { name: f.name.split(',')[0], risk: f.risk, color: f.risk === 'Critical' ? '#a855f7' : '#3b82f6', trigger: f.trigger }
+                properties: { name: f.name.split(',')[0], risk: f.risk, color: f.color, trigger: f.trigger }
               }))
             });
           }
         })
         .catch(err => console.error("Error fetching forecast:", err));
     }
-  }, [isPredictiveMode, timeframe]);
+  }, [isPredictiveMode, selectedHour]);
 
   // Close Physics Inspector when switching tabs
   useEffect(() => {
