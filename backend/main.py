@@ -63,6 +63,15 @@ def startup_event():
                 timestamp TEXT NOT NULL
             )
         """)
+        
+        # Add performance indexes
+        cursor.execute("CREATE INDEX IF NOT EXISTS idx_hotspots_timeframe_bpr_delay ON hotspots(timeframe, bpr_delay DESC)")
+        cursor.execute("CREATE INDEX IF NOT EXISTS idx_blindspots_patrol_bias ON blindspots(timeframe, patrol_bias_ratio DESC)")
+        cursor.execute("CREATE INDEX IF NOT EXISTS idx_violations_created_datetime ON violations(created_datetime)")
+        cursor.execute("CREATE INDEX IF NOT EXISTS idx_violations_location ON violations(location)")
+        cursor.execute("CREATE INDEX IF NOT EXISTS idx_violations_violation_type ON violations(violation_type)")
+        cursor.execute("CREATE INDEX IF NOT EXISTS idx_violations_vehicle_type ON violations(vehicle_type)")
+        
         conn.commit()
 
         # Cache top 15 location centers as BMTC stops for the live simulator
@@ -293,17 +302,51 @@ def get_forecast(hour: int = Query(9), weekday: int = Query(1)):
         """)
         hotspots = cursor.fetchall()
 
+        # Pre-fetch historical rates for all locations
+        cursor.execute("""
+            SELECT location, COUNT(*) as violations
+            FROM violations
+            WHERE CAST(strftime('%H', created_datetime) AS INTEGER) = ?
+            AND CAST(strftime('%w', created_datetime) AS INTEGER) = ?
+            GROUP BY location
+        """, (hour, weekday))
+        hist_violations_map = {row['location']: row['violations'] for row in cursor.fetchall()}
+
+        # Pre-fetch dominant vehicle type for all locations
+        cursor.execute("""
+            SELECT location, vehicle_type, COUNT(*) as c
+            FROM violations
+            GROUP BY location, vehicle_type
+        """)
+        vehicle_counts = {}
+        for row in cursor.fetchall():
+            loc = row['location']
+            if loc not in vehicle_counts:
+                vehicle_counts[loc] = []
+            vehicle_counts[loc].append((row['vehicle_type'], row['c']))
+        
+        dominant_vehicle_map = {}
+        for loc, counts in vehicle_counts.items():
+            counts.sort(key=lambda x: x[1], reverse=True)
+            dominant_vehicle_map[loc] = counts[0][0]
+
+        # Pre-fetch occurrences for confidence score
+        cursor.execute("""
+            SELECT location, COUNT(DISTINCT date(created_datetime)) as occurrences
+            FROM violations 
+            WHERE CAST(strftime('%H', created_datetime) AS INTEGER) = ?
+            AND CAST(strftime('%w', created_datetime) AS INTEGER) = ?
+            AND created_datetime >= datetime('2024-04-08', '-28 days')
+            GROUP BY location
+        """, (hour, weekday))
+        confidence_map = {row['location']: row['occurrences'] for row in cursor.fetchall()}
+
         predictions = []
         for h in hotspots:
+            name = h['name']
+            
             # 1. Historical Rate
-            cursor.execute("""
-                SELECT COUNT(*) as violations
-                FROM violations
-                WHERE location = ?
-                AND CAST(strftime('%H', created_datetime) AS INTEGER) = ?
-                AND CAST(strftime('%w', created_datetime) AS INTEGER) = ?
-            """, (h['name'], hour, weekday))
-            hist_violations = cursor.fetchone()['violations']
+            hist_violations = hist_violations_map.get(name, 0)
 
             # Capacity and Arrival Rate math
             capacity = h['lane_count'] * 1800  # PCU/hr
@@ -318,15 +361,7 @@ def get_forecast(hour: int = Query(9), weekday: int = Query(1)):
             excess_demand = arrival_rate - capacity
             
             # Get dominant vehicle for multiplier
-            cursor.execute("""
-                SELECT vehicle_type, COUNT(*) as c 
-                FROM violations 
-                WHERE location = ? 
-                GROUP BY vehicle_type 
-                ORDER BY c DESC LIMIT 1
-            """, (h['name'],))
-            vehicle_row = cursor.fetchone()
-            dominant_vehicle = vehicle_row['vehicle_type'] if vehicle_row else None
+            dominant_vehicle = dominant_vehicle_map.get(name)
             
             # 2. Real Spillover Time
             buffer_vehicles = 200 / 7
@@ -341,15 +376,7 @@ def get_forecast(hour: int = Query(9), weekday: int = Query(1)):
                 continue
 
             # 3. Confidence Score (Anchored to dataset max date 2024-04-08)
-            cursor.execute("""
-                SELECT COUNT(DISTINCT date(created_datetime)) 
-                FROM violations 
-                WHERE location = ?
-                AND CAST(strftime('%H', created_datetime) AS INTEGER) = ?
-                AND CAST(strftime('%w', created_datetime) AS INTEGER) = ?
-                AND created_datetime >= datetime('2024-04-08', '-28 days')
-            """, (h['name'], hour, weekday))
-            occurrences = cursor.fetchone()[0]
+            occurrences = confidence_map.get(name, 0)
             confidence = (occurrences / 4) * 100
             
             if confidence < 50:
@@ -372,7 +399,7 @@ def get_forecast(hour: int = Query(9), weekday: int = Query(1)):
 
             predictions.append({
                 "hotspot_id": h['id'],
-                "name": h['name'],
+                "name": name,
                 "latitude": h['lat'],
                 "longitude": h['lng'],
                 "spillover_minutes": spillover_mins,
@@ -495,19 +522,24 @@ def get_analytics(timeframe: str = Query("Last 30 Days")):
 
         # Dynamic Revenue Calculation based on BTP Fine Tiers
         cursor.execute("""
-            SELECT violation_type 
+            SELECT violation_type, COUNT(*) as count 
             FROM violations 
             WHERE {start_filter}
+            GROUP BY violation_type
         """.format(start_filter=start_filter), filter_params)
         rows = cursor.fetchall()
         conn.close()
 
         tier_1000 = 0
+        tier_500 = 0
         for r in rows:
             clean_type = clean_label(r[0]).upper()
+            count = r[1]
             if any(term in clean_type for term in ['BUSTOP', 'FOOTPATH', 'MAIN ROAD', 'DOUBLE PARKING']):
-                tier_1000 += 1
-        tier_500 = len(rows) - tier_1000
+                tier_1000 += count
+            else:
+                tier_500 += count
+                
         total_revenue_inr = (tier_1000 * 1000) + (tier_500 * 500)
 
         # Build clean lists
